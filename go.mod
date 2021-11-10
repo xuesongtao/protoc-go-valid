@@ -1,4 +1,4 @@
-module protoc-go-cjvalid
+module cjvalid
 
 go 1.14
 

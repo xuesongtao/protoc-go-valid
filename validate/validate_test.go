@@ -1,7 +1,7 @@
 package Validate
 
 import (
-	"protoc-go-cjvalid/test"
+	"cjvalid/test"
 	"testing"
 	"time"
 )

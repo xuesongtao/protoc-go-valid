@@ -1,9 +1,9 @@
 package file
 
 import (
+	"cjvalid/log"
 	"io/ioutil"
 	"os"
-	"protoc-go-cjvalid/log"
 )
 
 func WriteFile(inputPath string, areas []textArea) (err error) {
