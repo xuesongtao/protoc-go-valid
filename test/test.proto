@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package test;
+
+
+message User {
+    Man m = 1; // 人 @tag valid:"required"
+    string phone = 2; // 手机 @tag valid:"to=11" 
+}
+
+message Man {
+    string name = 1; // 姓名 @tag valid:"required" 
+    int32 age = 2; // 年龄 @tag valid:"to=1~150"
+}
