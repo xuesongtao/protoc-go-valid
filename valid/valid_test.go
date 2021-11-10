@@ -1,9 +1,10 @@
 package valid
 
 import (
-	"protoc-go-valid/test"
 	"testing"
 	"time"
+
+	"gitee.com/xuesongtao/protoc-go-valid/test"
 )
 
 type TestOrder struct {

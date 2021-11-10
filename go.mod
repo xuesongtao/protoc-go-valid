@@ -1,4 +1,4 @@
-module protoc-go-valid
+module gitee.com/xuesongtao/protoc-go-valid
 
 go 1.14
 

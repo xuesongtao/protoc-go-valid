@@ -3,10 +3,11 @@ package main
 import (
 	"flag"
 	"os"
-	"protoc-go-valid/file"
-	"protoc-go-valid/log"
 	"runtime"
 	"strings"
+
+	"gitee.com/xuesongtao/protoc-go-valid/file"
+	"gitee.com/xuesongtao/protoc-go-valid/log"
 )
 
 // handlePath 处理最后一个的路径服务

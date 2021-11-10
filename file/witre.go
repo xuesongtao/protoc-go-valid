@@ -3,7 +3,8 @@ package file
 import (
 	"io/ioutil"
 	"os"
-	"protoc-go-valid/log"
+
+	"gitee.com/xuesongtao/protoc-go-valid/log"
 )
 
 func WriteFile(inputPath string, areas []textArea) (err error) {
