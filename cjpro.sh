@@ -2,7 +2,7 @@
 
 # 用于本地构建项目目录下 proto 文件, 功能如下:
 # 1: protoc --go_out=xxx/library/protogo xxx.proto
-# 2: cjvalid -f=xxx/library/protogo
+# 2: protoc-go-valid -f=xxx/library/protogo
 outPdProjectPath="library/protogo" # pd 放入的项目路径
 
 function main() {
@@ -29,7 +29,7 @@ function main() {
     protoc --go_out=$goOutPath $@
 
     # 进行 tag 注入
-    cjvalid -f=$goOutPath
+    protoc-go-valid -f=$goOutPath
 }
 
 # 执行, 示例 main xxx.proto xxx.proto

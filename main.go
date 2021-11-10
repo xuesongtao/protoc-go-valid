@@ -1,10 +1,10 @@
 package main
 
 import (
-	"cjvalid/file"
-	"cjvalid/log"
 	"flag"
 	"os"
+	"protoc-go-valid/file"
+	"protoc-go-valid/log"
 	"runtime"
 	"strings"
 )

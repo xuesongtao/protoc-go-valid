@@ -1,4 +1,4 @@
-package Validate
+package valid
 
 import (
 	"errors"

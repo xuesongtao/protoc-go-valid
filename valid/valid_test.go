@@ -1,7 +1,7 @@
-package Validate
+package valid
 
 import (
-	"cjvalid/test"
+	"protoc-go-valid/test"
 	"testing"
 	"time"
 )
