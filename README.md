@@ -6,7 +6,7 @@
 
 
 #### 2. 注入工具使用
-- 1.先下载本项目: `go get -u gitee.com/xuesongtao/gitee.com/xuesongtao/protoc-go-valid`
+- 1.先下载本项目: `go get -u gitee.com/xuesongtao/protoc-go-valid`
 - 2.把项目中的`cjpro.sh`加到环境变量, **说明:** 如果为 **windows** 需要使用 `powershell` 来执行
 
 
