@@ -31,7 +31,7 @@ function main() {
         return
     fi
 
-    # protoc 进行编译
+    # protoc 进行编译 
     protoc --go_out=$goOutPath $@
 
     # tag 注入
