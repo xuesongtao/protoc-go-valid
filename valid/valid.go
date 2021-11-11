@@ -132,8 +132,9 @@ func (v *VStruct) Validate(in interface{}) *VStruct {
 			v.initEither(tag, ry.Name(), ty.Name, tv)
 		} else if strings.Index(tag, "phone") > -1 { // 验证手机号
 			v.validPhone(tag, ry.Name(), ty.Name, tv)
+		} else {
+			v.errBuf.WriteString("\"" + ry.Name() + "." + ty.Name +  "\" tag \"" + tag + "\" no have, I am sorry")
 		}
-
 	}
 	return v
 }

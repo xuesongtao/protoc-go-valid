@@ -11,4 +11,5 @@ message User {
 message Man {
     string name = 1; // 姓名 @tag valid:"required" 
     int32 age = 2; // 年龄 @tag valid:"to=1~150"
+    string tmp = 3; // 临时 @tag valid:"he"
 }
