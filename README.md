@@ -11,6 +11,7 @@
 	- 2.1 `protoc-go-valid -d="待注入的目录"`
 	- 2.2 `protoc-go-valid -p="匹配模式"`
 	- 2.3 `protoc-go-valid -f="单个待注入的文件"`
+- 3. 参考 `protoc-go-inject-tag`
 	
 
 #### 3. 工具补充
@@ -24,7 +25,7 @@ protoFileDirName="test" # proto 存放的目录
 
 
 
-#### 3. 验证器使用
+#### 4. 验证器使用
 - 1.请先下载项目
 - `pd` 内容如下: 
 ```
@@ -48,3 +49,5 @@ type Man struct {
 
 	// 输出: "Man.Age" is size less than 1
 ```
+
+
