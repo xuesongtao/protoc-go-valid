@@ -38,7 +38,7 @@ function main() {
     for protoFile in $@
     do
         filename=${protoFile%%'.proto'} # 去掉 xxx.proto 的 .proto 
-        protoc-go-valid -f="${goOutPath}/${filename}.pb.go"
+        protoc-go-valid -p="${goOutPath}/${filename}.pb.go"
     done
 }
 
