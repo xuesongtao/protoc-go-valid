@@ -72,7 +72,7 @@ func TestTmp(t *testing.T) {
 			Name: "xue",
 			Age:  0,
 		},
-		Phone: "",
+		Phone: "13540042615",
 	}
 	t.Log(ValidateStruct(u))
 }

@@ -39,6 +39,7 @@ type name2Value struct {
 // 1. required: 必填标识
 // 2. to: 长度验证, 格式为 to=xxx,xxx(字段类型: 字符串则为长度, 字段类型: 数字型则为大小)
 // 3. either: 多选一, 即多个中必须有一个必填, 格式为 either=xxx(通过数据进行标识)
+// 4. phone: 手机号验证
 // 说明: 如果想定义必填可以设置为: required, 如果为区间类型可以设置为: to=1~10
 func NewVStruct(targetTag ...string) *VStruct {
 	obj := syncValidPool.Get().(*VStruct)
@@ -123,20 +124,16 @@ func (v *VStruct) Validate(in interface{}) *VStruct {
 			continue
 		}
 
-		// 验证必填
-		if strings.Index(tag, "required") > -1 {
+		if strings.Index(tag, "required") > -1 { // 验证必填
 			v.validRequired(ry.Name(), ty.Name, tv, ty.Type)
-		}
-
-		// 验证长度
-		if strings.Index(tag, "to") > -1 {
+		} else if strings.Index(tag, "to") > -1 { // 验证长度
 			v.validTo(tag, ry.Name(), ty.Name, tv)
+		} else if strings.Index(tag, "either") > -1 { // 验证二选一
+			v.initEither(tag, ry.Name(), ty.Name, tv)
+		} else if strings.Index(tag, "phone") > -1 { // 验证手机号
+			v.validPhone(tag, ry.Name(), ty.Name, tv)
 		}
 
-		// 验证二选一
-		if strings.Index(tag, "either") > -1 {
-			v.initEither(tag, ry.Name(), ty.Name, tv)
-		}
 	}
 	return v
 }
@@ -240,6 +237,7 @@ func (v *VStruct) initEither(tag, structName, filedName string, tv reflect.Value
 	v.existMap[num] = append(v.existMap[num], &name2Value{structName: structName, filedName: filedName, val: tv})
 }
 
+// validEither 验证 either
 func (v *VStruct) validEither() {
 	// 判断下是否有值, 有就说明有 either 验证
 	if len(v.existMap) == 0 {
@@ -264,6 +262,14 @@ func (v *VStruct) validEither() {
 			zeroInfoStr = strings.TrimRight(zeroInfoStr, ", ")
 			v.errBuf.WriteString(zeroInfoStr + " they shouldn't all be empty" + v.endFlag)
 		}
+	}
+}
+
+// validPhone 验证手机号
+func (v *VStruct) validPhone(tag, structName, filedName string, tv reflect.Value) {
+	matched, _ := regexp.MatchString("^1[3,4,5,7,8,9]\\d{9}$", tv.String())
+	if !matched {
+		v.errBuf.WriteString(structName + "." + filedName + " is not phone")
 	}
 }
 

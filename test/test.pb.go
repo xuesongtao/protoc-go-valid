@@ -31,7 +31,7 @@ type User struct {
 	unknownFields protoimpl.UnknownFields
 
 	M     *Man   `protobuf:"bytes,1,opt,name=m,proto3" json:"m,omitempty" valid:"required"`         // 人 @tag valid:"required"
-	Phone string `protobuf:"bytes,2,opt,name=phone,proto3" json:"phone,omitempty" valid:"to=11"` // 手机 @tag valid:"to=11"
+	Phone string `protobuf:"bytes,2,opt,name=phone,proto3" json:"phone,omitempty" valid:"phone"` // 手机 @tag valid:"phone"
 }
 
 func (x *User) Reset() {

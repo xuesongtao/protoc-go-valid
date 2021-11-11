@@ -5,7 +5,7 @@ package test;
 
 message User {
     Man m = 1; // 人 @tag valid:"required"
-    string phone = 2; // 手机 @tag valid:"to=11" 
+    string phone = 2; // 手机 @tag valid:"phone" 
 }
 
 message Man {
