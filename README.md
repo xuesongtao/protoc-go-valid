@@ -24,7 +24,6 @@ protoFileDirName="test" # proto 存放的目录
 ```
 
 
-
 #### 4. 验证器使用
 - 1.请先下载项目
 - `pd` 内容如下: 
