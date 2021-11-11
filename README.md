@@ -25,7 +25,6 @@ protoFileDirName="test" # proto 存放的目录
 
 
 #### 4. 验证器使用
-- 1.请先下载项目
 - `pd` 内容如下: 
 ```
 type Man struct {
@@ -37,6 +36,7 @@ type Man struct {
 	Age  int32  `protobuf:"varint,2,opt,name=age,proto3" json:"age,omitempty" valid:"to=1~150"`  // 年龄 @tag valid:"to=1~150"
 }
 ```
+- **注:** 编写 `xxx.proto` 时, 需要加将 `@tag xxx` 放到注释的最后面
 
 - 代码里的使用
 ```
