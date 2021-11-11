@@ -1,6 +1,8 @@
 package file
 
 import (
+	"errors"
+	"io"
 	"io/ioutil"
 	"os"
 
@@ -27,6 +29,58 @@ func WriteFile(inputPath string, areas []textArea) (err error) {
 	}
 
 	if err = ioutil.WriteFile(inputPath, contents, 0644); err != nil {
+		return
+	}
+	return
+}
+
+// CopyFile 复制文件
+func CopyFile(src, dst string) (err error) {
+	if src == "" {
+		return errors.New("source file cannot be empty")
+	}
+
+	if dst == "" {
+		return errors.New("destination file cannot be empty")
+	}
+
+	// 如果相同就不处理
+	if src == dst {
+		return nil
+	}
+
+	in, err := os.Open(src)
+	if err != nil {
+		return
+	}
+	defer func() {
+		if e := in.Close(); e != nil {
+			err = e
+		}
+	}()
+
+	out, err := os.Create(dst)
+	if err != nil {
+		return
+	}
+	defer func() {
+		if e := out.Close(); e != nil {
+			err = e
+		}
+	}()
+
+	// 复制
+	if _, err = io.Copy(out, in); err != nil {
+		return
+	}
+
+	// 写盘
+	if err = out.Sync(); err != nil {
+		return
+	}
+
+	// 调整权限
+	if err = os.Chmod(dst, os.FileMode(0777)); err != nil {
 		return
 	}
 	return
