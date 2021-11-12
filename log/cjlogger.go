@@ -1,4 +1,4 @@
-package log
+package library
 
 import (
 	"log"
@@ -39,6 +39,16 @@ func (d *defaultLogger) Errorf(format string, v ...interface{}) {
 	d.log.Printf("[ERRO] "+format, v...)
 }
 
+func (d *defaultLogger) Fatal(v ...interface{}) {
+	d.Error(v...)
+	os.Exit(1)
+}
+
+func (d *defaultLogger) Fatalf(format string, v ...interface{}) {
+	d.Errorf(format, v...)
+	os.Exit(1)
+}
+
 // ============================= 常用方法封装 ===============================
 
 func Info(v ...interface{}) {
@@ -55,4 +65,12 @@ func Error(v ...interface{}) {
 
 func Errorf(format string, v ...interface{}) {
 	cjLog.Errorf(format, v...)
+}
+
+func Fatal(v ...interface{}) {
+	cjLog.Fatal(v...)
+}
+
+func Fatalf(format string, v ...interface{}) {
+	cjLog.Fatalf(format, v...)
 }
