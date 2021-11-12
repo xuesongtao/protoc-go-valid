@@ -1,4 +1,4 @@
-package library
+package log
 
 import (
 	"log"
