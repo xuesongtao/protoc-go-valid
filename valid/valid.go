@@ -37,10 +37,6 @@ func NewVStruct(targetTag ...string) *vStruct {
 	return obj
 }
 
-func (v *vStruct) method() {
-
-}
-
 // Validate 验证执行体
 func (v *vStruct) Validate(structName string, in interface{}, isValidSlice ...bool) *vStruct {
 	// 辅助 errMsg, 用于嵌套时拼接上一级的结构体名
