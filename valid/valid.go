@@ -4,28 +4,17 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
-	"regexp"
 	"strconv"
 	"strings"
-	"sync"
 )
 
-var (
-	syncValidPool       = sync.Pool{New: func() interface{} { return new(VStruct) }}
-	defaultTargetTag    = "valid" // 默认的验证 tag
-	vStructToTagErr     = errors.New("tag \"to\" is not ok, eg: to=1/to=6~30")
-	vStructEitherTagErr = errors.New("tag \"either\" is not ok, eg: " +
-		"type Test struct {\n" +
-		"    OrderNo string `either=1`\n" +
-		"    TradeNo sting `either=1`\n" +
-		"}, errMsg: \"OrderNo\" either \"TradeNo\" they shouldn't all be empty")
-)
-
-type VStruct struct {
-	targetTag string // 结构体中的 tag name
-	endFlag   string // 用于分割 err
-	errBuf    *strings.Builder
-	existMap  map[int][]*name2Value // 已存在的, 用于 either tag
+// vStruct 验证结构体
+type vStruct struct {
+	isCheckStructSlice bool   // 标记是否已验证是否为结构体切片
+	targetTag          string // 结构体中的待指定的验证的 tag
+	endFlag            string // 用于分割 err
+	errBuf             *strings.Builder
+	existMap           map[int][]*name2Value // 已存在的, 用于 either tag
 }
 
 // name2Value
@@ -35,72 +24,48 @@ type name2Value struct {
 	val        reflect.Value
 }
 
-// VStruct 验证结构体, 默认目标 tagName 为 defaultTargetTag, 现在支持的 tag 的值 如下:
-// 1. required: 必填标识
-// 2. to: 长度验证, 格式为 to=xxx,xxx(字段类型: 字符串则为长度, 字段类型: 数字型则为大小)
-// 3. either: 多选一, 即多个中必须有一个必填, 格式为 either=xxx(通过数据进行标识)
-// 4. phone: 手机号验证
-// 说明: 如果想定义必填可以设置为: required, 如果为区间类型可以设置为: to=1~10
-func NewVStruct(targetTag ...string) *VStruct {
-	obj := syncValidPool.Get().(*VStruct)
+// NewVStruct 验证结构体, 默认目标 tagName 为 "valid"
+func NewVStruct(targetTag ...string) *vStruct {
+	obj := syncValidPool.Get().(*vStruct)
 	tagName := defaultTargetTag
 	if len(targetTag) > 0 {
 		tagName = targetTag[0]
 	}
 	obj.targetTag = tagName
-	obj.endFlag = "\n "
+	obj.endFlag = errEndFlag
 	obj.errBuf = new(strings.Builder)
 	return obj
 }
 
-// parseTag 解析 tag, 获取目标内容
-func (v *VStruct) parseTag(dest, src string) string {
-	complie := regexp.MustCompile(dest + "=(.*)")
-	resSlice := complie.FindStringSubmatch(src)
-	if len(resSlice) < 1 {
-		return ""
-	}
-	// fmt.Println("resSlice: ", resSlice)
-	// 因为 tag 是按逗号隔开, 这里通过逗号先分割直接取下标为 0 的就是 size tag
-	resSlice = strings.Split(resSlice[1], ",")
-	return resSlice[0]
-}
+func (v *vStruct) method() {
 
-// parseTagTo 解析 tag: to 中 min, max
-func (v *VStruct) parseTagTo(toStr string) (min int, max int, err error) {
-	// 通过分割符来判断是否为区间
-	toSlice := strings.Split(toStr, "~")
-	l := len(toSlice)
-	// fmt.Println("toSlice: ", toSlice)
-	switch l {
-	case 1:
-		min, err = strconv.Atoi(toSlice[0])
-	case 2:
-		if min, err = strconv.Atoi(toSlice[0]); err != nil {
-			return
-		}
-
-		if max, err = strconv.Atoi(toSlice[1]); err != nil {
-			return
-		}
-	default:
-		err = vStructToTagErr
-	}
-	return
 }
 
 // Validate 验证执行体
-func (v *VStruct) Validate(in interface{}) *VStruct {
+func (v *vStruct) Validate(structName string, in interface{}, isValidSlice ...bool) *vStruct {
+	// 辅助 errMsg, 用于嵌套时拼接上一级的结构体名
+	if structName != "" {
+		structName = structName + "."
+	}
+
 	ry := reflect.TypeOf(in)
 	if ry.Kind() != reflect.Ptr {
-		v.errBuf.WriteString("structName: " + ry.Name() + " must ptr" + v.endFlag)
+		// 这里主要防止验证的切片为非结构体切片
+		if len(isValidSlice) > 0 && isValidSlice[0] {
+			return v
+		}
+		v.errBuf.WriteString("structName: " + structName + ry.Name() + " must ptr" + v.endFlag)
 		return v
 	}
 
 	ry = ry.Elem()
 	// 如果不是结构体就退出
 	if ry.Kind() != reflect.Struct {
-		v.errBuf.WriteString("in params \"" + ry.Name() + "\" is not struct")
+		// 这里主要防止验证的切片为非结构体切片
+		if len(isValidSlice) > 0 && isValidSlice[0] {
+			return v
+		}
+		v.errBuf.WriteString("in params \"" + structName + ry.Name() + "\" is not struct")
 		if ry.Name() == "" {
 			v.errBuf.WriteString(", params should is *struct")
 		}
@@ -124,122 +89,63 @@ func (v *VStruct) Validate(in interface{}) *VStruct {
 			continue
 		}
 
-		if strings.Index(tag, "required") > -1 { // 验证必填
-			v.validRequired(ry.Name(), ty.Name, tv, ty.Type)
-		} else if strings.Index(tag, "to") > -1 { // 验证长度
-			v.validTo(tag, ry.Name(), ty.Name, tv)
-		} else if strings.Index(tag, "either") > -1 { // 验证二选一
-			v.initEither(tag, ry.Name(), ty.Name, tv)
-		} else if strings.Index(tag, "phone") > -1 { // 验证手机号
-			v.validPhone(tag, ry.Name(), ty.Name, tv)
-		} else {
-			v.errBuf.WriteString("\"" + ry.Name() + "." + ty.Name +  "\" tag \"" + tag + "\" no have, I am sorry")
+		// 根据 tag 中的验证内容进行验证
+		for _, validName := range strings.Split(tag, ",") {
+			validKey, _ := ParseValidNameKV(validName)
+			fn, err := GetValidFn(validKey)
+			if err != nil {
+				v.errBuf.WriteString(err.Error())
+				continue
+			}
+
+			// 开始验证
+			if fn == nil && validKey == "required" { // 必填
+				v.required(structName+ry.Name(), ty.Name, tv)
+			} else if fn == nil && validKey == "either" { // 多选一
+				v.initEither(tag, structName+ry.Name(), ty.Name, tv)
+			} else {
+				fn(v.errBuf, validName, structName+ry.Name(), ty.Name, tv)
+			}
 		}
 	}
 	return v
 }
 
-// validRequired 验证 required
-func (v *VStruct) validRequired(structName, filedName string, tv reflect.Value, ty reflect.Type) {
+// required 验证 required
+func (v *vStruct) required(structName, filedName string, tv reflect.Value) {
 	if tv.IsZero() { // 验证必填
 		// 生成如: "TestOrderDetailSlice.Price" is required
 		v.errBuf.WriteString("\"" + structName + "." + filedName + "\" is required" + v.endFlag)
-	} else if ty.Kind() == reflect.Ptr || (ty.Kind() == reflect.Struct && ty.Name() != "Time") { // 结构体
-		if ty.Name() == structName { // 防止出现死循环
-			return
-		}
-		v.Validate(tv.Interface())
-	} else if ty.Kind() == reflect.Slice { // 切片
+	} else if tv.Kind() == reflect.Ptr || (tv.Kind() == reflect.Struct && structName != "Time") { // 结构体
+		v.Validate(structName, tv.Interface())
+	} else if tv.Kind() == reflect.Slice { // 切片
 		for i := 0; i < tv.Len(); i++ {
-			v.Validate(tv.Index(i).Interface())
+			v.Validate(fmt.Sprintf("%s-%d", structName, i), tv.Index(i).Interface(), true)
 		}
-	}
-}
-
-// validTo 验证 to
-func (v *VStruct) validTo(tag, structName, filedName string, tv reflect.Value) {
-	min, max, err := v.parseTagTo(v.parseTag("to", tag))
-	if err != nil {
-		v.errBuf.WriteString(err.Error() + v.endFlag)
-		return
-	}
-
-	var (
-		unitStr                = "size" // 大小的单位
-		isLessThan, isMoreThan bool
-	)
-	// fmt.Printf("min: %v, max: %v\n", min, max)
-	switch tv.Kind() {
-	case reflect.String:
-		unitStr = "len"
-		inLen := len([]rune(tv.String()))
-		if min > 0 && inLen < min {
-			isLessThan = true
-		}
-
-		if max > 0 && inLen > max {
-			isMoreThan = true
-		}
-	case reflect.Float32, reflect.Float64:
-		val := tv.Float()
-		if min > 0 && val < float64(min) {
-			isLessThan = true
-		}
-
-		if max > 0 && val > float64(max) {
-			isMoreThan = true
-		}
-	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		val := tv.Int()
-		if min > 0 && val < int64(min) {
-			isLessThan = true
-		}
-
-		if max > 0 && val > int64(max) {
-			isMoreThan = true
-		}
-	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-		val := tv.Uint()
-		if min > 0 && val < uint64(min) {
-			isLessThan = true
-		}
-
-		if max > 0 && val > uint64(max) {
-			isMoreThan = true
-		}
-	}
-
-	if isLessThan {
-		// 生成如: "TestOrder.AppName" is len less than 2
-		v.errBuf.WriteString("\"" + structName + "." + filedName + "\" is " + unitStr + " less than " + fmt.Sprintf("%d", min) + v.endFlag)
-	}
-
-	if isMoreThan {
-		// 生成如: "TestOrder.AppName" is len more than 30
-		v.errBuf.WriteString("\"" + structName + "." + filedName + "\" is " + unitStr + " more than " + fmt.Sprintf("%d", max) + v.endFlag)
 	}
 }
 
 // initEither 为验证 either 进行准备
-func (v *VStruct) initEither(tag, structName, filedName string, tv reflect.Value) {
+func (v *vStruct) initEither(validName, structName, filedName string, tv reflect.Value) {
+	_, eitherNum := ParseValidNameKV(validName)
+	if eitherNum == "" {
+		v.errBuf.WriteString(eitherValErr.Error() + v.endFlag)
+		return
+	}
+
 	if v.existMap == nil {
 		v.existMap = make(map[int][]*name2Value, 5)
 	}
 
-	eitherNum := v.parseTag("either", tag)
-	if eitherNum == "" {
-		v.errBuf.WriteString(vStructEitherTagErr.Error() + v.endFlag)
-		return
-	}
 	num, _ := strconv.Atoi(eitherNum)
 	if _, ok := v.existMap[num]; !ok {
-		v.existMap[num] = make([]*name2Value, 0, 5)
+		v.existMap[num] = make([]*name2Value, 0, 2)
 	}
 	v.existMap[num] = append(v.existMap[num], &name2Value{structName: structName, filedName: filedName, val: tv})
 }
 
 // validEither 验证 either
-func (v *VStruct) validEither() {
+func (v *vStruct) either() {
 	// 判断下是否有值, 有就说明有 either 验证
 	if len(v.existMap) == 0 {
 		return
@@ -266,33 +172,27 @@ func (v *VStruct) validEither() {
 	}
 }
 
-// validPhone 验证手机号
-func (v *VStruct) validPhone(tag, structName, filedName string, tv reflect.Value) {
-	matched, _ := regexp.MatchString("^1[3,4,5,7,8,9]\\d{9}$", tv.String())
-	if !matched {
-		v.errBuf.WriteString(structName + "." + filedName + " is not phone")
-	}
-}
-
-func (v *VStruct) GetErrMsg() error {
-	if v.errBuf.Len() == 0 {
-		return nil
-	}
+// GetErrMsg 获取 err
+func (v *vStruct) GetErrMsg() error {
 	defer v.free()
 
 	// 验证下 either
-	v.validEither()
+	v.either()
+
+	if v.errBuf.Len() == 0 {
+		return nil
+	}
 
 	// 这里需要去掉最后一个 endFlag
 	return errors.New(strings.TrimRight(v.errBuf.String(), v.endFlag))
 }
 
 // free 释放
-func (v *VStruct) free() {
+func (v *vStruct) free() {
+	v.isCheckStructSlice = false
 	v.targetTag = ""
 	v.endFlag = ""
 	v.errBuf.Reset()
-	v.existMap = nil
 	syncValidPool.Put(v)
 }
 
@@ -300,5 +200,5 @@ func (v *VStruct) free() {
 
 // ValidateStruct 验证结构体
 func ValidateStruct(in interface{}, targetTag ...string) error {
-	return NewVStruct(targetTag...).Validate(in).GetErrMsg()
+	return NewVStruct(targetTag...).Validate("", in).GetErrMsg()
 }
