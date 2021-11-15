@@ -15,7 +15,7 @@
 	
 
 #### 3. 工具补充
-- 1. protoc-go-valid -h` 可以通过这个查看帮助
+- 1. `protoc-go-valid -h` 可以通过这个查看帮助
 - 2. 由于此操作是先执行 `protoc` 才再进行注入(需先按照 `protoc`), 项目中的 `inject_tool.sh` 整合了这两步操作, 可以执行 `protoc-go-valid -init="true"`, **说明:** 如果为 **windows** 需要使用 `powershell` 来执行
 - 3. 根据直接项目目录结构调整 `inject_tool.sh` 中 `proto` 和 `pb` 的目录, 相对于应用的目录; 如本项目, 修改如下下:
 ```
