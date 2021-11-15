@@ -1,6 +1,10 @@
 package valid
 
 import (
+	"fmt"
+	"reflect"
+	"regexp"
+	"strings"
 	"testing"
 
 	"gitee.com/xuesongtao/protoc-go-valid/test"
@@ -52,6 +56,36 @@ func TestValidOrder(t *testing.T) {
 	t.Log(ValidateStruct(u, "alipay"))
 }
 
+func TestTo(t *testing.T) {
+	type Tmp struct {
+		Name string `valid:"to=1~3"`
+		Age  int32  `valid:"to=0~100"`
+		Addr string `valid:"le=3"`
+	}
+	v := &Tmp{Name: "测试调", Age: 100, Addr: "tets"}
+	t.Log(ValidateStruct(v))
+}
+
+func TestOto(t *testing.T) {
+	type Tmp struct {
+		Name string `valid:"oto=1~3"`
+		Age  int32  `valid:"oto=0~100"`
+		NickName string `valid:"gt=1"`
+		Addr string `valid:"lt=3"`
+	}
+	v := &Tmp{Name: "测试", Age: 0, NickName: "h1", Addr: "tets"}
+	t.Log(ValidateStruct(v))
+}
+
+func TestDate(t *testing.T) {
+	type Tmp struct {
+		Date string `valid:"date"`
+		Datetime string `valid:"datetime"`
+	}
+	v := &Tmp{}
+	t.Log(ValidateStruct(v))
+}
+
 func TestEither(t *testing.T) {
 	type Tmp struct {
 		Either1 int32 `valid:"either=1"`
@@ -92,6 +126,25 @@ func TestIdCard(t *testing.T) {
 	}
 	v := &Tmp{IDCard: "511321"}
 	t.Log(ValidateStruct(v))
+}
+
+func TestSetCustomerValidFn(t *testing.T) {
+	type Tmp struct {
+		Name string `valid:"required"`
+		Age  string `valid:"num"`
+	}
+
+	isNumFn := func(errBuf *strings.Builder, validName, structName, filedName string, tv reflect.Value) {
+		ok, _ := regexp.MatchString("^\\d+$", tv.String())
+		if !ok {
+			errBuf.WriteString(fmt.Sprintf("%q is not num", structName+"."+filedName))
+			return
+		}
+	}
+
+	SetCustomerValidFn("num", isNumFn)
+	v := Tmp{Name: "12", Age: "1ha"}
+	t.Log(ValidateStruct(&v))
 }
 
 func TestProtoPb1(t *testing.T) {
