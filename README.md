@@ -47,7 +47,16 @@ protoFileDirName="test" # proto 存放的目录
 
 
 ##### 4.2 使用示例:
--  `pd` 内容如下: 
+- `proto` 内容如下: 
+```
+message Man {
+    string name = 1; // 姓名 @tag valid:"required" 
+    int32 age = 2; // 年龄 @tag valid:"to=1~150"
+}
+```
+- **注:** 编写 `xxx.proto` 时, 需要加将 `@tag xxx` 放到注释的最后面
+
+- 执行命令: `inject_tool.sh xxx.proto` 生成 `pd` 内容如下: 
 ```
 type Man struct {
 	state         protoimpl.MessageState
@@ -58,7 +67,6 @@ type Man struct {
 	Age  int32  `protobuf:"varint,2,opt,name=age,proto3" json:"age,omitempty" valid:"to=1~150"`  // 年龄 @tag valid:"to=1~150"
 }
 ```
-- **注:** 编写 `xxx.proto` 时, 需要加将 `@tag xxx` 放到注释的最后面
 
 - 代码里的使用
 ```
