@@ -45,6 +45,7 @@ protoFileDirName="test" # proto 存放的目录
 | date     | 日期验证, 格式为 "date=xxxx-xx-xx"                                                                                        |
 | datetime | 时间验证, 格式为 "datetime=xxxx-xx-xx xx:xx:xx"                                                                           |
 
+- 其他: 如果没有实现的, 可以调用 `SetCustomerValidFn` 自定义
 
 ##### 4.2 使用示例:
 - `proto` 内容如下: 
