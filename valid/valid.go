@@ -90,7 +90,7 @@ func (v *vStruct) Validate(structName string, in interface{}, isValidSlice ...bo
 			validKey, _ := ParseValidNameKV(validName)
 			fn, err := GetValidFn(validKey)
 			if err != nil {
-				v.errBuf.WriteString(err.Error())
+				v.errBuf.WriteString(err.Error() + errEndFlag)
 				continue
 			}
 

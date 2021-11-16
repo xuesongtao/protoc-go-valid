@@ -254,7 +254,7 @@ func In(errBuf *strings.Builder, validName, structName, filedName string, tv ref
 	}
 
 	if !isIn {
-		errBuf.WriteString("\"" + structName + "." + filedName + "\" should in (" + inVals + ")")
+		errBuf.WriteString("\"" + structName + "." + filedName + "\" should in (" + inVals + ")" + errEndFlag)
 	}
 }
 
