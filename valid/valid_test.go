@@ -59,7 +59,7 @@ func TestValidOrder(t *testing.T) {
 func TestTo(t *testing.T) {
 	type Tmp struct {
 		Name string `valid:"to=1~3"`
-		Age  int32  `valid:"to=0~100"`
+		Age  int32  `valid:"to=0"`
 		Addr string `valid:"le=3"`
 	}
 	v := &Tmp{Name: "测试调", Age: 100, Addr: "tets"}

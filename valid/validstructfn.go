@@ -39,72 +39,72 @@ func validInputSize(min, max int, tv reflect.Value, isHasEqual ...bool) (isLessT
 		unitStr = "length"
 		inLen := len([]rune(tv.String()))
 		if hasEqual {
-			if inLen < min {
+			if min > 0 && inLen < min {
 				isLessThan = true
 			}
-			if inLen > max {
+			if max > 0 && inLen > max {
 				isMoreThan = true
 			}
 			return
 		}
 
-		if inLen <= min {
+		if min > 0 && inLen <= min {
 			isLessThan = true
 		}
-		if inLen >= max {
+		if max > 0 && inLen >= max {
 			isMoreThan = true
 		}
 	case reflect.Float32, reflect.Float64:
 		val := tv.Float()
 		if hasEqual {
-			if val < float64(min) {
+			if min > 0 && val < float64(min) {
 				isLessThan = true
 			}
-			if val > float64(max) {
+			if max > 0 && val > float64(max) {
 				isMoreThan = true
 			}
 			return
-		} 
+		}
 
-		if val <= float64(min) {
+		if min > 0 && val <= float64(min) {
 			isLessThan = true
 		}
-		if val >= float64(max) {
+		if max > 0 && val >= float64(max) {
 			isMoreThan = true
 		}
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		val := tv.Int()
 		if hasEqual {
-			if val < int64(min) {
+			if min > 0 && val < int64(min) {
 				isLessThan = true
 			}
-			if val > int64(max) {
+			if max > 0 && val > int64(max) {
 				isMoreThan = true
 			}
 			return
-		} 
+		}
 
-		if val <= int64(min) {
+		if min > 0 && val <= int64(min) {
 			isLessThan = true
 		}
-		if val >= int64(max) {
+		if max > 0 && val >= int64(max) {
 			isMoreThan = true
 		}
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
 		val := tv.Uint()
 		if hasEqual {
-			if val < uint64(min) {
+			if min > 0 && val < uint64(min) {
 				isLessThan = true
 			}
-			if val > uint64(max) {
+			if max > 0 && val > uint64(max) {
 				isMoreThan = true
 			}
 			return
 		}
-		if val < uint64(min) {
+		if min > 0 && val < uint64(min) {
 			isLessThan = true
 		}
-		if val > uint64(max) {
+		if max > 0 && val > uint64(max) {
 			isMoreThan = true
 		}
 	}
