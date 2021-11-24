@@ -260,7 +260,7 @@ func In(errBuf *strings.Builder, validName, structName, filedName string, tv ref
 
 // Phone 验证手机号
 func Phone(errBuf *strings.Builder, validName, structName, filedName string, tv reflect.Value) {
-	matched, _ := regexp.MatchString("^1[3,4,5,7,8,9]\\d{9}$", tv.String())
+	matched, _ := regexp.MatchString("^1[3,4,5,6,7,8,9]\\d{9}$", tv.String())
 	if matched {
 		return
 	}
