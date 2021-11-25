@@ -9,8 +9,7 @@ import (
 
 // 对象
 var (
-	syncValidPool     = sync.Pool{New: func() interface{} { return new(vStruct) }}
-	validName2FuncMap map[string]commonValidFn
+	syncValidPool = sync.Pool{New: func() interface{} { return new(vStruct) }}
 )
 
 // 标记
@@ -30,26 +29,25 @@ var (
 	inValErr = errors.New(defaultTargetTag + " \"in\" is not ok, eg: in=(1,2,3)")
 )
 
-type commonValidFn func(errBuf *strings.Builder, validName, structName, filedName string, tv reflect.Value)
-
-func init() {
-	validName2FuncMap = map[string]commonValidFn{
-		"required": nil,
-		"either":   nil,
-		"to":       To,
-		"ge":       Ge,
-		"le":       Le,
-		"oto":      OTo,
-		"gt":       Gt,
-		"lt":       Lt,
-		"in":       In,
-		"phone":    Phone,
-		"email":    Email,
-		"idcard":   IDCard,
-		"date":     Date,
-		"datetime": Datetime,
-	}
+// 验证函数
+var validName2FuncMap = map[string]commonValidFn{
+	"required": nil,
+	"either":   nil,
+	"to":       To,
+	"ge":       Ge,
+	"le":       Le,
+	"oto":      OTo,
+	"gt":       Gt,
+	"lt":       Lt,
+	"in":       In,
+	"phone":    Phone,
+	"email":    Email,
+	"idcard":   IDCard,
+	"date":     Date,
+	"datetime": Datetime,
 }
+
+type commonValidFn func(errBuf *strings.Builder, validName, structName, filedName string, tv reflect.Value)
 
 // SetCustomerValidFn 自定义验证函数
 func SetCustomerValidFn(validName string, fn commonValidFn) {
