@@ -100,6 +100,9 @@ func (v *vStruct) Validate(structName string, in interface{}, isValidSlice ...bo
 			} else if fn == nil && validKey == "either" { // 多选一
 				v.initEither(tag, structName+ry.Name(), ty.Name, tv)
 			} else {
+				if tv.IsZero() { // 空就直接跳过
+					continue
+				}
 				fn(v.errBuf, validName, structName+ry.Name(), ty.Name, tv)
 			}
 		}

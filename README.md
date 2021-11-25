@@ -51,7 +51,7 @@ protoFileDirName="test" # proto 存放的目录
 - `proto` 内容如下: 
 ```
 message Man {
-    string name = 1; // 姓名 @tag valid:"required" 
+    string name = 1; // 姓名 @tag valid:"required,to=1~3" 
     int32 age = 2; // 年龄 @tag valid:"to=1~150"
 }
 ```
@@ -64,7 +64,7 @@ type Man struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty" valid:"required"` // 姓名 @tag valid:"required"
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty" valid:"required,to=1~3"` // 姓名 @tag valid:"required,to=1~3"
 	Age  int32  `protobuf:"varint,2,opt,name=age,proto3" json:"age,omitempty" valid:"to=1~150"`  // 年龄 @tag valid:"to=1~150"
 }
 ```
@@ -73,7 +73,7 @@ type Man struct {
 ```
 	m := &test.Man{
 			Name: "xue",
-			Age:  0,
+			Age:  -1,
 	}
 	t.Log(ValidateStruct(m))
 

@@ -108,7 +108,7 @@ func TestPhone(t *testing.T) {
 	type Tmp struct {
 		Phone string `valid:"phone"`
 	}
-	v := &Tmp{Phone: "12344"}
+	v := &Tmp{Phone: "1"}
 	t.Log(ValidateStruct(v))
 }
 

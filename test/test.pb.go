@@ -85,7 +85,7 @@ type Man struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty" valid:"required"` // 姓名 @tag valid:"required"
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty" valid:"required,to=1~3"` // 姓名 @tag valid:"required,to=1~3"
 	Age  int32  `protobuf:"varint,2,opt,name=age,proto3" json:"age,omitempty" valid:"to=1~150"`  // 年龄 @tag valid:"to=1~150"
 	Tmp  string `protobuf:"bytes,3,opt,name=tmp,proto3" json:"tmp,omitempty" valid:"he"`   // 临时 @tag valid:"he"
 }
