@@ -45,6 +45,8 @@ var validName2FuncMap = map[string]commonValidFn{
 	"idcard":   IDCard,
 	"date":     Date,
 	"datetime": Datetime,
+	"int":      Int,
+	"float":    Float,
 }
 
 type commonValidFn func(errBuf *strings.Builder, validName, structName, filedName string, tv reflect.Value)

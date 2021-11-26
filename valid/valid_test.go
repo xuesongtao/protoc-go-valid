@@ -128,6 +128,38 @@ func TestIdCard(t *testing.T) {
 	t.Log(ValidateStruct(v))
 }
 
+func TestInt(t *testing.T) {
+	type Tmp struct {
+		IntString string  `valid:"int"`
+		IntNum    int     `valid:"int"`
+		FloatNum  float32 `valid:"int"`
+	}
+
+	v := &Tmp{
+		IntString: "11",
+		IntNum:    1,
+		FloatNum:  1.0,
+	}
+	t.Log(ValidateStruct(v))
+}
+
+func TestFloat(t *testing.T) {
+	type Tmp struct {
+		FloatString string  `valid:"float"`
+		IntNum      int     `valid:"float"`
+		FloatNum32  float32 `valid:"float"`
+		FloatNum64  float64 `valid:"float"`
+	}
+
+	v := &Tmp{
+		FloatString: "1.1",
+		IntNum:      10,
+		FloatNum32:  12.5,
+		FloatNum64:  1.0,
+	}
+	t.Log(ValidateStruct(v))
+}
+
 func TestSetCustomerValidFn(t *testing.T) {
 	type Tmp struct {
 		Name string `valid:"required"`

@@ -44,8 +44,10 @@ protoFileDirName="test" # proto 存放的目录
 | idcard   | 身份证号码验证                                                                                                            |
 | date     | 日期验证, 格式为 "date=xxxx-xx-xx"                                                                                        |
 | datetime | 时间验证, 格式为 "datetime=xxxx-xx-xx xx:xx:xx"                                                                           |
+| int      | 整数型验证                                                                                                                |
+| float    | 浮动数型验证                                                                                                              |
 
-- 其他: 如果没有实现的, 可以调用 `SetCustomerValidFn` 自定义
+- 其他: 如果没有实现的, 可以调用 `SetCustomerValidFn` 自定义; 使用的可以参考 `valid_test.go` 
 
 ##### 4.2 使用示例:
 - `proto` 内容如下: 

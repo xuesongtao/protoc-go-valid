@@ -302,3 +302,38 @@ func Datetime(errBuf *strings.Builder, validName, structName, filedName string, 
 	}
 	errBuf.WriteString("\"" + structName + "." + filedName + "\" is not datetime, eg: 2021-11-15 23:59:59" + errEndFlag)
 }
+
+// Int 验证整数
+func Int(errBuf *strings.Builder, validName, structName, filedName string, tv reflect.Value) {
+	matched := true
+	switch tv.Kind() {
+	case reflect.String:
+		matched, _ = regexp.MatchString("^\\d+$", tv.String())
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+	default:
+		matched = false
+	}
+
+	if matched {
+		return
+	}
+	errBuf.WriteString("\"" + structName + "." + filedName + "\" is not integer" + errEndFlag)
+}
+
+// Float 验证浮动数
+func Float(errBuf *strings.Builder, validName, structName, filedName string, tv reflect.Value) {
+	matched := true
+	switch tv.Kind() {
+	case reflect.String:
+		matched, _ = regexp.MatchString("^\\d+.\\d+$", tv.String())
+	case reflect.Float32, reflect.Float64:
+	default:
+		matched = false
+	}
+
+	if matched {
+		return
+	}
+	errBuf.WriteString("\"" + structName + "." + filedName + "\" is not float" + errEndFlag)
+}
