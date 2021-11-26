@@ -87,6 +87,10 @@ func (v *vStruct) Validate(structName string, in interface{}, isValidSlice ...bo
 
 		// 根据 tag 中的验证内容进行验证
 		for _, validName := range strings.Split(tag, ",") {
+			if validName == "" {
+				continue
+			}
+			
 			validKey, _ := ParseValidNameKV(validName)
 			fn, err := GetValidFn(validKey)
 			if err != nil {
