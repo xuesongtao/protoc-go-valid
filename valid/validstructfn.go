@@ -155,17 +155,6 @@ func To(errBuf *strings.Builder, validName, structName, filedName string, tv ref
 	}
 }
 
-// Le 小于或等于验证, 如果为字符串则是验证字符个数, 如果是数字的话就验证数字的大小
-func Le(errBuf *strings.Builder, validName, structName, filedName string, tv reflect.Value) {
-	_, maxStr := ParseValidNameKV(validName)
-	max, _ := strconv.Atoi(maxStr)
-	_, isMoreThan, unitStr := validInputSize(0, max, tv)
-	if isMoreThan {
-		// 生成如: "TestOrder.AppName" is len more than 30
-		errBuf.WriteString("\"" + structName + "." + filedName + "\" is " + unitStr + " more than or equal " + fmt.Sprintf("%d", max) + errEndFlag)
-	}
-}
-
 // Ge 大于或等于验证, 如果为字符串则是验证字符个数, 如果是数字的话就验证数字的大小
 func Ge(errBuf *strings.Builder, validName, structName, filedName string, tv reflect.Value) {
 	_, minStr := ParseValidNameKV(validName)
@@ -174,6 +163,17 @@ func Ge(errBuf *strings.Builder, validName, structName, filedName string, tv ref
 	if isLessThan {
 		// 生成如: "TestOrder.AppName" is len less than 2
 		errBuf.WriteString("\"" + structName + "." + filedName + "\" is " + unitStr + " less than or equal " + fmt.Sprintf("%d", min) + errEndFlag)
+	}
+}
+
+// Le 小于或等于验证, 如果为字符串则是验证字符个数, 如果是数字的话就验证数字的大小
+func Le(errBuf *strings.Builder, validName, structName, filedName string, tv reflect.Value) {
+	_, maxStr := ParseValidNameKV(validName)
+	max, _ := strconv.Atoi(maxStr)
+	_, isMoreThan, unitStr := validInputSize(0, max, tv)
+	if isMoreThan {
+		// 生成如: "TestOrder.AppName" is len more than 30
+		errBuf.WriteString("\"" + structName + "." + filedName + "\" is " + unitStr + " more than or equal " + fmt.Sprintf("%d", max) + errEndFlag)
 	}
 }
 
@@ -198,17 +198,6 @@ func OTo(errBuf *strings.Builder, validName, structName, filedName string, tv re
 	}
 }
 
-// Lt 小于验证, 如果为字符串则是验证字符个数, 如果是数字的话就验证数字的大小
-func Lt(errBuf *strings.Builder, validName, structName, filedName string, tv reflect.Value) {
-	_, maxStr := ParseValidNameKV(validName)
-	max, _ := strconv.Atoi(maxStr)
-	_, isMoreThan, unitStr := validInputSize(0, max, tv, false)
-	if isMoreThan {
-		// 生成如: "TestOrder.AppName" is len more than 30
-		errBuf.WriteString("\"" + structName + "." + filedName + "\" is " + unitStr + " more than " + fmt.Sprintf("%d", max) + errEndFlag)
-	}
-}
-
 // Gt 大于验证, 如果为字符串则是验证字符个数, 如果是数字的话就验证数字的大小
 func Gt(errBuf *strings.Builder, validName, structName, filedName string, tv reflect.Value) {
 	_, minStr := ParseValidNameKV(validName)
@@ -217,6 +206,17 @@ func Gt(errBuf *strings.Builder, validName, structName, filedName string, tv ref
 	if isLessThan {
 		// 生成如: "TestOrder.AppName" is len less than 2
 		errBuf.WriteString("\"" + structName + "." + filedName + "\" is " + unitStr + " less than " + fmt.Sprintf("%d", min) + errEndFlag)
+	}
+}
+
+// Lt 小于验证, 如果为字符串则是验证字符个数, 如果是数字的话就验证数字的大小
+func Lt(errBuf *strings.Builder, validName, structName, filedName string, tv reflect.Value) {
+	_, maxStr := ParseValidNameKV(validName)
+	max, _ := strconv.Atoi(maxStr)
+	_, isMoreThan, unitStr := validInputSize(0, max, tv, false)
+	if isMoreThan {
+		// 生成如: "TestOrder.AppName" is len more than 30
+		errBuf.WriteString("\"" + structName + "." + filedName + "\" is " + unitStr + " more than " + fmt.Sprintf("%d", max) + errEndFlag)
 	}
 }
 
