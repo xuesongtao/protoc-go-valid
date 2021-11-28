@@ -1,9 +1,6 @@
 package valid
 
 import (
-	"fmt"
-	"reflect"
-	"regexp"
 	"strings"
 	"testing"
 
@@ -54,129 +51,6 @@ func TestValidOrder(t *testing.T) {
 		TestOrderDetailSlice: testOrderDetails,
 	}
 	t.Log(ValidateStruct(u, "alipay"))
-}
-
-func TestTo(t *testing.T) {
-	type Tmp struct {
-		Name string `valid:"to=1~3"`
-		Age  int32  `valid:"to=0"`
-		Addr string `valid:"le=3"`
-	}
-	v := &Tmp{Name: "测试调", Age: 100, Addr: "tets"}
-	t.Log(ValidateStruct(v))
-}
-
-func TestOto(t *testing.T) {
-	type Tmp struct {
-		Name     string `valid:"oto=1~3"`
-		Age      int32  `valid:"oto=0~100"`
-		NickName string `valid:"gt=1"`
-		Addr     string `valid:"lt=3"`
-	}
-	v := &Tmp{Name: "测试", Age: 0, NickName: "h1", Addr: "tets"}
-	t.Log(ValidateStruct(v))
-}
-
-func TestDate(t *testing.T) {
-	type Tmp struct {
-		Date     string `valid:"date"`
-		Datetime string `valid:"datetime"`
-	}
-	v := &Tmp{}
-	t.Log(ValidateStruct(v))
-}
-
-func TestEither(t *testing.T) {
-	type Tmp struct {
-		Either1 int32 `valid:"either=1"`
-		Either2 int32 `valid:"either=1"`
-	}
-	v := &Tmp{}
-	t.Log(ValidateStruct(v))
-}
-
-func TestIn(t *testing.T) {
-	type Tmp struct {
-		SelectNum int32  `valid:"in=(1/2/3/4)"`
-		SelectStr string `valid:"in=(a/b/c/d)"`
-	}
-	v := &Tmp{SelectNum: 1, SelectStr: "a"}
-	t.Log(ValidateStruct(v))
-}
-
-func TestPhone(t *testing.T) {
-	type Tmp struct {
-		Phone string `valid:"phone"`
-	}
-	v := &Tmp{Phone: "1"}
-	t.Log(ValidateStruct(v))
-}
-
-func TestEmail(t *testing.T) {
-	type Tmp struct {
-		Email string `valid:"email"`
-	}
-	v := &Tmp{Email: "xuesongtao512@qq.com"}
-	t.Log(ValidateStruct(v))
-}
-
-func TestIdCard(t *testing.T) {
-	type Tmp struct {
-		IDCard string `valid:"idcard"`
-	}
-	v := &Tmp{IDCard: "511321"}
-	t.Log(ValidateStruct(v))
-}
-
-func TestInt(t *testing.T) {
-	type Tmp struct {
-		IntString string  `valid:"int"`
-		IntNum    int     `valid:"int"`
-		FloatNum  float32 `valid:"int"`
-	}
-
-	v := &Tmp{
-		IntString: "11",
-		IntNum:    1,
-		FloatNum:  1.0,
-	}
-	t.Log(ValidateStruct(v))
-}
-
-func TestFloat(t *testing.T) {
-	type Tmp struct {
-		FloatString string  `valid:"float"`
-		IntNum      int     `valid:"float"`
-		FloatNum32  float32 `valid:"float"`
-		FloatNum64  float64 `valid:"float"`
-	}
-
-	v := &Tmp{
-		FloatString: "1.1",
-		IntNum:      10,
-		FloatNum32:  12.5,
-		FloatNum64:  1.0,
-	}
-	t.Log(ValidateStruct(v))
-}
-
-func TestSetCustomerValidFn(t *testing.T) {
-	type Tmp struct {
-		Name string `valid:"required"`
-		Age  string `valid:"num"`
-	}
-
-	isNumFn := func(errBuf *strings.Builder, validName, structName, filedName string, tv reflect.Value) {
-		ok, _ := regexp.MatchString("^\\d+$", tv.String())
-		if !ok {
-			errBuf.WriteString(fmt.Sprintf("%q is not num", structName+"."+filedName))
-			return
-		}
-	}
-
-	SetCustomerValidFn("num", isNumFn)
-	v := Tmp{Name: "12", Age: "1ha"}
-	t.Log(ValidateStruct(&v))
 }
 
 func TestProtoPb1(t *testing.T) {
