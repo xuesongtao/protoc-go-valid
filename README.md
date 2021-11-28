@@ -47,7 +47,7 @@ protoFileDirName="test" # proto 存放的目录
 | int      | 整数型验证                                                                                                                |
 | float    | 浮动数型验证                                                                                                              |
 
-- 其他: 如果没有实现的, 可以调用 `SetCustomerValidFn` 自定义; 使用的可以参考 `valid_test.go` 
+- 其他: 如果没有实现的, 可以调用 `SetCustomerValidFn` 自定义; 使用的可以参考 `example_test.go`, `valid_test.go`  
 
 ##### 4.2 使用示例:
 - `proto` 内容如下: 
