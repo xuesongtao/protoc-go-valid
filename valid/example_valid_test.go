@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func ExampleRequired()  {
+func ExampleRequired() {
 	type Tmp struct {
 		Name string `valid:"required"`
 		Age  int32  `valid:"ge=0"`
@@ -42,6 +42,24 @@ func ExampleOto() {
 	fmt.Println(ValidateStruct(v))
 	// Output:
 	// "Tmp.Addr" is length more than 3
+}
+
+func ExampleEq() {
+	type Tmp struct {
+		Name  string  `valid:"required,eq=3"`
+		Age   int32   `valid:"required,eq=20"`
+		Score float64 `valid:"eq=80"`
+		Phone string  `valid:"eq=11"`
+	}
+	v := &Tmp{
+		Name:  "xue",
+		Age:   20,
+		Score: 80,
+		Phone: "1354004261",
+	}
+	fmt.Println(ValidateStruct(v))
+	// Output:
+	// "Tmp.Phone" length should equal 11
 }
 
 func ExampleDate() {

@@ -220,6 +220,40 @@ func Lt(errBuf *strings.Builder, validName, structName, filedName string, tv ref
 	}
 }
 
+// Eq 等于验证, 如果为字符串则是验证字符个数, 如果是数字的话就验证数字的大小
+func Eq(errBuf *strings.Builder, validName, structName, filedName string, tv reflect.Value) {
+	_, eqStr := ParseValidNameKV(validName)
+	eqInt, _ := strconv.Atoi(eqStr)
+	isEq := true
+	uintStr := "size"
+	switch tv.Kind() {
+	case reflect.String:
+		uintStr = "length"
+		if len([]rune(tv.String())) != eqInt {
+			isEq = false
+		}
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		if tv.Int() != int64(eqInt) {
+			isEq = false
+		}
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		if tv.Uint() != uint64(eqInt) {
+			isEq = false
+		}
+	case reflect.Float32, reflect.Float64:
+		if tv.Float() != float64(eqInt) {
+			isEq = false
+		}
+	default:
+		isEq = false
+	}
+
+	if isEq {
+		return
+	}
+	errBuf.WriteString("\"" + structName + "." + filedName + "\" " + uintStr + " should equal " + eqStr + errEndFlag)
+}
+
 // In 指定输入选项
 func In(errBuf *strings.Builder, validName, structName, filedName string, tv reflect.Value) {
 	_, val := ParseValidNameKV(validName)
