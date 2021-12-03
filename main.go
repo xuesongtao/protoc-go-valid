@@ -19,6 +19,7 @@ const (
 	windowsInjectTool        = "protoc-go-valid-windows"
 	darwinInjectTool         = "protoc-go-valid-darwin"
 	linuxInjectTool          = "protoc-go-valid-linux"
+	tmpInjectTool            = "protoc-go-valid"
 )
 
 // copyInjectTool 将 inject_tool.sh 脚本移动到 GOPATH 下
@@ -47,9 +48,12 @@ func copyInjectTool() {
 	default:
 		toolSrc = linuxInjectTool
 	}
-	if err := file.CopyFile(toolSrc, goBin); err != nil {
+	if err := file.CopyFile(toolSrc, goBin, true); err != nil {
 		log.Errorf("copy %q to %q is failed, err: %v", toolSrc, goBin, err)
 	}
+
+	// 删除通用的
+	_ = os.Remove(handlePath(goBin) + tmpInjectTool)
 
 	// 判断下是否已经移动了, 如果已经移动就不处理了
 	dest := handlePath(goPath) + injectToolShellFileName
@@ -63,7 +67,7 @@ func copyInjectTool() {
 		log.Error("replaceFileContent is failed, err: ", err)
 		return
 	}
-	
+
 	// 复制
 	if err := file.CopyFile(src, dest); err != nil {
 		log.Error("file.CopyFile is failed, err: ", err)
