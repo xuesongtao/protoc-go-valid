@@ -35,7 +35,7 @@ func WriteFile(inputPath string, areas []textArea) (err error) {
 }
 
 // CopyFile 复制文件
-func CopyFile(src, dst string) (err error) {
+func CopyFile(src, dst string, isFirstDel ...bool) (err error) {
 	if src == "" {
 		return errors.New("source file cannot be empty")
 	}
@@ -47,6 +47,13 @@ func CopyFile(src, dst string) (err error) {
 	// 如果相同就不处理
 	if src == dst {
 		return nil
+	}
+
+	// 删除原来的
+	if len(isFirstDel) >0 && isFirstDel[0] {
+		if err := os.Remove(dst); err != nil {
+			return err
+		}
 	}
 
 	in, err := os.Open(src)

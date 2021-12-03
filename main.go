@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bytes"
 	"flag"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -12,7 +14,11 @@ import (
 )
 
 const (
-	injectToolFileName = "inject_tool.sh"
+	injectToolShellFileName  = "inject_tool.sh"
+	injectToolSheellToolName = "protoc-go-valid-template" // 这里用于inject_tool.sh替换工具名
+	windowsInjectTool        = "protoc-go-valid-windows"
+	darwinInjectTool         = "protoc-go-valid-darwin"
+	linuxInjectTool          = "protoc-go-valid-linux"
 )
 
 // copyInjectTool 将 inject_tool.sh 脚本移动到 GOPATH 下
@@ -24,18 +30,54 @@ func copyInjectTool() {
 		return
 	}
 
+	goBin := os.Getenv("GOBIN")
+	log.Info("GOBIN: ", goBin)
+	if goBin == "" {
+		log.Error("it is not found GOBIN, inject_tool.sh can not use")
+		return
+	}
+
+	// 对应操作系统
+	toolSrc := ""
+	switch runtime.GOOS {
+	case "windows":
+		toolSrc = windowsInjectTool
+	case "darwin":
+		toolSrc = darwinInjectTool
+	default:
+		toolSrc = linuxInjectTool
+	}
+	if err := file.CopyFile(toolSrc, goBin); err != nil {
+		log.Errorf("copy %q to %q is failed, err: %v", toolSrc, goBin, err)
+	}
+
 	// 判断下是否已经移动了, 如果已经移动就不处理了
-	dest := handlePath(goPath) + injectToolFileName
+	dest := handlePath(goPath) + injectToolShellFileName
 	if _, err := os.Stat(dest); os.IsExist(err) {
 		return
 	}
 
+	// 替换里面的工具名
+	src := injectToolShellFileName
+	if err := replaceFileContent(src, injectToolSheellToolName, toolSrc); err != nil {
+		log.Error("replaceFileContent is failed, err: ", err)
+		return
+	}
+	
 	// 复制
-	src := injectToolFileName
 	if err := file.CopyFile(src, dest); err != nil {
 		log.Error("file.CopyFile is failed, err: ", err)
 		return
 	}
+}
+
+// replaceFileContent 文件内容替换
+func replaceFileContent(src, old, new string) error {
+	contentByte, err := os.ReadFile(src)
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(src, bytes.ReplaceAll(contentByte, []byte(old), []byte(new)), fs.ModePerm)
 }
 
 // handlePath 处理最后一个的路径服务
