@@ -2,7 +2,7 @@
 
 # 用于本地构建项目目录下 proto 文件, 功能如下:
 # 1: protoc --go_out=xxx/library/protogo xxx.proto
-# 2: protoc-go-valid-darwin -f=xxx/library/protogo
+# 2: protoc-go-valid-template -f=xxx/library/protogo
 protoFileDir="document" # proto 存放的目录
 outPdProjectDir="library/protogo" # 生成 pb 的目录
 
@@ -38,7 +38,7 @@ function main() {
     for protoFile in $@
     do
         filename=${protoFile%%'.proto'} # 去掉 xxx.proto 的 .proto 
-        protoc-go-valid-darwin -f="${goOutPath}/${filename}.pb.go"
+        protoc-go-valid-template -f="${goOutPath}/${filename}.pb.go"
     done
 }
 

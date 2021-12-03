@@ -51,8 +51,8 @@ func CopyFile(src, dst string, isFirstDel ...bool) (err error) {
 
 	// 删除原来的
 	if len(isFirstDel) >0 && isFirstDel[0] {
-		if err := os.Remove(dst); err != nil {
-			return err
+		if err = os.Remove(dst); err != nil {
+			return
 		}
 	}
 

@@ -5,6 +5,8 @@ import (
 	"go/parser"
 	"go/token"
 	"regexp"
+	"runtime"
+	"strings"
 )
 
 const (
@@ -23,6 +25,18 @@ type textArea struct {
 	End        int    // 截止位置
 	CurrentTag string // 已有 tag
 	InjectTag  string // 注入的 tag
+}
+
+// HandlePath 处理最后一个的路径服务
+func HandlePath(path string) string {
+	lastSymbol := "/"
+	if runtime.GOOS == "windows" {
+		lastSymbol = "\\\\"
+	}
+	if strings.LastIndex(path, lastSymbol) != len(path)-1 {
+		path += lastSymbol
+	}
+	return path
 }
 
 // ParseFile 解析文件

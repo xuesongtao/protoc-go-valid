@@ -14,12 +14,13 @@ import (
 )
 
 const (
-	injectToolShellFileName  = "inject_tool.sh"
-	injectToolSheellToolName = "protoc-go-valid-template" // 这里用于inject_tool.sh替换工具名
-	windowsInjectTool        = "protoc-go-valid-windows"
-	darwinInjectTool         = "protoc-go-valid-darwin"
-	linuxInjectTool          = "protoc-go-valid-linux"
-	tmpInjectTool            = "protoc-go-valid"
+	injectToolTemplateSh = "inject_tool_template.sh"
+	injectToolSh         = "inject_tool.sh"
+	injectToolReplaceTag = "protoc-go-valid-template" // 这里用于inject_tool_template.sh替换工具名
+	windowsInjectTool    = "protoc-go-valid-windows"
+	darwinInjectTool     = "protoc-go-valid-darwin"
+	linuxInjectTool      = "protoc-go-valid-linux"
+	tmpInjectTool        = "protoc-go-valid"
 )
 
 // copyInjectTool 将 inject_tool.sh 脚本移动到 GOPATH 下
@@ -31,14 +32,9 @@ func copyInjectTool() {
 		return
 	}
 
-	goBin := os.Getenv("GOBIN")
-	log.Info("GOBIN: ", goBin)
-	if goBin == "" {
-		log.Error("it is not found GOBIN, inject_tool.sh can not use")
-		return
-	}
+	goBin := file.HandlePath(goPath) + "bin"
 
-	// 对应操作系统
+	// 将操作系统对应的注入工具复制到 GOBIN 下
 	toolSrc := ""
 	switch runtime.GOOS {
 	case "windows":
@@ -48,23 +44,24 @@ func copyInjectTool() {
 	default:
 		toolSrc = linuxInjectTool
 	}
-	if err := file.CopyFile(toolSrc, goBin, true); err != nil {
+	if err := file.CopyFile(toolSrc, file.HandlePath(goBin)+toolSrc, true); err != nil {
 		log.Errorf("copy %q to %q is failed, err: %v", toolSrc, goBin, err)
+		return
 	}
 
-	// 删除通用的
-	_ = os.Remove(handlePath(goBin) + tmpInjectTool)
+	// 删除通过 go install 生成的可执行文件
+	_ = os.Remove(file.HandlePath(goBin) + tmpInjectTool)
 
 	// 判断下是否已经移动了, 如果已经移动就不处理了
-	dest := handlePath(goPath) + injectToolShellFileName
+	dest := file.HandlePath(goPath) + injectToolSh
 	if _, err := os.Stat(dest); os.IsExist(err) {
 		return
 	}
 
 	// 替换里面的工具名
-	src := injectToolShellFileName
-	if err := replaceFileContent(src, injectToolSheellToolName, toolSrc); err != nil {
-		log.Error("replaceFileContent is failed, err: ", err)
+	src := injectToolSh
+	if err := createInjectToolSh(injectToolTemplateSh, src, injectToolReplaceTag, toolSrc); err != nil {
+		log.Error("createInjectToolSh is failed, err: ", err)
 		return
 	}
 
@@ -75,25 +72,13 @@ func copyInjectTool() {
 	}
 }
 
-// replaceFileContent 文件内容替换
-func replaceFileContent(src, old, new string) error {
-	contentByte, err := os.ReadFile(src)
+// createInjectToolSh 文件内容替换
+func createInjectToolSh(template, create, old, new string) error {
+	contentByte, err := os.ReadFile(template)
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(src, bytes.ReplaceAll(contentByte, []byte(old), []byte(new)), fs.ModePerm)
-}
-
-// handlePath 处理最后一个的路径服务
-func handlePath(path string) string {
-	lastSymbol := "/"
-	if runtime.GOOS == "windows" {
-		lastSymbol = "\\\\"
-	}
-	if strings.LastIndex(path, lastSymbol) != len(path)-1 {
-		path += lastSymbol
-	}
-	return path
+	return os.WriteFile(create, bytes.ReplaceAll(contentByte, []byte(old), []byte(new)), fs.ModePerm)
 }
 
 // handleDir 按目录处理
@@ -104,7 +89,7 @@ func handleDir(dirPath string) (isHasMatch bool) {
 		return
 	}
 
-	dirPath = handlePath(dirPath)
+	dirPath = file.HandlePath(dirPath)
 	for _, dir := range dirs {
 		if dir.IsDir() {
 			continue
