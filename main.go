@@ -6,7 +6,6 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
-	"runtime"
 	"strings"
 
 	"gitee.com/xuesongtao/protoc-go-valid/file"
@@ -14,13 +13,7 @@ import (
 )
 
 const (
-	injectToolTemplateSh = "inject_tool_template.sh"
-	injectToolSh         = "inject_tool.sh"
-	injectToolReplaceTag = "protoc-go-valid-template" // 这里用于inject_tool_template.sh替换工具名
-	windowsInjectTool    = "protoc-go-valid-windows"
-	darwinInjectTool     = "protoc-go-valid-darwin"
-	linuxInjectTool      = "protoc-go-valid-linux"
-	tmpInjectTool        = "protoc-go-valid"
+	injectToolSh = "inject_tool.sh"
 )
 
 // copyInjectTool 将 inject_tool.sh 脚本移动到 GOPATH 下
@@ -32,41 +25,14 @@ func copyInjectTool() {
 		return
 	}
 
-	goBin := file.HandlePath(goPath) + "bin"
-
-	// 将操作系统对应的注入工具复制到 GOBIN 下
-	toolSrc := ""
-	switch runtime.GOOS {
-	case "windows":
-		toolSrc = windowsInjectTool
-	case "darwin":
-		toolSrc = darwinInjectTool
-	default:
-		toolSrc = linuxInjectTool
-	}
-	if err := file.CopyFile(toolSrc, file.HandlePath(goBin)+toolSrc, true); err != nil {
-		log.Errorf("copy %q to %q is failed, err: %v", toolSrc, goBin, err)
-		return
-	}
-
-	// 删除通过 go install 生成的可执行文件
-	_ = os.Remove(file.HandlePath(goBin) + tmpInjectTool)
-
 	// 判断下是否已经移动了, 如果已经移动就不处理了
 	dest := file.HandlePath(goPath) + injectToolSh
 	if _, err := os.Stat(dest); os.IsExist(err) {
 		return
 	}
 
-	// 替换里面的工具名
-	src := injectToolSh
-	if err := createInjectToolSh(injectToolTemplateSh, src, injectToolReplaceTag, toolSrc); err != nil {
-		log.Error("createInjectToolSh is failed, err: ", err)
-		return
-	}
-
 	// 复制
-	if err := file.CopyFile(src, dest); err != nil {
+	if err := file.CopyFile(injectToolSh, dest); err != nil {
 		log.Error("file.CopyFile is failed, err: ", err)
 		return
 	}
