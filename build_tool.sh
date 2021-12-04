@@ -2,8 +2,8 @@
 
 # 根据不同平台进行编译
 function goBuild() {
-    echo "请输入要编译的平台: 1-Windows 2-Linux 3-Darwin"
-    read platform
+    echo "需要编译的平台选项: 1-Windows 2-Linux 3-Darwin"
+    read -p "请输入选项: " platform
     case $platform in
     1)
         GOOS=windows
