@@ -15,7 +15,7 @@ var (
 // 标记
 var (
 	defaultTargetTag = "valid" // 默认的验证 tag
-	errEndFlag       = " \n"   // 错误结束符号
+	errEndFlag       = "; "   // 错误结束符号
 )
 
 // 错误
