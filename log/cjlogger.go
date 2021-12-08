@@ -1,23 +1,24 @@
 package log
 
 import (
+	"fmt"
 	"log"
 	"os"
 )
 
 var (
-	cjLog *defaultLogger
+	CjLog *defaultLogger
 )
 
 func init() {
-	cjLog = newCjLogger()
+	CjLog = NewCjLogger()
 }
 
 type defaultLogger struct {
 	log *log.Logger
 }
 
-func newCjLogger() *defaultLogger {
+func NewCjLogger() *defaultLogger {
 	return &defaultLogger{
 		log: log.New(os.Stderr, "", log.LstdFlags),
 	}
@@ -49,28 +50,47 @@ func (d *defaultLogger) Fatalf(format string, v ...interface{}) {
 	os.Exit(1)
 }
 
+func (d *defaultLogger) Panic(v ...interface{}) {
+	d.Error(v...)
+	panic(fmt.Sprint(v...))
+}
+
+func (d *defaultLogger) Panicf(format string, v ...interface{}) {
+	d.Errorf(format, v...)
+	panic(fmt.Sprintf(format, v...))
+}
+
 // ============================= 常用方法封装 ===============================
 
 func Info(v ...interface{}) {
-	cjLog.Info(v...)
+	CjLog.Info(v...)
 }
 
 func Infof(format string, v ...interface{}) {
-	cjLog.Infof(format, v...)
+	CjLog.Infof(format, v...)
 }
 
 func Error(v ...interface{}) {
-	cjLog.Error(v...)
+	CjLog.Error(v...)
 }
 
 func Errorf(format string, v ...interface{}) {
-	cjLog.Errorf(format, v...)
+	CjLog.Errorf(format, v...)
 }
 
 func Fatal(v ...interface{}) {
-	cjLog.Fatal(v...)
+	CjLog.Fatal(v...)
 }
 
 func Fatalf(format string, v ...interface{}) {
-	cjLog.Fatalf(format, v...)
+	CjLog.Fatalf(format, v...)
 }
+
+func Panic(v ...interface{}) {
+	CjLog.Panic(v...)
+}
+
+func Panicf(format string, v ...interface{}) {
+	CjLog.Panicf(format, v...)
+}
+
