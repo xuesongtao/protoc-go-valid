@@ -188,3 +188,38 @@ func ExampleSetCustomerValidFn() {
 	// Output:
 	// "Tmp.Age" is not num
 }
+
+func ExampleRule() {
+	type Tmp struct {
+		Name string
+		Age  string
+		ClassName string
+	}
+	v := Tmp{Name: "xue", Age: "12a"}
+	rule := RM{"name,age,classname": "required", "age": "int"}
+	if err := ValidStructForRule(rule, &v); err != nil {
+		fmt.Println(err)
+	}
+
+	// Output:
+	// "Tmp.Age" is not integer; "Tmp.ClassName" is required
+}
+
+
+func ExampleRule2() {
+	type Tmp struct {
+		Name string
+		Age  string
+	}
+	v := Tmp{Name: "xue"}
+	ruleMap := NewRule()
+	if v.Name == "xue" {
+		ruleMap.Set("age", "required")
+	}
+	if err := ValidStructForRule(ruleMap, &v); err != nil {
+		fmt.Println(err)
+	}
+
+	// Output:
+	// "Tmp.Age" is required
+}

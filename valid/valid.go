@@ -8,12 +8,18 @@ import (
 	"strings"
 )
 
+const (
+	requiredFlag = "required"
+	eitherFlag   = "either"
+)
+
 // vStruct 验证结构体
 type vStruct struct {
 	isCheckStructSlice bool   // 标记是否已验证是否为结构体切片
 	targetTag          string // 结构体中的待指定的验证的 tag
 	endFlag            string // 用于分割 err
 	errBuf             *strings.Builder
+	ruleMap            RM                    // 验证规则
 	existMap           map[int][]*name2Value // 已存在的, 用于 either tag
 }
 
@@ -34,11 +40,25 @@ func NewVStruct(targetTag ...string) *vStruct {
 	obj.targetTag = tagName
 	obj.endFlag = errEndFlag
 	obj.errBuf = new(strings.Builder)
+	obj.ruleMap = make(RM)
 	return obj
 }
 
-// Validate 验证执行体
-func (v *vStruct) Validate(structName string, in interface{}, isValidSlice ...bool) *vStruct {
+// SetRule 添加验证规则
+func (v *vStruct) SetRule(ruleMap RM) *vStruct {
+	for filedNames, rules := range ruleMap {
+		v.ruleMap.Set(filedNames, rules)
+	}
+	return v
+}
+
+// Valid 验证
+func (v *vStruct) Valid(in interface{}) error {
+	return v.validate("", in).getError()
+}
+
+// validate 验证执行体
+func (v *vStruct) validate(structName string, in interface{}, isValidSlice ...bool) *vStruct {
 	// 辅助 errMsg, 用于嵌套时拼接上一级的结构体名
 	if structName != "" {
 		structName = structName + "."
@@ -79,18 +99,23 @@ func (v *vStruct) Validate(structName string, in interface{}, isValidSlice ...bo
 		}
 
 		ty := ry.Field(filedNum)
-		tag := ty.Tag.Get(v.targetTag)
-		// 没有 tag 直接跳过
-		if tag == "" {
+		validNames := ty.Tag.Get(v.targetTag)
+		// 如果设置了规则就覆盖 tag 中的验证内容
+		if rule := v.ruleMap.Get(ty.Name); rule != "" {
+			validNames = rule
+		}
+
+		// 没有 validNames 直接跳过
+		if validNames == "" {
 			continue
 		}
 
 		// 根据 tag 中的验证内容进行验证
-		for _, validName := range strings.Split(tag, ",") {
+		for _, validName := range strings.Split(validNames, ",") {
 			if validName == "" {
 				continue
 			}
-			
+
 			validKey, _ := ParseValidNameKV(validName)
 			fn, err := GetValidFn(validKey)
 			if err != nil {
@@ -99,10 +124,10 @@ func (v *vStruct) Validate(structName string, in interface{}, isValidSlice ...bo
 			}
 
 			// 开始验证
-			if fn == nil && validKey == "required" { // 必填
+			if fn == nil && validKey == requiredFlag { // 必填
 				v.required(structName+ry.Name(), ty.Name, tv)
-			} else if fn == nil && validKey == "either" { // 多选一
-				v.initEither(tag, structName+ry.Name(), ty.Name, tv)
+			} else if fn == nil && validKey == eitherFlag { // 多选一
+				v.initEither(validName, structName+ry.Name(), ty.Name, tv)
 			} else {
 				if tv.IsZero() { // 空就直接跳过
 					continue
@@ -120,10 +145,10 @@ func (v *vStruct) required(structName, filedName string, tv reflect.Value) {
 		// 生成如: "TestOrderDetailSlice.Price" is required
 		v.errBuf.WriteString("\"" + structName + "." + filedName + "\" is required" + v.endFlag)
 	} else if tv.Kind() == reflect.Ptr || (tv.Kind() == reflect.Struct && structName != "Time") { // 结构体
-		v.Validate(structName, tv.Interface())
+		v.validate(structName, tv.Interface())
 	} else if tv.Kind() == reflect.Slice { // 切片
 		for i := 0; i < tv.Len(); i++ {
-			v.Validate(fmt.Sprintf("%s-%d", structName, i), tv.Index(i).Interface(), true)
+			v.validate(fmt.Sprintf("%s-%d", structName, i), tv.Index(i).Interface(), true)
 		}
 	}
 }
@@ -175,8 +200,8 @@ func (v *vStruct) either() {
 	}
 }
 
-// GetErrMsg 获取 err
-func (v *vStruct) GetErrMsg() error {
+// getError 获取 err
+func (v *vStruct) getError() error {
 	defer v.free()
 
 	// 验证下 either
@@ -203,5 +228,10 @@ func (v *vStruct) free() {
 
 // ValidateStruct 验证结构体
 func ValidateStruct(in interface{}, targetTag ...string) error {
-	return NewVStruct(targetTag...).Validate("", in).GetErrMsg()
+	return NewVStruct(targetTag...).Valid(in)
+}
+
+// ValidStructForRule 自定义验证规则并验证
+func ValidStructForRule(ruleMap RM, in interface{}, targetTag ...string) error {
+	return NewVStruct(targetTag...).SetRule(ruleMap).Valid(in)
 }
