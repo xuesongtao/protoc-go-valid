@@ -27,6 +27,9 @@ func (r RM) Set(filedNames string, rules string) RM {
 
 // Get 获取验证规则
 func (r RM) Get(filedName string) string {
+	if len(r) == 0 || filedName == "" {
+		return ""
+	}
 	return r[r.toLower(filedName)]
 }
 
