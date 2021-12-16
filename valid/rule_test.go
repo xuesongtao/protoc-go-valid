@@ -10,7 +10,7 @@ func TestRule(t *testing.T) {
 	}
 	v := Tmp{Name: "xue", Age: "12a"}
 	validObj := NewVStruct()
-	validObj.SetRule(RM{"name,age,classname": "required", "age": "int"})
+	validObj.SetRule(RM{"Name,Age,ClassName": "required", "Age": "int"})
 	if err := validObj.Valid(&v); err != nil {
 		t.Log(err)
 	}
@@ -23,8 +23,7 @@ func TestRule2(t *testing.T) {
 	}
 	v := Tmp{Name: "xue", Age: "12a"}
 	validObj := NewVStruct()
-	validObj.SetRule(NewRule().Set("name,age", "required").Set("age", "int"))
-	t.Log(validObj.ruleMap.Get("name"))
+	validObj.SetRule(NewRule().Set("Name,Age", "required").Set("Age", "int"))
 	if err := validObj.Valid(&v); err != nil {
 		t.Log(err)
 	}

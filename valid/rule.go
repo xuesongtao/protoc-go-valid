@@ -14,13 +14,12 @@ func NewRule() RM {
 // rules 多个字段通过逗号隔开
 func (r RM) Set(filedNames string, rules string) RM {
 	for _, filedName := range strings.Split(filedNames, ",") {
-		key := r.toLower(filedName)
 		// 如果存在的话就通过逗号隔开
-		if _, ok := r[key]; ok {
-			r[key] += "," + rules
+		if _, ok := r[filedName]; ok {
+			r[filedName] += "," + rules
 			continue
 		}
-		r[key] = rules
+		r[filedName] = rules
 	}
 	return r
 }
@@ -30,7 +29,7 @@ func (r RM) Get(filedName string) string {
 	if len(r) == 0 || filedName == "" {
 		return ""
 	}
-	return r[r.toLower(filedName)]
+	return r[filedName]
 }
 
 func (r RM) toLower(s string) string {

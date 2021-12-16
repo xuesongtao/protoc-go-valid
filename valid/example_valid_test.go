@@ -196,7 +196,7 @@ func ExampleRule() {
 		ClassName string
 	}
 	v := Tmp{Name: "xue", Age: "12a"}
-	rule := RM{"name,age,classname": "required", "age": "int"}
+	rule := RM{"Name,Age,ClassName": "required", "Age": "int"}
 	if err := ValidStructForRule(rule, &v); err != nil {
 		fmt.Println(err)
 	}
@@ -214,7 +214,7 @@ func ExampleRule2() {
 	v := Tmp{Name: "xue"}
 	ruleMap := NewRule()
 	if v.Name == "xue" {
-		ruleMap.Set("age", "required")
+		ruleMap.Set("Age", "required")
 	}
 	if err := ValidStructForRule(ruleMap, &v); err != nil {
 		fmt.Println(err)
