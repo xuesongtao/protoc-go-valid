@@ -48,7 +48,7 @@ protoFileDirName="test" # proto 存放的目录
 
 ##### 4.2 设置验证
 - 1. 通过设置 `tag` 进行设置验证规则, 默认目标 `tagName` 为 `valid`
-- 2. 通过创建 `RM` 对象进行设置
+- 2. 通过创建 `RM` 对象进行设置, `RM` 暂不支持嵌套
 - 其他: 默认按照 `tag` 进行处理, 如果设置 `RM` 对象会以此规则为准; 如果没有实现的, 可以调用 `SetCustomerValidFn` 自定义; 使用的可以参考 `example_test.go`, `valid_test.go`  
 
 
