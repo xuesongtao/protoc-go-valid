@@ -52,7 +52,7 @@ var validName2FuncMap = map[string]commonValidFn{
 
 type commonValidFn func(errBuf *strings.Builder, validName, structName, filedName string, tv reflect.Value)
 
-// SetCustomerValidFn 自定义验证函数
+// SetCustomerValidFn 自定义Struct验证函数
 func SetCustomerValidFn(validName string, fn commonValidFn) {
 	validName2FuncMap[validName] = fn
 }
