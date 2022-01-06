@@ -66,7 +66,7 @@ func (v *vStruct) validate(structName string, in interface{}, isValidSlice ...bo
 
 	ry := reflect.TypeOf(in)
 	if ry.Kind() != reflect.Ptr {
-		// 这里主要防止验证的切片为非结构体切片
+		// 这里主要防止验证的切片为非结构体切片, 如 []int{1, 2, 3}, 这里会出现1, 为非指针所有需要退出
 		if len(isValidSlice) > 0 && isValidSlice[0] {
 			return v
 		}
@@ -74,23 +74,19 @@ func (v *vStruct) validate(structName string, in interface{}, isValidSlice ...bo
 		return v
 	}
 
-	ry = ry.Elem()
+	ry = removeTypePtr(ry)
 	// 如果不是结构体就退出
 	if ry.Kind() != reflect.Struct {
 		// 这里主要防止验证的切片为非结构体切片
 		if len(isValidSlice) > 0 && isValidSlice[0] {
 			return v
 		}
-		v.errBuf.WriteString("in params \"" + structName + ry.Name() + "\" is not struct")
-		if ry.Name() == "" {
-			v.errBuf.WriteString(", params should is *struct")
-		}
-		v.errBuf.WriteString(v.endFlag)
+		v.errBuf.WriteString("in params \"" + structName + ry.Name() + "\" is not struct" + v.endFlag)
 		return v
 	}
 
 	// 取值
-	rv := reflect.ValueOf(in).Elem()
+	rv := removeValuePtr(reflect.ValueOf(in))
 	for filedNum := 0; filedNum < rv.NumField(); filedNum++ {
 		tv := rv.Field(filedNum)
 		// 不能导出就跳过
@@ -222,6 +218,22 @@ func (v *vStruct) free() {
 	v.endFlag = ""
 	v.errBuf.Reset()
 	syncValidPool.Put(v)
+}
+
+// removeTypePtr 移除多指针
+func removeTypePtr(t reflect.Type) reflect.Type {
+	for t.Kind() == reflect.Ptr {
+		t = t.Elem()
+	}
+	return t
+}
+
+// removeValuePtr 移除多指针
+func removeValuePtr(t reflect.Value) reflect.Value {
+	for t.Kind() == reflect.Ptr {
+		t = t.Elem()
+	}
+	return t
 }
 
 // =========================== 常用方法进行封装 =======================================

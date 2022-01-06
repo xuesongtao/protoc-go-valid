@@ -141,7 +141,7 @@ func ExampleInt() {
 		IntNum:    1,
 		FloatNum:  1.0,
 	}
-	fmt.Println(ValidateStruct(v))
+	fmt.Println(ValidateStruct(&v))
 
 	// Output:
 	// "Tmp.FloatNum" is not integer
@@ -161,6 +161,7 @@ func ExampleFloat() {
 		FloatNum32:  12.5,
 		FloatNum64:  1.0,
 	}
+	
 	fmt.Println(ValidateStruct(v))
 
 	// Output:
