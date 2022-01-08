@@ -135,7 +135,7 @@ func parseTagTo(toVal string) (min int, max int, err error) {
 }
 
 // To 验证输入的大小区间, 如果为字符串则是验证字符个数, 如果是数字的话就验证数字的大小, 注: 左右都为闭区间
-func To(errBuf *strings.Builder, validName, structName, filedName string, tv reflect.Value) {
+func To(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
 	_, toVal := ParseValidNameKV(validName)
 	min, max, err := parseTagTo(toVal)
 	if err != nil {
@@ -146,39 +146,39 @@ func To(errBuf *strings.Builder, validName, structName, filedName string, tv ref
 	isLessThan, isMoreThan, unitStr := validInputSize(min, max, tv)
 	if isLessThan {
 		// 生成如: "TestOrder.AppName" is len less than 2
-		errBuf.WriteString("\"" + structName + "." + filedName + "\" is " + unitStr + " less than or equal " + fmt.Sprintf("%d", min) + errEndFlag)
+		errBuf.WriteString("\"" + objName + "." + filedName + "\" is " + unitStr + " less than or equal " + fmt.Sprintf("%d", min) + errEndFlag)
 	}
 
 	if isMoreThan {
 		// 生成如: "TestOrder.AppName" is len more than 30
-		errBuf.WriteString("\"" + structName + "." + filedName + "\" is " + unitStr + " more than or equal " + fmt.Sprintf("%d", max) + errEndFlag)
+		errBuf.WriteString("\"" + objName + "." + filedName + "\" is " + unitStr + " more than or equal " + fmt.Sprintf("%d", max) + errEndFlag)
 	}
 }
 
 // Ge 大于或等于验证, 如果为字符串则是验证字符个数, 如果是数字的话就验证数字的大小
-func Ge(errBuf *strings.Builder, validName, structName, filedName string, tv reflect.Value) {
+func Ge(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
 	_, minStr := ParseValidNameKV(validName)
 	min, _ := strconv.Atoi(minStr)
 	isLessThan, _, unitStr := validInputSize(min, 0, tv)
 	if isLessThan {
 		// 生成如: "TestOrder.AppName" is len less than 2
-		errBuf.WriteString("\"" + structName + "." + filedName + "\" is " + unitStr + " less than or equal " + fmt.Sprintf("%d", min) + errEndFlag)
+		errBuf.WriteString("\"" + objName + "." + filedName + "\" is " + unitStr + " less than or equal " + fmt.Sprintf("%d", min) + errEndFlag)
 	}
 }
 
 // Le 小于或等于验证, 如果为字符串则是验证字符个数, 如果是数字的话就验证数字的大小
-func Le(errBuf *strings.Builder, validName, structName, filedName string, tv reflect.Value) {
+func Le(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
 	_, maxStr := ParseValidNameKV(validName)
 	max, _ := strconv.Atoi(maxStr)
 	_, isMoreThan, unitStr := validInputSize(0, max, tv)
 	if isMoreThan {
 		// 生成如: "TestOrder.AppName" is len more than 30
-		errBuf.WriteString("\"" + structName + "." + filedName + "\" is " + unitStr + " more than or equal " + fmt.Sprintf("%d", max) + errEndFlag)
+		errBuf.WriteString("\"" + objName + "." + filedName + "\" is " + unitStr + " more than or equal " + fmt.Sprintf("%d", max) + errEndFlag)
 	}
 }
 
 // OTo 验证输入的大小区间, 如果为字符串则是验证字符个数, 如果是数字的话就验证数字的大小, 注: 左右都为开区间
-func OTo(errBuf *strings.Builder, validName, structName, filedName string, tv reflect.Value) {
+func OTo(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
 	_, toVal := ParseValidNameKV(validName)
 	min, max, err := parseTagTo(toVal)
 	if err != nil {
@@ -189,39 +189,39 @@ func OTo(errBuf *strings.Builder, validName, structName, filedName string, tv re
 	isLessThan, isMoreThan, unitStr := validInputSize(min, max, tv, false)
 	if isLessThan {
 		// 生成如: "TestOrder.AppName" is len less than 2
-		errBuf.WriteString("\"" + structName + "." + filedName + "\" is " + unitStr + " less than " + fmt.Sprintf("%d", min) + errEndFlag)
+		errBuf.WriteString("\"" + objName + "." + filedName + "\" is " + unitStr + " less than " + fmt.Sprintf("%d", min) + errEndFlag)
 	}
 
 	if isMoreThan {
 		// 生成如: "TestOrder.AppName" is len more than 30
-		errBuf.WriteString("\"" + structName + "." + filedName + "\" is " + unitStr + " more than " + fmt.Sprintf("%d", max) + errEndFlag)
+		errBuf.WriteString("\"" + objName + "." + filedName + "\" is " + unitStr + " more than " + fmt.Sprintf("%d", max) + errEndFlag)
 	}
 }
 
 // Gt 大于验证, 如果为字符串则是验证字符个数, 如果是数字的话就验证数字的大小
-func Gt(errBuf *strings.Builder, validName, structName, filedName string, tv reflect.Value) {
+func Gt(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
 	_, minStr := ParseValidNameKV(validName)
 	min, _ := strconv.Atoi(minStr)
 	isLessThan, _, unitStr := validInputSize(min, 0, tv, false)
 	if isLessThan {
 		// 生成如: "TestOrder.AppName" is len less than 2
-		errBuf.WriteString("\"" + structName + "." + filedName + "\" is " + unitStr + " less than " + fmt.Sprintf("%d", min) + errEndFlag)
+		errBuf.WriteString("\"" + objName + "." + filedName + "\" is " + unitStr + " less than " + fmt.Sprintf("%d", min) + errEndFlag)
 	}
 }
 
 // Lt 小于验证, 如果为字符串则是验证字符个数, 如果是数字的话就验证数字的大小
-func Lt(errBuf *strings.Builder, validName, structName, filedName string, tv reflect.Value) {
+func Lt(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
 	_, maxStr := ParseValidNameKV(validName)
 	max, _ := strconv.Atoi(maxStr)
 	_, isMoreThan, unitStr := validInputSize(0, max, tv, false)
 	if isMoreThan {
 		// 生成如: "TestOrder.AppName" is len more than 30
-		errBuf.WriteString("\"" + structName + "." + filedName + "\" is " + unitStr + " more than " + fmt.Sprintf("%d", max) + errEndFlag)
+		errBuf.WriteString("\"" + objName + "." + filedName + "\" is " + unitStr + " more than " + fmt.Sprintf("%d", max) + errEndFlag)
 	}
 }
 
 // Eq 等于验证, 如果为字符串则是验证字符个数, 如果是数字的话就验证数字的大小
-func Eq(errBuf *strings.Builder, validName, structName, filedName string, tv reflect.Value) {
+func Eq(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
 	_, eqStr := ParseValidNameKV(validName)
 	eqInt, _ := strconv.Atoi(eqStr)
 	isEq := true
@@ -251,11 +251,11 @@ func Eq(errBuf *strings.Builder, validName, structName, filedName string, tv ref
 	if isEq {
 		return
 	}
-	errBuf.WriteString("\"" + structName + "." + filedName + "\" " + uintStr + " should equal " + eqStr + errEndFlag)
+	errBuf.WriteString("\"" + objName + "." + filedName + "\" " + uintStr + " should equal " + eqStr + errEndFlag)
 }
 
 // In 指定输入选项
-func In(errBuf *strings.Builder, validName, structName, filedName string, tv reflect.Value) {
+func In(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
 	_, val := ParseValidNameKV(validName)
 	// 取左括号的下标
 	leftBracketIndex := strings.Index(val, "(")
@@ -288,57 +288,57 @@ func In(errBuf *strings.Builder, validName, structName, filedName string, tv ref
 	}
 
 	if !isIn {
-		errBuf.WriteString("\"" + structName + "." + filedName + "\" should in (" + inVals + ")" + errEndFlag)
+		errBuf.WriteString("\"" + objName + "." + filedName + "\" should in (" + inVals + ")" + errEndFlag)
 	}
 }
 
 // Phone 验证手机号
-func Phone(errBuf *strings.Builder, validName, structName, filedName string, tv reflect.Value) {
+func Phone(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
 	matched, _ := regexp.MatchString("^1[3,4,5,6,7,8,9]\\d{9}$", tv.String())
 	if matched {
 		return
 	}
-	errBuf.WriteString("\"" + structName + "." + filedName + "\" is not phone" + errEndFlag)
+	errBuf.WriteString("\"" + objName + "." + filedName + "\" is not phone" + errEndFlag)
 }
 
 // Email 验证邮箱
-func Email(errBuf *strings.Builder, validName, structName, filedName string, tv reflect.Value) {
+func Email(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
 	matched, _ := regexp.MatchString("^\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*$", tv.String())
 	if matched {
 		return
 	}
-	errBuf.WriteString("\"" + structName + "." + filedName + "\" is not email" + errEndFlag)
+	errBuf.WriteString("\"" + objName + "." + filedName + "\" is not email" + errEndFlag)
 }
 
 // IDCard 验证身份证
-func IDCard(errBuf *strings.Builder, validName, structName, filedName string, tv reflect.Value) {
+func IDCard(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
 	matched, _ := regexp.MatchString("(^\\d{15}$)|(^\\d{18}$)|(^\\d{17}(\\d|X|x)$)", tv.String())
 	if matched {
 		return
 	}
-	errBuf.WriteString("\"" + structName + "." + filedName + "\" is not idcard" + errEndFlag)
+	errBuf.WriteString("\"" + objName + "." + filedName + "\" is not idcard" + errEndFlag)
 }
 
 // Date 验证日期
-func Date(errBuf *strings.Builder, validName, structName, filedName string, tv reflect.Value) {
+func Date(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
 	matched, _ := regexp.MatchString("^\\d{4}-\\d{1,2}-\\d{1,2}", tv.String())
 	if matched {
 		return
 	}
-	errBuf.WriteString("\"" + structName + "." + filedName + "\" is not date, eg: 2021-11-15" + errEndFlag)
+	errBuf.WriteString("\"" + objName + "." + filedName + "\" is not date, eg: 2021-11-15" + errEndFlag)
 }
 
 // Datetime 验证时间
-func Datetime(errBuf *strings.Builder, validName, structName, filedName string, tv reflect.Value) {
+func Datetime(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
 	matched, _ := regexp.MatchString("^\\d{4}-\\d{1,2}-\\d{1,2} \\d{1,2}:\\d{1,2}:\\d{1,2}", tv.String())
 	if matched {
 		return
 	}
-	errBuf.WriteString("\"" + structName + "." + filedName + "\" is not datetime, eg: 2021-11-15 23:59:59" + errEndFlag)
+	errBuf.WriteString("\"" + objName + "." + filedName + "\" is not datetime, eg: 2021-11-15 23:59:59" + errEndFlag)
 }
 
 // Int 验证整数
-func Int(errBuf *strings.Builder, validName, structName, filedName string, tv reflect.Value) {
+func Int(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
 	matched := true
 	switch tv.Kind() {
 	case reflect.String:
@@ -352,11 +352,11 @@ func Int(errBuf *strings.Builder, validName, structName, filedName string, tv re
 	if matched {
 		return
 	}
-	errBuf.WriteString("\"" + structName + "." + filedName + "\" is not integer" + errEndFlag)
+	errBuf.WriteString("\"" + objName + "." + filedName + "\" is not integer" + errEndFlag)
 }
 
 // Float 验证浮动数
-func Float(errBuf *strings.Builder, validName, structName, filedName string, tv reflect.Value) {
+func Float(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
 	matched := true
 	switch tv.Kind() {
 	case reflect.String:
@@ -369,5 +369,5 @@ func Float(errBuf *strings.Builder, validName, structName, filedName string, tv 
 	if matched {
 		return
 	}
-	errBuf.WriteString("\"" + structName + "." + filedName + "\" is not float" + errEndFlag)
+	errBuf.WriteString("\"" + objName + "." + filedName + "\" is not float" + errEndFlag)
 }
