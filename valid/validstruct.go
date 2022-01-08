@@ -244,6 +244,7 @@ func ValidateStruct(in interface{}, targetTag ...string) error {
 }
 
 // ValidStructForRule 自定义验证规则并验证
+// 注: 通过字段名来匹配规则, 如果嵌套中如果有相同的名的都会走这个规则, 因此建议这种方式推荐使用非嵌套结构体
 func ValidStructForRule(ruleMap RM, in interface{}, targetTag ...string) error {
 	return NewVStruct(targetTag...).SetRule(ruleMap).Valid(in)
 }
