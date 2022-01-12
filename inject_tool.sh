@@ -8,6 +8,16 @@ outPdProjectDir="test" # 生成 pb 的目录
 # protoFileDir="document" # proto 存放的目录
 # outPdProjectDir="library/protogo" # 生成 pb 的目录
 
+function checkIsOk() {
+    # $1 操作名
+
+    if [[ $? > 0 ]]; then
+        echo "[${1}] is failed"
+        exit 1
+    fi
+    echo "[${1}] is success"
+}
+
 function main() {
     curPath=$(pwd)
     echo "当前路径: ${curPath}"
@@ -34,7 +44,8 @@ function main() {
     fi
 
     # protoc 进行编译 
-    protoc --go_out=$goOutPath $@
+    protoc --go_out=paths=source_relative:$goOutPath $@
+    checkIsOk "protoc"
 
     # tag 注入
     for protoFile in $@
