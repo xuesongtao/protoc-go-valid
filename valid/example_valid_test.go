@@ -23,12 +23,12 @@ func ExampleTo() {
 	type Tmp struct {
 		Name string `valid:"to=1~3"`
 		Age  int32  `valid:"to=0"`
-		Addr string `valid:"le=3"`
+		Addr string `valid:"le=3.2"`
 	}
 	v := &Tmp{Name: "测试调", Age: 100, Addr: "tets"}
 	fmt.Println(ValidateStruct(v))
 	// Output:
-	// "Tmp.Addr" is length more than or equal 3
+	// "Tmp.Addr" [tets] length more than or equal 3
 }
 
 func ExampleOto() {
@@ -41,7 +41,7 @@ func ExampleOto() {
 	v := &Tmp{Name: "测试", Age: 0, NickName: "h1", Addr: "tets"}
 	fmt.Println(ValidateStruct(v))
 	// Output:
-	// "Tmp.Addr" is length more than 3
+	// "Tmp.Addr" [tets] length more than 3
 }
 
 func ExampleEq() {
@@ -59,7 +59,7 @@ func ExampleEq() {
 	}
 	fmt.Println(ValidateStruct(v))
 	// Output:
-	// "Tmp.Phone" length should equal 11
+	// "Tmp.Phone" [1354004261] length should equal 11
 }
 
 func ExampleDate() {
@@ -70,8 +70,7 @@ func ExampleDate() {
 	v := &Tmp{Date: "2021-10", Datetime: "2021-10-11"}
 	fmt.Println(ValidateStruct(v))
 	// Output:
-	// "Tmp.Date" is not date, eg: 2021-11-15
-	// "Tmp.Datetime" is not datetime, eg: 2021-11-15 23:59:59
+	// "Tmp.Date [2021-10] is not date, eg: 2021-11-15; "Tmp.Datetime [2021-10-11] is not datetime, eg: 2021-11-15 23:59:59
 }
 
 func ExampleEither() {
@@ -93,7 +92,17 @@ func ExampleIn() {
 	v := &Tmp{SelectNum: 1, SelectStr: "ac"}
 	fmt.Println(ValidateStruct(v))
 	// Output:
-	// "Tmp.SelectStr" should in (a/b/c/d)
+	// "Tmp.SelectStr" [ac] should in (a/b/c/d)
+}
+
+func ExampleInclude() {
+	type Tmp struct {
+		SelectStr string `valid:"include=(hello/test)"`
+	}
+	v := &Tmp{SelectStr: "hel"}
+	fmt.Println(ValidateStruct(v))
+	// Output:
+	// "Tmp.SelectStr" [hel] should include (hello/test)
 }
 
 func ExamplePhone() {
@@ -104,18 +113,18 @@ func ExamplePhone() {
 	fmt.Println(ValidateStruct(v))
 
 	// Output:
-	// "Tmp.Phone" is not phone
+	// "Tmp.Phone [1] is not phone
 }
 
 func ExampleEmail() {
 	type Tmp struct {
 		Email string `valid:"email"`
 	}
-	v := &Tmp{Email: "xuesongtao512@qq.com"}
+	v := &Tmp{Email: "xuesongtao512qq.com"}
 	fmt.Println(ValidateStruct(v))
 
 	// Output:
-	// nil
+	// "Tmp.Email [xuesongtao512qq.com] is not email
 }
 
 func ExampleIdCard() {
@@ -126,7 +135,7 @@ func ExampleIdCard() {
 	fmt.Println(ValidateStruct(v))
 
 	// Output:
-	// "Tmp.IDCard" is not idcard
+	// "Tmp.IDCard [511321] is not idcard
 }
 
 func ExampleInt() {
@@ -139,12 +148,12 @@ func ExampleInt() {
 	v := &Tmp{
 		IntString: "11",
 		IntNum:    1,
-		FloatNum:  1.0,
+		FloatNum:  1.2,
 	}
 	fmt.Println(ValidateStruct(&v))
 
 	// Output:
-	// "Tmp.FloatNum" is not integer
+	// "Tmp.FloatNum [1.2] is not integer
 }
 
 func ExampleFloat() {
@@ -165,7 +174,7 @@ func ExampleFloat() {
 	fmt.Println(ValidateStruct(v))
 
 	// Output:
-	// "Tmp.IntNum" is not float
+	// "Tmp.IntNum [10] is not float
 }
 
 func ExampleSetCustomerValidFn() {
@@ -203,7 +212,7 @@ func ExampleRule() {
 	}
 
 	// Output:
-	// "Tmp.Age" is not integer; "Tmp.ClassName" is required
+	// "Tmp.Age [12a] is not integer; "Tmp.ClassName" is required
 }
 
 

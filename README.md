@@ -38,7 +38,8 @@ protoFileDirName="test" # proto 存放的目录
 | gt       | 大于验证, 格式为 "gt=xxx"(字段类型: 字符串则为长度, 字段类型: 数字型则为大小)                                             |
 | lt       | 小于验证, 格式为: "lt=xxx"(字段类型: 字符串则为长度, 字段类型: 数字型则为大小)                                                                                              |
 | eq       | 等于验证, 格式为: "eq=xxx"(字段类型: 字符串则为长度, 字段类型: 数字型则为大小)
-| in       | 指定输入选项, 格式为 "in=(xxx/xxx/xxx)", 如: "in=(1/2/3)"                                                                 |
+| in       | 指定输入选项, 格式为 "in=(xxx/xxx/xxx)", 如: "in=(1/abc/3)"                                                                 |
+| include  | 指定输入包含选项, 格式为 "include=(xxx/xxx/xxx)", 如: "in=(hello/2/3)"                                                                 |
 | phone    | 手机号验证                                                                                                                |
 | email    | 邮箱验证                                                                                                                  |
 | idcard   | 身份证号码验证                                                                                                            |
@@ -50,7 +51,12 @@ protoFileDirName="test" # proto 存放的目录
 ###### 4.1.2 设置验证
 - 1. 通过设置 `tag` 进行设置验证规则, 默认目标 `tagName` 为 `valid`
 - 2. 通过创建 `RM` 对象进行设置, `RM` 暂不支持嵌套
-- 其他: 默认按照 `tag` 进行处理, 如果设置 `RM` 对象会以此规则为准; 如果没有实现的, 可以调用 `SetCustomerValidFn` 自定义; 使用的可以参考 `example_test.go`, `valid_test.go`  
+
+###### 4.1.3 其他
+- 1. 默认按照 `tag` 进行处理, 如果设置 `RM` 对象会以此规则为准
+- 2. 如果验证方法没有实现的, 可以调用 `SetCustomerValidFn` 自定义
+- 3. 使用的可以参考 `example_test.go`, `valid_test.go`
+- 4. **会验证所有字段的内容, 最后输出不满足的规则的 err**  
 
 
 #### 5 使用示例:
