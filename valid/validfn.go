@@ -277,7 +277,7 @@ func Datetime(errBuf *strings.Builder, validName, objName, filedName string, tv 
 		errBuf.WriteString(err.Error() + errEndFlag)
 		return
 	}
-	matched, _ := regexp.MatchString("^\\d{4}-\\d{1,2}-\\d{1,2} \\d{1,2}:\\d{1,2}:\\d{1,2}", tv.String())
+	matched, _ := regexp.MatchString("^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}", tv.String())
 	if matched {
 		return
 	}
