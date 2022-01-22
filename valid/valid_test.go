@@ -72,6 +72,10 @@ func TestProtoPb2(t *testing.T) {
 	t.Log(ValidateStruct(m))
 }
 
+func TestTmp(t *testing.T) {
+	t.Log(GetJoinValidErrStr("ab", "cd", "1", "is not ok", "tt"))
+}
+
 func BenchmarkValid(b *testing.B) {
 	testOrderDetailPtr := &TestOrderDetailPtr{
 		TmpTest3:  &TmpTest3{Name: "测试"},

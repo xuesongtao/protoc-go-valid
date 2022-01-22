@@ -25,12 +25,30 @@ func ParseValidNameKV(validName string) (key, value string) {
 	return
 }
 
+// GetJoinValidErrStr 获取拼接验证的错误消息, 内容直接通过空格隔开, 最后会拼接 errEndFlag
+func GetJoinValidErrStr(objName, filedName, inputVal string, others ...string) (res string) {
+	res = "\"" + objName + "." + filedName + "\" input \"" + inputVal + "\" "
+	if len(others) == 0 {
+		return
+	}
+
+	lastIndex := len(others) - 1
+	for i, content := range others {
+		if i < lastIndex {
+			res += content + " "
+			continue
+		}
+		res += content + errEndFlag
+	}
+	return
+}
+
 // checkfieldIsString 验证字段类型是否为字符串
-func checkFieldIsString(validName, objName, filedName string, tv reflect.Value) (err error) {
+func checkFieldIsString(objName, filedName string, tv reflect.Value) (err error) {
 	switch tv.Kind() {
 	case reflect.String:
 	default:
-		err = fmt.Errorf("\"" + objName + "." + filedName + " [" + tv.String() + "] " + "must is string")
+		err = fmt.Errorf(GetJoinValidErrStr(objName, filedName, tv.String()) + "must is string")
 	}
 	return
 }

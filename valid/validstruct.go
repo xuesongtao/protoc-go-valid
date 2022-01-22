@@ -139,7 +139,7 @@ func (v *vStruct) validate(structName string, in interface{}, isValidSlice ...bo
 func (v *vStruct) required(structName, filedName string, tv reflect.Value) {
 	if tv.IsZero() { // 验证必填
 		// 生成如: "TestOrderDetailSlice.Price" is required
-		v.errBuf.WriteString("\"" + structName + "." + filedName + "\" is required" + v.endFlag)
+		v.errBuf.WriteString(GetJoinValidErrStr(structName, filedName, "", "is required"))
 	} else if tv.Kind() == reflect.Ptr || (tv.Kind() == reflect.Struct && structName != "Time") { // 结构体
 		v.validate(structName, tv.Interface())
 	} else if tv.Kind() == reflect.Slice { // 切片

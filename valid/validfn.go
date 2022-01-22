@@ -18,19 +18,19 @@ func To(errBuf *strings.Builder, validName, objName, filedName string, tv reflec
 	_, toVal := ParseValidNameKV(validName)
 	min, max, err := parseTagTo(toVal)
 	if err != nil {
-		errBuf.WriteString(err.Error() + errEndFlag)
+		errBuf.WriteString(err.Error())
 		return
 	}
 
 	isLessThan, isMoreThan, valStr, unitStr := validInputSize(min, max, tv)
 	if isLessThan {
-		// 生成如: "TestOrder.AppName" [xxx] len less than 2
-		errBuf.WriteString("\"" + objName + "." + filedName + "\" " + "[" + valStr + "] " + unitStr + " less than or equal " + fmt.Sprintf("%d", min) + errEndFlag)
+		// 生成如: "TestOrder.AppName" input "xxx" len less than 2
+		errBuf.WriteString(GetJoinValidErrStr(objName, filedName, valStr, unitStr, fmt.Sprintf("less than or equal %d", min)))
 	}
 
 	if isMoreThan {
-		// 生成如: "TestOrder.AppName" [xxx] len more than 30
-		errBuf.WriteString("\"" + objName + "." + filedName + "\" " + "[" + valStr + "] " + unitStr + " more than or equal " + fmt.Sprintf("%d", max) + errEndFlag)
+		// 生成如: "TestOrder.AppName" input "xxx" len more than 30
+		errBuf.WriteString(GetJoinValidErrStr(objName, filedName, valStr, unitStr, fmt.Sprintf("more than or equal %d", max)))
 	}
 }
 
@@ -40,8 +40,8 @@ func Ge(errBuf *strings.Builder, validName, objName, filedName string, tv reflec
 	min, _ := strconv.Atoi(minStr)
 	isLessThan, _, valStr, unitStr := validInputSize(min, 0, tv)
 	if isLessThan {
-		// 生成如: "TestOrder.AppName" [xxx] len less than 2
-		errBuf.WriteString("\"" + objName + "." + filedName + "\" " + "[" + valStr + "] " + unitStr + " less than or equal " + fmt.Sprintf("%d", min) + errEndFlag)
+		// 生成如: "TestOrder.AppName" input "xxx" len less than 2
+		errBuf.WriteString(GetJoinValidErrStr(objName, filedName, valStr, unitStr, fmt.Sprintf("less than or equal %d", min)))
 	}
 }
 
@@ -51,8 +51,8 @@ func Le(errBuf *strings.Builder, validName, objName, filedName string, tv reflec
 	max, _ := strconv.Atoi(maxStr)
 	_, isMoreThan, valStr, unitStr := validInputSize(0, max, tv)
 	if isMoreThan {
-		// 生成如: "TestOrder.AppName" [xxx] len more than 30
-		errBuf.WriteString("\"" + objName + "." + filedName + "\" " + "[" + valStr + "] " + unitStr + " more than or equal " + fmt.Sprintf("%d", max) + errEndFlag)
+		// 生成如: "TestOrder.AppName" input "xxx" len more than 30
+		errBuf.WriteString(GetJoinValidErrStr(objName, filedName, valStr, unitStr, fmt.Sprintf("more than or equal %d", max)))
 	}
 }
 
@@ -61,19 +61,19 @@ func OTo(errBuf *strings.Builder, validName, objName, filedName string, tv refle
 	_, toVal := ParseValidNameKV(validName)
 	min, max, err := parseTagTo(toVal)
 	if err != nil {
-		errBuf.WriteString(err.Error() + errEndFlag)
+		errBuf.WriteString(err.Error())
 		return
 	}
 
 	isLessThan, isMoreThan, valStr, unitStr := validInputSize(min, max, tv, false)
 	if isLessThan {
-		// 生成如: "TestOrder.AppName" [xxx] len less than 2
-		errBuf.WriteString("\"" + objName + "." + filedName + "\" " + "[" + valStr + "] " + unitStr + " less than " + fmt.Sprintf("%d", min) + errEndFlag)
+		// 生成如: "TestOrder.AppName" input "xxx" len less than 2
+		errBuf.WriteString(GetJoinValidErrStr(objName, filedName, valStr, unitStr, fmt.Sprintf("less than %d", min)))
 	}
 
 	if isMoreThan {
-		// 生成如: "TestOrder.AppName" [xxx] len more than 30
-		errBuf.WriteString("\"" + objName + "." + filedName + "\" " + "[" + valStr + "] " + unitStr + " more than " + fmt.Sprintf("%d", max) + errEndFlag)
+		// 生成如: "TestOrder.AppName" input "xxx" len more than 30
+		errBuf.WriteString(GetJoinValidErrStr(objName, filedName, valStr, unitStr, fmt.Sprintf("more than %d", max)))
 	}
 }
 
@@ -83,8 +83,8 @@ func Gt(errBuf *strings.Builder, validName, objName, filedName string, tv reflec
 	min, _ := strconv.Atoi(minStr)
 	isLessThan, _, valStr, unitStr := validInputSize(min, 0, tv, false)
 	if isLessThan {
-		// 生成如: "TestOrder.AppName" [xxx] len less than 2
-		errBuf.WriteString("\"" + objName + "." + filedName + "\" " + "[" + valStr + "] " + unitStr + " less than " + fmt.Sprintf("%d", min) + errEndFlag)
+		// 生成如: "TestOrder.AppName" input "xxx" len less than 2
+		errBuf.WriteString(GetJoinValidErrStr(objName, filedName, valStr, unitStr, fmt.Sprintf("less than %d", min)))
 	}
 }
 
@@ -94,8 +94,8 @@ func Lt(errBuf *strings.Builder, validName, objName, filedName string, tv reflec
 	max, _ := strconv.Atoi(maxStr)
 	_, isMoreThan, valStr, unitStr := validInputSize(0, max, tv, false)
 	if isMoreThan {
-		// 生成如: "TestOrder.AppName" [xxx] len more than 30
-		errBuf.WriteString("\"" + objName + "." + filedName + "\" " + "[" + valStr + "] " + unitStr + " more than " + fmt.Sprintf("%d", max) + errEndFlag)
+		// 生成如: "TestOrder.AppName" input "xxx" len more than 30
+		errBuf.WriteString(GetJoinValidErrStr(objName, filedName, valStr, unitStr, fmt.Sprintf("more than %d", max)))
 	}
 }
 
@@ -139,7 +139,7 @@ func Eq(errBuf *strings.Builder, validName, objName, filedName string, tv reflec
 	if isEq {
 		return
 	}
-	errBuf.WriteString("\"" + objName + "." + filedName + "\" " + "[" + valStr + "] " + uintStr + " should equal " + eqStr + errEndFlag)
+	errBuf.WriteString(GetJoinValidErrStr(objName, filedName, valStr, uintStr, "should equal", eqStr))
 }
 
 // In 指定输入选项(精准匹配)
@@ -151,7 +151,7 @@ func In(errBuf *strings.Builder, validName, objName, filedName string, tv reflec
 	// 取右括号的下标
 	rightBracketIndex := strings.Index(val, ")")
 	if leftBracketIndex == -1 || rightBracketIndex == -1 {
-		errBuf.WriteString(inValErr.Error() + errEndFlag)
+		errBuf.WriteString(inValErr.Error())
 		return
 	}
 
@@ -176,7 +176,7 @@ func In(errBuf *strings.Builder, validName, objName, filedName string, tv reflec
 	}
 
 	if !isIn {
-		errBuf.WriteString("\"" + objName + "." + filedName + "\" " + "[" + tvVal + "] " + "should in (" + inVals + ")" + errEndFlag)
+		errBuf.WriteString(GetJoinValidErrStr(objName, filedName, tvVal, "should in ("+inVals+")"))
 	}
 }
 
@@ -189,7 +189,7 @@ func Include(errBuf *strings.Builder, validName, objName, filedName string, tv r
 	// 取右括号的下标
 	rightBracketIndex := strings.Index(val, ")")
 	if leftBracketIndex == -1 || rightBracketIndex == -1 {
-		errBuf.WriteString(inValErr.Error() + errEndFlag)
+		errBuf.WriteString(inValErr.Error())
 		return
 	}
 
@@ -203,7 +203,7 @@ func Include(errBuf *strings.Builder, validName, objName, filedName string, tv r
 	case reflect.String:
 		tvVal = tv.String()
 	default:
-		errBuf.WriteString(includeErr.Error() + errEndFlag)
+		errBuf.WriteString(includeErr.Error())
 		return
 	}
 
@@ -215,73 +215,73 @@ func Include(errBuf *strings.Builder, validName, objName, filedName string, tv r
 	}
 
 	if !isIn {
-		errBuf.WriteString("\"" + objName + "." + filedName + "\" " + "[" + tvVal + "] " + "should include (" + inVals + ")" + errEndFlag)
+		errBuf.WriteString(GetJoinValidErrStr(objName, filedName, tvVal, "should include ("+inVals+")"))
 	}
 }
 
 // Phone 验证手机号
 func Phone(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
-	if err := checkFieldIsString(validName, objName, filedName, tv); err != nil {
-		errBuf.WriteString(err.Error() + errEndFlag)
+	if err := checkFieldIsString(objName, filedName, tv); err != nil {
+		errBuf.WriteString(err.Error())
 		return
 	}
 	matched, _ := regexp.MatchString("^1[3,4,5,6,7,8,9]\\d{9}$", tv.String())
 	if matched {
 		return
 	}
-	errBuf.WriteString("\"" + objName + "." + filedName + " [" + tv.String() + "] " + "is not phone" + errEndFlag)
+	errBuf.WriteString(GetJoinValidErrStr(objName, filedName, tv.String(), "is not phone"))
 }
 
 // Email 验证邮箱
 func Email(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
-	if err := checkFieldIsString(validName, objName, filedName, tv); err != nil {
-		errBuf.WriteString(err.Error() + errEndFlag)
+	if err := checkFieldIsString(objName, filedName, tv); err != nil {
+		errBuf.WriteString(err.Error())
 		return
 	}
 	matched, _ := regexp.MatchString("^\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*$", tv.String())
 	if matched {
 		return
 	}
-	errBuf.WriteString("\"" + objName + "." + filedName + " [" + tv.String() + "] " + "is not email" + errEndFlag)
+	errBuf.WriteString(GetJoinValidErrStr(objName, filedName, tv.String(), "is not email"))
 }
 
 // IDCard 验证身份证
 func IDCard(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
-	if err := checkFieldIsString(validName, objName, filedName, tv); err != nil {
-		errBuf.WriteString(err.Error() + errEndFlag)
+	if err := checkFieldIsString(objName, filedName, tv); err != nil {
+		errBuf.WriteString(err.Error())
 		return
 	}
 	matched, _ := regexp.MatchString("(^\\d{15}$)|(^\\d{18}$)|(^\\d{17}(\\d|X|x)$)", tv.String())
 	if matched {
 		return
 	}
-	errBuf.WriteString("\"" + objName + "." + filedName + " [" + tv.String() + "] " + "is not idcard" + errEndFlag)
+	errBuf.WriteString(GetJoinValidErrStr(objName, filedName, tv.String(), "is not idcard"))
 }
 
 // Date 验证日期
 func Date(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
-	if err := checkFieldIsString(validName, objName, filedName, tv); err != nil {
-		errBuf.WriteString(err.Error() + errEndFlag)
+	if err := checkFieldIsString(objName, filedName, tv); err != nil {
+		errBuf.WriteString(err.Error())
 		return
 	}
 	matched, _ := regexp.MatchString("^\\d{4}-\\d{2}-\\d{2}", tv.String())
 	if matched {
 		return
 	}
-	errBuf.WriteString("\"" + objName + "." + filedName + " [" + tv.String() + "] " + "is not date, eg: 2021-11-15" + errEndFlag)
+	errBuf.WriteString(GetJoinValidErrStr(objName, filedName, tv.String(), "is not date, eg: 2021-09-28"))
 }
 
 // Datetime 验证时间
 func Datetime(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
-	if err := checkFieldIsString(validName, objName, filedName, tv); err != nil {
-		errBuf.WriteString(err.Error() + errEndFlag)
+	if err := checkFieldIsString(objName, filedName, tv); err != nil {
+		errBuf.WriteString(err.Error())
 		return
 	}
 	matched, _ := regexp.MatchString("^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}", tv.String())
 	if matched {
 		return
 	}
-	errBuf.WriteString("\"" + objName + "." + filedName + " [" + tv.String() + "] " + "is not datetime, eg: 2021-11-15 23:59:59" + errEndFlag)
+	errBuf.WriteString(GetJoinValidErrStr(objName, filedName, tv.String(), "is not datetime, eg: 2021-09-28 23:00:00"))
 }
 
 // Int 验证整数
@@ -304,7 +304,7 @@ func Int(errBuf *strings.Builder, validName, objName, filedName string, tv refle
 	if matched {
 		return
 	}
-	errBuf.WriteString("\"" + objName + "." + filedName + " [" + valStr + "] " + "is not integer" + errEndFlag)
+	errBuf.WriteString(GetJoinValidErrStr(objName, filedName, valStr, "is not integer"))
 }
 
 // Float 验证浮动数
@@ -325,5 +325,5 @@ func Float(errBuf *strings.Builder, validName, objName, filedName string, tv ref
 	if matched {
 		return
 	}
-	errBuf.WriteString("\"" + objName + "." + filedName + " [" + valStr + "] " + "is not float" + errEndFlag)
+	errBuf.WriteString(GetJoinValidErrStr(objName, filedName, valStr, "is not float"))
 }
