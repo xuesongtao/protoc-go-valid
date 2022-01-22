@@ -73,7 +73,7 @@ func TestProtoPb2(t *testing.T) {
 }
 
 func TestTmp(t *testing.T) {
-	t.Log(GetJoinValidErrStr("ab", "cd", "1", "is not ok", "tt"))
+	t.Log(GetJoinValidErrStr("User", "Name", "xue", "len is less than 3"))
 }
 
 func BenchmarkValid(b *testing.B) {
