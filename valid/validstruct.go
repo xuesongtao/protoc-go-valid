@@ -184,7 +184,7 @@ func (v *vStruct) either() {
 		for _, obj := range objs {
 			if obj.val.IsZero() {
 				isZeroLen++
-				zeroInfoStr += "\"" + obj.structName + "\"." + "\"" + obj.filedName + "\", "
+				zeroInfoStr += "\"" + obj.structName + "." + obj.filedName + "\", "
 			}
 		}
 
