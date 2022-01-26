@@ -8,11 +8,6 @@ import (
 	"strings"
 )
 
-const (
-	requiredFlag = "required"
-	eitherFlag   = "either"
-)
-
 // vStruct 验证结构体
 type vStruct struct {
 	isCheckStructSlice bool   // 标记是否已验证是否为结构体切片
@@ -120,9 +115,9 @@ func (v *vStruct) validate(structName string, in interface{}, isValidSlice ...bo
 			}
 
 			// 开始验证
-			if fn == nil && validKey == requiredFlag { // 必填
+			if fn == nil && validKey == "required" { // 必填
 				v.required(structName+ry.Name(), ty.Name, tv)
-			} else if fn == nil && validKey == eitherFlag { // 多选一
+			} else if fn == nil && validKey == "either" { // 多选一
 				v.initEither(validName, structName+ry.Name(), ty.Name, tv)
 			} else {
 				if tv.IsZero() { // 空就直接跳过

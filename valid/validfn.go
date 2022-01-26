@@ -8,11 +8,6 @@ import (
 	"strings"
 )
 
-const (
-	strUnitStr = "length"
-	numUnitStr = "size"
-)
-
 // To 验证输入的大小区间, 如果为字符串则是验证字符个数, 如果是数字的话就验证数字的大小, 注: 左右都为闭区间
 func To(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
 	_, toVal := ParseValidNameKV(validName)

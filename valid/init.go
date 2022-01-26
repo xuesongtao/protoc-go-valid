@@ -7,6 +7,11 @@ import (
 	"sync"
 )
 
+const (
+	strUnitStr = "length"
+	numUnitStr = "size"
+)
+
 // 对象
 var (
 	syncValidPool = sync.Pool{New: func() interface{} { return new(vStruct) }}
