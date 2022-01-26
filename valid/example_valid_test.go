@@ -81,7 +81,7 @@ func ExampleEither() {
 	v := &Tmp{}
 	fmt.Println(ValidateStruct(v))
 	// Output:
-	// "Tmp"."Either1", "Tmp"."Either2" they shouldn't all be empty
+	// "Tmp.Either1", "Tmp.Either2" they shouldn't all be empty
 }
 
 func ExampleIn() {
