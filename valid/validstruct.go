@@ -10,12 +10,11 @@ import (
 
 // vStruct 验证结构体
 type vStruct struct {
-	isCheckStructSlice bool   // 标记是否已验证是否为结构体切片
-	targetTag          string // 结构体中的待指定的验证的 tag
-	endFlag            string // 用于分割 err
-	errBuf             *strings.Builder
-	ruleMap            RM                    // 验证规则
-	existMap           map[int][]*name2Value // 已存在的, 用于 either tag
+	targetTag string // 结构体中的待指定的验证的 tag
+	endFlag   string // 用于分割 err
+	errBuf    *strings.Builder
+	ruleMap   RM                    // 验证规则
+	existMap  map[int][]*name2Value // 已存在的, 用于 either tag
 }
 
 // name2Value
@@ -37,6 +36,13 @@ func NewVStruct(targetTag ...string) *vStruct {
 	obj.errBuf = new(strings.Builder)
 	obj.ruleMap = make(RM)
 	return obj
+}
+
+// free 释放
+func (v *vStruct) free() {
+	v.errBuf.Reset()
+	v.ruleMap = nil
+	syncValidPool.Put(v)
 }
 
 // SetRule 添加验证规则
@@ -204,15 +210,6 @@ func (v *vStruct) getError() error {
 
 	// 这里需要去掉最后一个 endFlag
 	return errors.New(strings.TrimRight(v.errBuf.String(), v.endFlag))
-}
-
-// free 释放
-func (v *vStruct) free() {
-	v.isCheckStructSlice = false
-	v.targetTag = ""
-	v.endFlag = ""
-	v.errBuf.Reset()
-	syncValidPool.Put(v)
 }
 
 // removeTypePtr 移除多指针
