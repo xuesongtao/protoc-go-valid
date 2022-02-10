@@ -1,7 +1,7 @@
 # proto 中注入 tag, 验证
 #### 1. 介绍
 - 1. 对 `xxx.pd.go` 文件中的 `struct` 注入自定义的 `tag`
-- 2. 通过验证器对内容进行验证, 验证器暂只支持: 必填, 长度, 多个一个必填
+- 2. 通过验证器对内容进行验证
 
 
 #### 2. 注入工具使用
@@ -16,7 +16,7 @@
 
 #### 3. 工具补充
 - 1. `protoc-go-valid -h` 可以通过这个查看帮助
-- 2. 由于此操作是先执行 `protoc` 才再进行注入(需先按照 `protoc`), 项目中的 `inject_tool.sh` 整合了这两步操作, 可以执行 `protoc-go-valid -init="true"`, **说明:** 如果为 **windows** 需要使用 `powershell` 来执行
+- 2. 由于此操作是先执行 `protoc` 才再进行注入(需先安装 `protoc`), 项目中的 `inject_tool.sh` 整合了这两步操作, 可以执行 `protoc-go-valid -init="true"`, **说明:** 如果为 **windows** 需要使用 `powershell` 来执行
 - 3. 根据自己的项目目录结构调整 `inject_tool.sh` 中 `proto` 和 `pb` 的目录, 相对于应用的目录; 如本项目, 修改如下下:
 ```
 outPdProjectPath="test" # pb 放入的项目路径
