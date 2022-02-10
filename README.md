@@ -87,9 +87,9 @@ type Man struct {
 			Name: "xue",
 			Age:  -1,
 	}
-	t.Log(ValidateStruct(m))
+	fmt.Println(ValidateStruct(m))
 
-	// 输出: "Man.Age" is size less than 1
+	// Output: "Man.Age" input "-1" is size less than 1
 ```
 
 
