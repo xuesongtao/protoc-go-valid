@@ -263,7 +263,7 @@ func Date(errBuf *strings.Builder, validName, objName, filedName string, tv refl
 	if matched {
 		return
 	}
-	errBuf.WriteString(GetJoinValidErrStr(objName, filedName, tv.String(), "is not date, eg: 2021-09-28"))
+	errBuf.WriteString(GetJoinValidErrStr(objName, filedName, tv.String(), "is not date, eg: 1996-09-28"))
 }
 
 // Datetime 验证时间
@@ -276,7 +276,7 @@ func Datetime(errBuf *strings.Builder, validName, objName, filedName string, tv 
 	if matched {
 		return
 	}
-	errBuf.WriteString(GetJoinValidErrStr(objName, filedName, tv.String(), "is not datetime, eg: 2021-09-28 23:00:00"))
+	errBuf.WriteString(GetJoinValidErrStr(objName, filedName, tv.String(), "is not datetime, eg: 1996-09-28 23:00:00"))
 }
 
 // Int 验证整数

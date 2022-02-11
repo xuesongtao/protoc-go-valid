@@ -70,7 +70,7 @@ func ExampleDate() {
 	v := &Tmp{Date: "2021-1", Datetime: "2021-01-11"}
 	fmt.Println(ValidateStruct(v))
 	// Output:
-	// "Tmp.Date" input "2021-1" is not date, eg: 2021-09-28; "Tmp.Datetime" input "2021-01-11" is not datetime, eg: 2021-09-28 23:00:00
+	// "Tmp.Date" input "2021-1" is not date, eg: 1996-09-28; "Tmp.Datetime" input "2021-01-11" is not datetime, eg: 1996-09-28 23:00:00
 }
 
 func ExampleEither() {
