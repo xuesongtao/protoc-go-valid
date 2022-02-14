@@ -72,7 +72,7 @@ func TestProtoPb2(t *testing.T) {
 	t.Log(ValidateStruct(m))
 }
 
-func TestTmp(t *testing.T) {
+func TestGetJoinValidErrStr(t *testing.T) {
 	t.Log(GetJoinValidErrStr("User", "Name", "xue", "len is less than 3"))
 }
 

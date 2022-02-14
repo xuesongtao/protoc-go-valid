@@ -164,3 +164,19 @@ func parseTagTo(toVal string) (min int, max int, err error) {
 	}
 	return
 }
+
+// removeTypePtr 移除多指针
+func removeTypePtr(t reflect.Type) reflect.Type {
+	for t.Kind() == reflect.Ptr {
+		t = t.Elem()
+	}
+	return t
+}
+
+// removeValuePtr 移除多指针
+func removeValuePtr(t reflect.Value) reflect.Value {
+	for t.Kind() == reflect.Ptr {
+		t = t.Elem()
+	}
+	return t
+}
