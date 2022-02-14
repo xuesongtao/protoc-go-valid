@@ -18,11 +18,37 @@ func NewDumpStruct() *dumpStruct {
 	}
 }
 
-func (d *dumpStruct) GetDumpStructStr(v interface{}) string {
-	return d.getStructStr(v).get()
+func (d *dumpStruct) HandleDumpStruct(v interface{}, isSlice ...bool) *dumpStruct {
+	tv := removeValuePtr(reflect.ValueOf(v))
+	if !tv.IsValid() {
+		d.buf.WriteString("null")
+		return d
+	}
+	ty := tv.Type()
+
+	// 不是结构体就不处理
+	if tv.Kind() != reflect.Struct {
+		if len(isSlice) > 0 && isSlice[0] { // 非结构体切片
+			d.loopHandleKV(d.nullStructFiled, tv, false)
+		}
+		return d
+	}
+
+	d.buf.WriteByte('{')
+	maxIndex := tv.NumField()
+	for i := 0; i < maxIndex; i++ {
+		d.loopHandleKV(ty.Field(i), tv.Field(i))
+
+		// 去掉最后一个逗号
+		if i < maxIndex-1 {
+			d.buf.WriteString(", ")
+		}
+	}
+	d.buf.WriteByte('}')
+	return d
 }
 
-func (d *dumpStruct) get() string {
+func (d *dumpStruct) Get() string {
 	defer d.buf.Reset()
 	return d.buf.String()
 }
@@ -57,14 +83,14 @@ func (d *dumpStruct) loopHandleKV(s reflect.StructField, tv reflect.Value, isNee
 	case reflect.Float32, reflect.Float64:
 		d.buf.Write(strconv.AppendFloat([]byte{}, tv.Float(), 'f', -1, 64))
 	case reflect.Ptr: // 指针结构体
-		d.getStructStr(tv.Interface())
+		d.HandleDumpStruct(tv.Interface())
 	case reflect.Struct: // 结构体
-		d.getStructStr(tv.Interface())
+		d.HandleDumpStruct(tv.Interface())
 	case reflect.Slice, reflect.Array: // 切片
 		d.buf.WriteByte('[')
 		sliceLen := tv.Len()
 		for i := 0; i < sliceLen; i++ {
-			d.getStructStr(tv.Index(i).Interface(), true)
+			d.HandleDumpStruct(tv.Index(i).Interface(), true)
 			if i < sliceLen-1 {
 				d.buf.WriteString(", ")
 			}
@@ -93,41 +119,11 @@ func (d *dumpStruct) loopHandleKV(s reflect.StructField, tv reflect.Value, isNee
 	}
 }
 
-func (d *dumpStruct) getStructStr(v interface{}, isSlice ...bool) *dumpStruct {
-	tv := removeValuePtr(reflect.ValueOf(v))
-	if !tv.IsValid() {
-		d.buf.WriteString("null")
-		return d
-	}
-	ty := tv.Type()
-
-	// 不是结构体就不处理
-	if tv.Kind() != reflect.Struct {
-		if len(isSlice) > 0 && isSlice[0] { // 非结构体切片
-			d.loopHandleKV(d.nullStructFiled, tv, false)
-		}
-		return d
-	}
-
-	d.buf.WriteByte('{')
-	maxIndex := tv.NumField()
-	for i := 0; i < maxIndex; i++ {
-		d.loopHandleKV(ty.Field(i), tv.Field(i))
-
-		// 去掉最后一个逗号
-		if i < maxIndex-1 {
-			d.buf.WriteString(", ")
-		}
-	}
-	d.buf.WriteByte('}')
-	return d
-}
-
 // =========================== 常用方法进行封装 =======================================
 
 // GetDumpStructStr 获取待 dump 的结构体字符串
 func GetDumpStructStr(v interface{}) string {
-	return NewDumpStruct().GetDumpStructStr(v)
+	return NewDumpStruct().HandleDumpStruct(v).Get()
 }
 
 func GetDumpStructStrForJson(v interface{}) string {

@@ -2,7 +2,6 @@ package valid
 
 import (
 	"encoding/json"
-	"fmt"
 	"testing"
 )
 
@@ -222,36 +221,36 @@ func BenchmarkDump0(b *testing.B) {
 	}
 }
 
-func BenchmarkDump1(b *testing.B) {
-	u := &User{
-		Man: Man{
-			Name: "xuesongtao",
-			Age:  20,
-		},
-		Hobby: []int32{1},
-		Class: Class{
-			Name:         "社会大学1",
-			TeatherNames: []string{"社佬"},
-			Testhers: []*Testher{
-				{
-					Man{
-						Name: "社佬",
-						Age:  11,
-					},
-				},
-				{
-					Man{
-						Name: "社佬1",
-						Age:  11,
-					},
-				},
-			},
-		},
-	}
-	for i := 0; i < b.N; i++ {
-		_ = fmt.Sprintf("%+v", u)
-	}
-}
+// func BenchmarkDump1(b *testing.B) {
+// 	u := &User{
+// 		Man: Man{
+// 			Name: "xuesongtao",
+// 			Age:  20,
+// 		},
+// 		Hobby: []int32{1},
+// 		Class: Class{
+// 			Name:         "社会大学1",
+// 			TeatherNames: []string{"社佬"},
+// 			Testhers: []*Testher{
+// 				{
+// 					Man{
+// 						Name: "社佬",
+// 						Age:  11,
+// 					},
+// 				},
+// 				{
+// 					Man{
+// 						Name: "社佬1",
+// 						Age:  11,
+// 					},
+// 				},
+// 			},
+// 		},
+// 	}
+// 	for i := 0; i < b.N; i++ {
+// 		_ = fmt.Sprintf("%+v", u)
+// 	}
+// }
 
 func BenchmarkDump2(b *testing.B) {
 	u := &User{
