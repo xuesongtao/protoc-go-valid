@@ -114,7 +114,7 @@ func (d *dumpStruct) loopHandleKV(s reflect.StructField, tv reflect.Value, isNee
 		}
 		d.buf.WriteByte('}')
 	default: // 其他不处理, 如: func/chan
-		d.buf.WriteString("unknown")
+		d.buf.WriteString("\"unknown\"")
 	}
 }
 
