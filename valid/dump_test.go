@@ -82,6 +82,7 @@ func TestDump3(t *testing.T) {
 	}
 	t.Logf("%+v", d)
 	t.Log(GetDumpStructStr(d))
+	t.Log(GetDumpStructStrForJson(d))
 }
 
 func TestDump4(t *testing.T) {
@@ -103,6 +104,7 @@ func TestDump4(t *testing.T) {
 	}
 	t.Logf("%+v", d)
 	t.Log(GetDumpStructStr(d))
+	t.Log(GetDumpStructStrForJson(d))
 }
 
 func TestDump5(t *testing.T) {
@@ -160,8 +162,33 @@ func TestDump(t *testing.T) {
 		},
 	}
 	t.Logf("%+v", u)
-	d := NewDumpStruct()
-	t.Log(d.GetDumpStructStr(u))
+	t.Log(GetDumpStructStr(u))
+	t.Log(GetDumpStructStrForJson(u))
+}
+
+func TestOrderDump(t *testing.T) {
+	testOrderDetailPtr := &TestOrderDetailPtr{
+		TmpTest3:  &TmpTest3{Name: "测试"},
+		GoodsName: "玻尿酸",
+	}
+	// testOrderDetailPtr = nil
+
+	testOrderDetails := []*TestOrderDetailSlice{
+		{TmpTest3: &TmpTest3{Name: "测试1"}, BuyerNames: []string{"test1", "hello2"}},
+		{TmpTest3: &TmpTest3{Name: "测试2"}, GoodsName: "隆鼻"},
+		{GoodsName: "丰胸"},
+		{TmpTest3: &TmpTest3{Name: "测试4"}, GoodsName: "隆鼻"},
+	}
+	// testOrderDetails = nil
+
+	u := &TestOrder{
+		AppName:              "集美测试",
+		TotalFeeFloat:        2,
+		TestOrderDetailPtr:   testOrderDetailPtr,
+		TestOrderDetailSlice: testOrderDetails,
+	}
+	t.Log(GetDumpStructStr(u))
+	t.Log(GetDumpStructStrForJson(u))
 }
 
 func BenchmarkDump0(b *testing.B) {
@@ -253,7 +280,6 @@ func BenchmarkDump2(b *testing.B) {
 		},
 	}
 	for i := 0; i < b.N; i++ {
-		b, _ := json.Marshal(u)
-		_ = string(b)
+		_ = GetDumpStructStrForJson(u)
 	}
 }

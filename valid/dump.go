@@ -1,6 +1,7 @@
 package valid
 
 import (
+	"encoding/json"
 	"reflect"
 	"strconv"
 	"strings"
@@ -39,6 +40,7 @@ func (d *dumpStruct) loopHandleKV(s reflect.StructField, tv reflect.Value, isNee
 	if needFiledName {
 		d.buf.WriteString("\"" + s.Name + "\": ")
 	}
+
 	switch tv.Kind() {
 	case reflect.String: // 字符串
 		d.buf.WriteString("\"" + tv.String() + "\"")
@@ -55,7 +57,6 @@ func (d *dumpStruct) loopHandleKV(s reflect.StructField, tv reflect.Value, isNee
 	case reflect.Float32, reflect.Float64:
 		d.buf.Write(strconv.AppendFloat([]byte{}, tv.Float(), 'f', -1, 64))
 	case reflect.Ptr: // 指针结构体
-		tv = removeValuePtr(tv)
 		d.getStructStr(tv.Interface())
 	case reflect.Struct: // 结构体
 		d.getStructStr(tv.Interface())
@@ -75,7 +76,10 @@ func (d *dumpStruct) loopHandleKV(s reflect.StructField, tv reflect.Value, isNee
 		mapLen := tv.Len()
 		tmpIndex := 0
 		for mapObj.Next() {
+			// 把 key 处理成字符串
+			d.buf.WriteByte('"')
 			d.loopHandleKV(d.nullStructFiled, mapObj.Key(), false)
+			d.buf.WriteByte('"')
 			d.buf.WriteString(": ")
 			d.loopHandleKV(d.nullStructFiled, mapObj.Value(), false)
 			if tmpIndex < mapLen-1 {
@@ -91,6 +95,10 @@ func (d *dumpStruct) loopHandleKV(s reflect.StructField, tv reflect.Value, isNee
 
 func (d *dumpStruct) getStructStr(v interface{}, isSlice ...bool) *dumpStruct {
 	tv := removeValuePtr(reflect.ValueOf(v))
+	if !tv.IsValid() {
+		d.buf.WriteString("null")
+		return d
+	}
 	ty := tv.Type()
 
 	// 不是结构体就不处理
@@ -120,4 +128,9 @@ func (d *dumpStruct) getStructStr(v interface{}, isSlice ...bool) *dumpStruct {
 // GetDumpStructStr 获取待 dump 的结构体字符串
 func GetDumpStructStr(v interface{}) string {
 	return NewDumpStruct().GetDumpStructStr(v)
+}
+
+func GetDumpStructStrForJson(v interface{}) string {
+	b, _ := json.Marshal(v)
+	return string(b)
 }
