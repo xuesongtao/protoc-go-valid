@@ -10,6 +10,7 @@ import (
 type dumpStruct struct {
 	buf             *strings.Builder
 	nullStructFiled reflect.StructField
+	numBytes        [64]byte
 }
 
 func NewDumpStruct() *dumpStruct {
@@ -77,14 +78,12 @@ func (d *dumpStruct) loopHandleKV(s reflect.StructField, tv reflect.Value, isNee
 		}
 		d.buf.WriteString("\"" + boolStr + "\"")
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		d.buf.Write(strconv.AppendInt([]byte{}, tv.Int(), 10))
+		d.buf.Write(strconv.AppendInt(d.numBytes[:0], tv.Int(), 10))
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
-		d.buf.Write(strconv.AppendUint([]byte{}, tv.Uint(), 10))
+		d.buf.Write(strconv.AppendUint(d.numBytes[:0], tv.Uint(), 10))
 	case reflect.Float32, reflect.Float64:
-		d.buf.Write(strconv.AppendFloat([]byte{}, tv.Float(), 'f', -1, 64))
-	case reflect.Ptr: // 指针结构体
-		d.HandleDumpStruct(tv.Interface())
-	case reflect.Struct: // 结构体
+		d.buf.Write(strconv.AppendFloat(d.numBytes[:0], tv.Float(), 'f', -1, 64))
+	case reflect.Ptr, reflect.Struct, reflect.Interface:
 		d.HandleDumpStruct(tv.Interface())
 	case reflect.Slice, reflect.Array: // 切片
 		d.buf.WriteByte('[')
@@ -114,14 +113,14 @@ func (d *dumpStruct) loopHandleKV(s reflect.StructField, tv reflect.Value, isNee
 			tmpIndex++
 		}
 		d.buf.WriteByte('}')
-	default: // 其他不处理, 如: func/chan/interface
+	default: // 其他不处理, 如: func/chan
 		d.buf.WriteString("unknown")
 	}
 }
 
 // =========================== 常用方法进行封装 =======================================
 
-// GetDumpStructStr 获取待 dump 的结构体字符串
+// GetDumpStructStr 获取待 dump 的结构体字符串, 支持json格式化
 func GetDumpStructStr(v interface{}) string {
 	return NewDumpStruct().HandleDumpStruct(v).Get()
 }
