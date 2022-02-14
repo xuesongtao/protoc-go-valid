@@ -55,50 +55,41 @@ func (v *vStruct) SetRule(ruleMap RM) *vStruct {
 
 // Valid 验证
 func (v *vStruct) Valid(in interface{}) error {
-	return v.validate("", in).getError()
+	return v.validate("", reflect.ValueOf(in)).getError()
 }
 
 // validate 验证执行体
-func (v *vStruct) validate(structName string, in interface{}, isValidSlice ...bool) *vStruct {
+func (v *vStruct) validate(structName string, value reflect.Value, isValidSlice ...bool) *vStruct {
 	// 辅助 errMsg, 用于嵌套时拼接上一级的结构体名
 	if structName != "" {
 		structName = structName + "."
 	}
 
-	ry := reflect.TypeOf(in)
-	if ry.Kind() != reflect.Ptr {
+	tv := removeValuePtr(value)
+	ty := tv.Type()
+
+	// 如果不是结构体就退出
+	if ty.Kind() != reflect.Struct {
 		// 这里主要防止验证的切片为非结构体切片, 如 []int{1, 2, 3}, 这里会出现1, 为非指针所有需要退出
 		if len(isValidSlice) > 0 && isValidSlice[0] {
 			return v
 		}
-		v.errBuf.WriteString("structName: " + structName + ry.Name() + " must ptr" + v.endFlag)
+		v.errBuf.WriteString("in params \"" + structName + ty.Name() + "\" is not struct" + v.endFlag)
 		return v
 	}
 
-	ry = removeTypePtr(ry)
-	// 如果不是结构体就退出
-	if ry.Kind() != reflect.Struct {
-		// 这里主要防止验证的切片为非结构体切片
-		if len(isValidSlice) > 0 && isValidSlice[0] {
-			return v
-		}
-		v.errBuf.WriteString("in params \"" + structName + ry.Name() + "\" is not struct" + v.endFlag)
-		return v
-	}
-
-	// 取值
-	rv := removeValuePtr(reflect.ValueOf(in))
-	for filedNum := 0; filedNum < rv.NumField(); filedNum++ {
-		tv := rv.Field(filedNum)
+	for filedNum := 0; filedNum < tv.NumField(); filedNum++ {
+		filedValue := tv.Field(filedNum)
 		// 不能导出就跳过
-		if !tv.CanInterface() {
+		if !filedValue.CanInterface() {
 			continue
 		}
 
-		ty := ry.Field(filedNum)
-		validNames := ty.Tag.Get(v.targetTag)
+		structFiled := ty.Field(filedNum)
+		validNames := structFiled.Tag.Get(v.targetTag)
+
 		// 如果设置了规则就覆盖 tag 中的验证内容
-		if rule := v.ruleMap.Get(ty.Name); rule != "" {
+		if rule := v.ruleMap.Get(structFiled.Name); rule != "" {
 			validNames = rule
 		}
 
@@ -122,14 +113,14 @@ func (v *vStruct) validate(structName string, in interface{}, isValidSlice ...bo
 
 			// 开始验证
 			if fn == nil && validKey == "required" { // 必填
-				v.required(structName+ry.Name(), ty.Name, tv)
+				v.required(structName+ty.Name(), structFiled.Name, filedValue)
 			} else if fn == nil && validKey == "either" { // 多选一
-				v.initEither(validName, structName+ry.Name(), ty.Name, tv)
+				v.initEither(validName, structName+ty.Name(), structFiled.Name, filedValue)
 			} else {
 				if tv.IsZero() { // 空就直接跳过
 					continue
 				}
-				fn(v.errBuf, validName, structName+ry.Name(), ty.Name, tv)
+				fn(v.errBuf, validName, structName+ty.Name(), structFiled.Name, filedValue)
 			}
 		}
 	}
@@ -142,10 +133,10 @@ func (v *vStruct) required(structName, filedName string, tv reflect.Value) {
 		// 生成如: "TestOrderDetailSlice.Price" is required
 		v.errBuf.WriteString(GetJoinValidErrStr(structName, filedName, "", "is required"))
 	} else if tv.Kind() == reflect.Ptr || (tv.Kind() == reflect.Struct && structName != "Time") { // 结构体
-		v.validate(structName, tv.Interface())
+		v.validate(structName, tv)
 	} else if tv.Kind() == reflect.Slice { // 切片
 		for i := 0; i < tv.Len(); i++ {
-			v.validate(fmt.Sprintf("%s-%d", structName, i), tv.Index(i).Interface(), true)
+			v.validate(fmt.Sprintf("%s-%d", structName, i), tv.Index(i), true)
 		}
 	}
 }

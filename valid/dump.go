@@ -19,8 +19,8 @@ func NewDumpStruct() *dumpStruct {
 	}
 }
 
-func (d *dumpStruct) HandleDumpStruct(v interface{}, isSlice ...bool) *dumpStruct {
-	tv := removeValuePtr(reflect.ValueOf(v))
+func (d *dumpStruct) HandleDumpStruct(v reflect.Value, isSlice ...bool) *dumpStruct {
+	tv := removeValuePtr(v)
 	if !tv.IsValid() {
 		d.buf.WriteString("null")
 		return d
@@ -84,12 +84,12 @@ func (d *dumpStruct) loopHandleKV(s reflect.StructField, tv reflect.Value, isNee
 	case reflect.Float32, reflect.Float64:
 		d.buf.Write(strconv.AppendFloat(d.numBytes[:0], tv.Float(), 'f', -1, 64))
 	case reflect.Ptr, reflect.Struct, reflect.Interface:
-		d.HandleDumpStruct(tv.Interface())
+		d.HandleDumpStruct(tv)
 	case reflect.Slice, reflect.Array: // 切片
 		d.buf.WriteByte('[')
 		sliceLen := tv.Len()
 		for i := 0; i < sliceLen; i++ {
-			d.HandleDumpStruct(tv.Index(i).Interface(), true)
+			d.HandleDumpStruct(tv.Index(i), true)
 			if i < sliceLen-1 {
 				d.buf.WriteString(", ")
 			}
@@ -122,7 +122,7 @@ func (d *dumpStruct) loopHandleKV(s reflect.StructField, tv reflect.Value, isNee
 
 // GetDumpStructStr 获取待 dump 的结构体字符串, 支持json格式化
 func GetDumpStructStr(v interface{}) string {
-	return NewDumpStruct().HandleDumpStruct(v).Get()
+	return NewDumpStruct().HandleDumpStruct(reflect.ValueOf(v)).Get()
 }
 
 func GetDumpStructStrForJson(v interface{}) string {

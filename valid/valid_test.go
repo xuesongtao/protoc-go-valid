@@ -5,28 +5,29 @@ import (
 	"testing"
 
 	"gitee.com/xuesongtao/protoc-go-valid/test"
+	// "github.com/gookit/validate"
 )
 
 type TestOrder struct {
-	AppName              string                  `alipay:"to=2~10"`  //应用名
-	TotalFeeFloat        float64                 `alipay:"to=2~5"`   //订单总金额，单位为分，详见支付金额
-	TestOrderDetailPtr   *TestOrderDetailPtr     `alipay:"required"` // 商品详细描述
-	TestOrderDetailSlice []*TestOrderDetailSlice `alipay:"required"` // 商品详细描述
+	AppName              string                  `alipay:"to=2~10" validate:"minLen:2|maxLen:10"` //应用名
+	TotalFeeFloat        float64                 `alipay:"to=2~5" validate:"min:2|max:5"`         //订单总金额，单位为分，详见支付金额
+	TestOrderDetailPtr   *TestOrderDetailPtr     `alipay:"required" validate:"required"`          // 商品详细描述
+	TestOrderDetailSlice []*TestOrderDetailSlice `alipay:"required validate:"required"`           // 商品详细描述
 }
 
 type TestOrderDetailPtr struct {
-	TmpTest3  *TmpTest3 `alipay:"required"`
-	GoodsName string    `alipay:"to=1~2"`
+	TmpTest3  *TmpTest3 `alipay:"required" validate:"required"`
+	GoodsName string    `alipay:"to=1~2" validate:"minLen:1|maxLen:2"`
 }
 
 type TestOrderDetailSlice struct {
-	TmpTest3   *TmpTest3 `alipay:"required"`
-	GoodsName  string    `alipay:"required"`
-	BuyerNames []string  `alipay:"required"`
+	TmpTest3   *TmpTest3 `alipay:"required" validate:"required"`
+	GoodsName  string    `alipay:"required" validate:"required"`
+	BuyerNames []string  `alipay:"required" validate:"required"`
 }
 
 type TmpTest3 struct {
-	Name string `alipay:"required"`
+	Name string `alipay:"required" validate:"required"`
 }
 
 func TestValidOrder(t *testing.T) {
@@ -52,6 +53,34 @@ func TestValidOrder(t *testing.T) {
 	}
 	t.Log(ValidateStruct(u, "alipay"))
 }
+
+// func TestValidateOrder(t *testing.T) {
+// 	testOrderDetailPtr := &TestOrderDetailPtr{
+// 		TmpTest3:  &TmpTest3{Name: "测试"},
+// 		GoodsName: "玻尿酸",
+// 	}
+// 	// testOrderDetailPtr = nil
+
+// 	testOrderDetails := []*TestOrderDetailSlice{
+// 		{TmpTest3: &TmpTest3{Name: "测试1"}, BuyerNames: []string{"test1", "hello2"}},
+// 		{TmpTest3: &TmpTest3{Name: "测试2"}, GoodsName: "隆鼻"},
+// 		{GoodsName: "丰胸"},
+// 		{TmpTest3: &TmpTest3{Name: "测试4"}, GoodsName: "隆鼻"},
+// 	}
+// 	// testOrderDetails = nil
+
+// 	u := &TestOrder{
+// 		AppName:              "集美测试",
+// 		TotalFeeFloat:        2,
+// 		TestOrderDetailPtr:   testOrderDetailPtr,
+// 		TestOrderDetailSlice: testOrderDetails,
+// 	}
+// 	validObj := validate.Struct(u)
+// 	validObj.Validate()
+// 	for _, err := range validObj.Errors {
+// 		t.Log(err)
+// 	}
+// }
 
 func TestProtoPb1(t *testing.T) {
 	u := &test.User{
@@ -101,6 +130,34 @@ func BenchmarkValid(b *testing.B) {
 		_ = ValidateStruct(&u, "alipay")
 	}
 }
+
+// func BenchmarkValidate(b *testing.B) {
+// 	testOrderDetailPtr := &TestOrderDetailPtr{
+// 		TmpTest3:  &TmpTest3{Name: "测试"},
+// 		GoodsName: "玻尿酸",
+// 	}
+// 	// testOrderDetailPtr = nil
+
+// 	testOrderDetails := []*TestOrderDetailSlice{
+// 		{TmpTest3: &TmpTest3{Name: "测试1"}, BuyerNames: []string{"test1", "hello2"}},
+// 		{TmpTest3: &TmpTest3{Name: "测试2"}, GoodsName: "隆鼻"},
+// 		{GoodsName: "丰胸"},
+// 		{TmpTest3: &TmpTest3{Name: "测试4"}, GoodsName: "隆鼻"},
+// 	}
+// 	// testOrderDetails = nil
+
+// 	u := &TestOrder{
+// 		AppName:              "集美测试",
+// 		TotalFeeFloat:        2,
+// 		TestOrderDetailPtr:   testOrderDetailPtr,
+// 		TestOrderDetailSlice: testOrderDetails,
+// 	}
+// 	for i := 0; i < b.N; i++ {
+// 		validObj := validate.Struct(u)
+// 		validObj.Validate()
+// 		_ = validObj.Errors.Error()
+// 	}
+// }
 
 func BenchmarkIfValid(b *testing.B) {
 	testOrderDetailPtr := &TestOrderDetailPtr{
