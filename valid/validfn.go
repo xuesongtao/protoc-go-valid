@@ -20,12 +20,12 @@ func To(errBuf *strings.Builder, validName, objName, filedName string, tv reflec
 	isLessThan, isMoreThan, valStr, unitStr := validInputSize(min, max, tv)
 	if isLessThan {
 		// 生成如: "TestOrder.AppName" input "xxx" len less than 2
-		errBuf.WriteString(GetJoinValidErrStr(objName, filedName, valStr, unitStr, fmt.Sprintf("less than or equal %d", min)))
+		errBuf.WriteString(GetJoinValidErrStr(objName, filedName, valStr, unitStr, "less than or equal", strconv.Itoa(min)))
 	}
 
 	if isMoreThan {
 		// 生成如: "TestOrder.AppName" input "xxx" len more than 30
-		errBuf.WriteString(GetJoinValidErrStr(objName, filedName, valStr, unitStr, fmt.Sprintf("more than or equal %d", max)))
+		errBuf.WriteString(GetJoinValidErrStr(objName, filedName, valStr, unitStr, "more than or equal", strconv.Itoa(max)))
 	}
 }
 
@@ -36,7 +36,7 @@ func Ge(errBuf *strings.Builder, validName, objName, filedName string, tv reflec
 	isLessThan, _, valStr, unitStr := validInputSize(min, 0, tv)
 	if isLessThan {
 		// 生成如: "TestOrder.AppName" input "xxx" len less than 2
-		errBuf.WriteString(GetJoinValidErrStr(objName, filedName, valStr, unitStr, fmt.Sprintf("less than or equal %d", min)))
+		errBuf.WriteString(GetJoinValidErrStr(objName, filedName, valStr, unitStr, "less than or equal", strconv.Itoa(min)))
 	}
 }
 
@@ -47,7 +47,7 @@ func Le(errBuf *strings.Builder, validName, objName, filedName string, tv reflec
 	_, isMoreThan, valStr, unitStr := validInputSize(0, max, tv)
 	if isMoreThan {
 		// 生成如: "TestOrder.AppName" input "xxx" len more than 30
-		errBuf.WriteString(GetJoinValidErrStr(objName, filedName, valStr, unitStr, fmt.Sprintf("more than or equal %d", max)))
+		errBuf.WriteString(GetJoinValidErrStr(objName, filedName, valStr, unitStr, "more than or equal", strconv.Itoa(max)))
 	}
 }
 
@@ -63,12 +63,12 @@ func OTo(errBuf *strings.Builder, validName, objName, filedName string, tv refle
 	isLessThan, isMoreThan, valStr, unitStr := validInputSize(min, max, tv, false)
 	if isLessThan {
 		// 生成如: "TestOrder.AppName" input "xxx" len less than 2
-		errBuf.WriteString(GetJoinValidErrStr(objName, filedName, valStr, unitStr, fmt.Sprintf("less than %d", min)))
+		errBuf.WriteString(GetJoinValidErrStr(objName, filedName, valStr, unitStr, "less than", strconv.Itoa(min)))
 	}
 
 	if isMoreThan {
 		// 生成如: "TestOrder.AppName" input "xxx" len more than 30
-		errBuf.WriteString(GetJoinValidErrStr(objName, filedName, valStr, unitStr, fmt.Sprintf("more than %d", max)))
+		errBuf.WriteString(GetJoinValidErrStr(objName, filedName, valStr, unitStr, "more than", strconv.Itoa(max)))
 	}
 }
 
@@ -79,7 +79,7 @@ func Gt(errBuf *strings.Builder, validName, objName, filedName string, tv reflec
 	isLessThan, _, valStr, unitStr := validInputSize(min, 0, tv, false)
 	if isLessThan {
 		// 生成如: "TestOrder.AppName" input "xxx" len less than 2
-		errBuf.WriteString(GetJoinValidErrStr(objName, filedName, valStr, unitStr, fmt.Sprintf("less than %d", min)))
+		errBuf.WriteString(GetJoinValidErrStr(objName, filedName, valStr, unitStr, "less than", strconv.Itoa(min)))
 	}
 }
 
@@ -90,7 +90,7 @@ func Lt(errBuf *strings.Builder, validName, objName, filedName string, tv reflec
 	_, isMoreThan, valStr, unitStr := validInputSize(0, max, tv, false)
 	if isMoreThan {
 		// 生成如: "TestOrder.AppName" input "xxx" len more than 30
-		errBuf.WriteString(GetJoinValidErrStr(objName, filedName, valStr, unitStr, fmt.Sprintf("more than %d", max)))
+		errBuf.WriteString(GetJoinValidErrStr(objName, filedName, valStr, unitStr, "more than", strconv.Itoa(max)))
 	}
 }
 
@@ -100,91 +100,63 @@ func Eq(errBuf *strings.Builder, validName, objName, filedName string, tv reflec
 	eqInt, _ := strconv.Atoi(eqStr)
 	isEq := true
 	uintStr := numUnitStr
-	valStr := ""
 	switch tv.Kind() {
 	case reflect.String:
-		valStr = tv.String()
 		uintStr = strUnitStr
-		if len([]rune(valStr)) != eqInt {
+		if len([]rune(tv.String())) != eqInt {
 			isEq = false
 		}
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		val := tv.Int()
-		valStr = fmt.Sprintf("%d", val)
-		if val != int64(eqInt) {
+		if tv.Int() != int64(eqInt) {
 			isEq = false
 		}
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-		val := tv.Uint()
-		valStr = fmt.Sprintf("%d", val)
-		if val != uint64(eqInt) {
+		if tv.Uint() != uint64(eqInt) {
 			isEq = false
 		}
 	case reflect.Float32, reflect.Float64:
-		val := tv.Float()
-		valStr = fmt.Sprintf("%v", val)
-		if val != float64(eqInt) {
+		if tv.Float() != float64(eqInt) {
 			isEq = false
 		}
 	default:
-		valStr = fmt.Sprintf("%v", tv.Interface())
 		isEq = false
 	}
 
 	if isEq {
 		return
 	}
-	errBuf.WriteString(GetJoinValidErrStr(objName, filedName, valStr, uintStr, "should equal", eqStr))
+	errBuf.WriteString(GetJoinValidErrStr(objName, filedName, fmt.Sprintf("%v", tv.Interface()), uintStr, "should equal", eqStr))
 }
 
 // In 指定输入选项(精准匹配)
 func In(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
-	_, val := ParseValidNameKV(validName)
-	// 取左括号的下标
-	leftBracketIndex := strings.Index(val, "(")
-
-	// 取右括号的下标
-	rightBracketIndex := strings.Index(val, ")")
-	if leftBracketIndex == -1 || rightBracketIndex == -1 {
-		errBuf.WriteString(inValErr.Error())
-		return
-	}
-
-	var (
-		isIn   bool   // 默认不在输入范围选项中
-		tvVal  string // 获取输入内容的值, 用于判断
-		inVals = val[leftBracketIndex+1 : rightBracketIndex]
-	)
-
-	switch tv.Kind() {
-	case reflect.String:
-		tvVal = tv.String()
-	default:
-		tvVal = fmt.Sprintf("%v", tv.Interface())
-	}
-
-	for _, v := range strings.Split(inVals, "/") {
-		if v == tvVal {
-			isIn = true
-			break
-		}
-	}
-
-	if !isIn {
-		errBuf.WriteString(GetJoinValidErrStr(objName, filedName, tvVal, "should in ("+inVals+")"))
-	}
+	in(errBuf, validName, objName, filedName, tv, func(tvVal, v string) bool {
+		return tvVal == v
+	})
 }
 
 // Include 指定包含什么字符串(模糊匹配)
 func Include(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
-	_, val := ParseValidNameKV(validName)
+	in(errBuf, validName, objName, filedName, tv, func(tvVal, v string) bool {
+		return strings.Contains(tvVal, v)
+	})
+}
+
+// in 是否包含
+func in(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value, fn func(string, string) bool) {
+	key, val := ParseValidNameKV(validName)
 	// 取左括号的下标
 	leftBracketIndex := strings.Index(val, "(")
+
+	useErrMsg := inValErr.Error()
+	if key == "include" {
+		useErrMsg = includeErr.Error()
+	}
 
 	// 取右括号的下标
 	rightBracketIndex := strings.Index(val, ")")
 	if leftBracketIndex == -1 || rightBracketIndex == -1 {
-		errBuf.WriteString(inValErr.Error())
+		errBuf.WriteString(useErrMsg)
 		return
 	}
 
@@ -198,19 +170,23 @@ func Include(errBuf *strings.Builder, validName, objName, filedName string, tv r
 	case reflect.String:
 		tvVal = tv.String()
 	default:
-		errBuf.WriteString(includeErr.Error())
-		return
+		// include 必须为字符串才验证, 其他就不处理
+		if key == "include" {
+			errBuf.WriteString(useErrMsg)
+			return
+		}
+		tvVal = fmt.Sprintf("%v", tv.Interface())
 	}
 
 	for _, v := range strings.Split(inVals, "/") {
-		if strings.Contains(tvVal, v) {
+		if fn(tvVal, v) {
 			isIn = true
 			break
 		}
 	}
 
 	if !isIn {
-		errBuf.WriteString(GetJoinValidErrStr(objName, filedName, tvVal, "should include ("+inVals+")"))
+		errBuf.WriteString(GetJoinValidErrStr(objName, filedName, tvVal, "should "+key+" ("+inVals+")"))
 	}
 }
 
@@ -285,12 +261,10 @@ func Int(errBuf *strings.Builder, validName, objName, filedName string, tv refle
 	valStr := ""
 	switch tv.Kind() {
 	case reflect.String:
-		valStr = fmt.Sprintf("%s", tv.String())
+		valStr = tv.String()
 		matched, _ = regexp.MatchString("^\\d+$", valStr)
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		valStr = fmt.Sprintf("%d", tv.Int())
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-		valStr = fmt.Sprintf("%d", tv.Uint())
 	default:
 		valStr = fmt.Sprintf("%v", tv.Interface())
 		matched = false
@@ -311,7 +285,6 @@ func Float(errBuf *strings.Builder, validName, objName, filedName string, tv ref
 		valStr = tv.String()
 		matched, _ = regexp.MatchString("^\\d+.\\d+$", valStr)
 	case reflect.Float32, reflect.Float64:
-		valStr = fmt.Sprintf("%v", tv.Float())
 	default:
 		valStr = fmt.Sprintf("%v", tv.Interface())
 		matched = false
