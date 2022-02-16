@@ -68,6 +68,12 @@ func (d *dumpStruct) loopHandleKV(s reflect.StructField, tv reflect.Value, isNee
 		d.buf.WriteString("\"" + s.Name + "\": ")
 	}
 
+	// 不处理的内容
+	if s.Name == "Time" {
+		d.buf.WriteString("\"Time\"")
+		return
+	}
+
 	switch tv.Kind() {
 	case reflect.String: // 字符串
 		d.buf.WriteString("\"" + tv.String() + "\"")

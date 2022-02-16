@@ -3,6 +3,7 @@ package valid
 import (
 	"encoding/json"
 	"testing"
+	"time"
 )
 
 type Man struct {
@@ -40,6 +41,7 @@ func TestDump1(t *testing.T) {
 	type SliceDemo struct {
 		Name  string
 		Hobby []int32
+		Time  time.Time
 	}
 
 	d := SliceDemo{
