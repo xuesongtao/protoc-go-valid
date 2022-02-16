@@ -9,10 +9,10 @@
 
 * 1. 先下载本项目: `go get -u gitee.com/xuesongtao/protoc-go-valid`
 * 2. `protoc-go-valid` 命令操作, 如下:   
-    * 2.1 `protoc-go-valid -init="true"`
-	* 2.1 `protoc-go-valid -d="待注入的目录"`
-	* 2.2 `protoc-go-valid -p="匹配模式"`
-	* 2.3 `protoc-go-valid -f="单个待注入的文件"`
+    - 2.1 `protoc-go-valid -init="true"`
+  + 2.1 `protoc-go-valid -d="待注入的目录"`
+  + 2.2 `protoc-go-valid -p="匹配模式"`
+  + 2.3 `protoc-go-valid -f="单个待注入的文件"`
 
 * 3. 参考 `protoc-go-inject-tag`
 	
@@ -65,7 +65,7 @@ protoFileDirName="test" # proto 存放的目录
 
 * 1. 默认按照 `tag` 进行处理, 如果设置 `RM` 对象会以此规则为准
 * 2. 如果验证方法没有实现的, 可以调用 `SetCustomerValidFn` 自定义
-* 3. 使用的可以参考 `example_test.go`,      `valid_test.go`
+* 3. 使用的可以参考 `example_test.go`,       `valid_test.go`
 * 4. **会验证所有字段的内容, 最后输出不满足的规则的 err**  
 
 #### 5 使用示例:
