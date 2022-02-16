@@ -70,7 +70,7 @@ func (d *dumpStruct) loopHandleKV(s reflect.StructField, tv reflect.Value, isNee
 
 	// 不处理的内容
 	if s.Name == "Time" {
-		d.buf.WriteString("\"Time\"")
+		d.buf.WriteString("\"time is not handle\"")
 		return
 	}
 
