@@ -96,10 +96,28 @@ func Lt(errBuf *strings.Builder, validName, objName, filedName string, tv reflec
 
 // Eq 等于验证, 如果为字符串则是验证字符个数, 如果是数字的话就验证数字的大小
 func Eq(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
-	_, eqStr := ParseValidNameKV(validName)
+	eqStr, uintStr, isEq := eq(validName, tv)
+	if isEq {
+		return
+	}
+	errBuf.WriteString(GetJoinValidErrStr(objName, filedName, fmt.Sprintf("%v", tv.Interface()), uintStr, "should equal", eqStr))
+}
+
+// NoEq 不等于验证, 如果为字符串则是验证字符个数, 如果是数字的话就验证数字的大小
+func NoEq(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
+	eqStr, uintStr, isEq := eq(validName, tv)
+	if !isEq {
+		return
+	}
+	errBuf.WriteString(GetJoinValidErrStr(objName, filedName, fmt.Sprintf("%v", tv.Interface()), uintStr, "should no equal", eqStr))
+}
+
+// eq 相等
+func eq(validName string, tv reflect.Value) (eqStr, uintStr string, isEq bool) {
+	_, eqStr = ParseValidNameKV(validName)
 	eqInt, _ := strconv.Atoi(eqStr)
-	isEq := true
-	uintStr := numUnitStr
+	isEq = true
+	uintStr = numUnitStr
 	switch tv.Kind() {
 	case reflect.String:
 		uintStr = strUnitStr
@@ -121,11 +139,7 @@ func Eq(errBuf *strings.Builder, validName, objName, filedName string, tv reflec
 	default:
 		isEq = false
 	}
-
-	if isEq {
-		return
-	}
-	errBuf.WriteString(GetJoinValidErrStr(objName, filedName, fmt.Sprintf("%v", tv.Interface()), uintStr, "should equal", eqStr))
+	return
 }
 
 // In 指定输入选项(精准匹配)

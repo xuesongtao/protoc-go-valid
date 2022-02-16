@@ -62,6 +62,24 @@ func ExampleEq() {
 	// "Tmp.Phone" input "1354004261" length should equal 11
 }
 
+func ExampleNoEq() {
+	type Tmp struct {
+		Name  string  `valid:"required,noeq=3"`
+		Age   int32   `valid:"required,noeq=20"`
+		Score float64 `valid:"noeq=80"`
+		Phone string  `valid:"noeq=11"`
+	}
+	v := &Tmp{
+		Name:  "xue",
+		Age:   20,
+		Score: 80,
+		Phone: "1354004261",
+	}
+	fmt.Println(ValidateStruct(v))
+	// Output:
+	// "Tmp.Name" input "xue" length should no equal 3; "Tmp.Age" input "20" size should no equal 20; "Tmp.Score" input "80" size should no equal 80
+}
+
 func ExampleDate() {
 	type Tmp struct {
 		Date     string `valid:"date"`
@@ -170,7 +188,7 @@ func ExampleFloat() {
 		FloatNum32:  12.5,
 		FloatNum64:  1.0,
 	}
-	
+
 	fmt.Println(ValidateStruct(v))
 
 	// Output:
@@ -201,8 +219,8 @@ func ExampleSetCustomerValidFn() {
 
 func ExampleRule() {
 	type Tmp struct {
-		Name string
-		Age  string
+		Name      string
+		Age       string
 		ClassName string
 	}
 	v := Tmp{Name: "xue", Age: "12a"}
@@ -214,7 +232,6 @@ func ExampleRule() {
 	// Output:
 	// "Tmp.Age" input "12a" is not integer; "Tmp.ClassName" input "" is required
 }
-
 
 func ExampleRule2() {
 	type Tmp struct {

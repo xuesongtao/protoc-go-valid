@@ -58,6 +58,7 @@ var validName2FuncMap = map[string]commonValidFn{
 	"gt":       Gt,
 	"lt":       Lt,
 	"eq":       Eq,
+	"noeq":     NoEq,
 	"in":       In,
 	"include":  Include,
 	"phone":    Phone,
