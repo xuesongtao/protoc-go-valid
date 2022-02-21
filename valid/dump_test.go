@@ -28,6 +28,12 @@ type Testher struct {
 	Man Man
 }
 
+// GetDumpStructStrForJson 先json序列化, 再获取
+func GetDumpStructStrForJson(v interface{}) string {
+	b, _ := json.Marshal(v)
+	return string(b)
+}
+
 func TestDump0(t *testing.T) {
 	m := Man{
 		Name: "XUE",

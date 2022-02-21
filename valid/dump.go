@@ -1,7 +1,6 @@
 package valid
 
 import (
-	"encoding/json"
 	"reflect"
 	"strconv"
 	"strings"
@@ -129,9 +128,4 @@ func (d *dumpStruct) loopHandleKV(s reflect.StructField, tv reflect.Value, isNee
 // GetDumpStructStr 获取待 dump 的结构体字符串, 支持json格式化
 func GetDumpStructStr(v interface{}) string {
 	return NewDumpStruct().HandleDumpStruct(reflect.ValueOf(v)).Get()
-}
-
-func GetDumpStructStrForJson(v interface{}) string {
-	b, _ := json.Marshal(v)
-	return string(b)
 }
