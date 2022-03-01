@@ -72,16 +72,8 @@ var validName2FuncMap = map[string]commonValidFn{
 
 type commonValidFn func(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value)
 
+// Deprecated 此函数会修改全局变量, 会导致内存释放不了, 此推荐 ValidStructForMyValidFn
 // SetCustomerValidFn 自定义验证函数
 func SetCustomerValidFn(validName string, fn commonValidFn) {
 	validName2FuncMap[validName] = fn
-}
-
-// GetValidFn 获取验证函数
-func GetValidFn(validName string) (commonValidFn, error) {
-	f, ok := validName2FuncMap[validName]
-	if !ok {
-		return nil, errors.New("valid: \"" + validName + "\" is not exist, You can call SetCustomerValidFn")
-	}
-	return f, nil
 }

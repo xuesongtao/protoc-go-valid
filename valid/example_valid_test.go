@@ -217,6 +217,51 @@ func ExampleSetCustomerValidFn() {
 	// "Tmp.Age" is not num
 }
 
+func ExampleSetCustomerValidFn1() {
+	type Tmp struct {
+		Name string `valid:"required"`
+		Age  string `valid:"num"`
+	}
+
+	isNumFn := func(errBuf *strings.Builder, validName, structName, filedName string, tv reflect.Value) {
+		ok, _ := regexp.MatchString("^\\d+$", tv.String())
+		if !ok {
+			errBuf.WriteString(fmt.Sprintf("%q is not num", structName+"."+filedName))
+			return
+		}
+	}
+
+	SetCustomerValidFn("num", isNumFn)
+	v := Tmp{Name: "12", Age: "1ha"}
+	fmt.Println(ValidStructForMyValidFn(v, "num", isNumFn))
+
+	// Output:
+	// "Tmp.Age" is not num
+}
+
+func ExampleSetCustomerValidFn3() {
+	type Tmp struct {
+		Name string `valid:"required"`
+		Age  string `valid:"num"`
+	}
+
+	isNumFn := func(errBuf *strings.Builder, validName, structName, filedName string, tv reflect.Value) {
+		ok, _ := regexp.MatchString("^\\d+$", tv.String())
+		if !ok {
+			errBuf.WriteString(fmt.Sprintf("%q is not num", structName+"."+filedName))
+			return
+		}
+	}
+
+	obj := NewVStruct()
+	obj.SetValidFn("num", isNumFn)
+	v := Tmp{Name: "12", Age: "1ha"}
+	fmt.Println(obj.Valid(v))
+
+	// Output:
+	// "Tmp.Age" is not num
+}
+
 func ExampleRule() {
 	type Tmp struct {
 		Name      string

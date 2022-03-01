@@ -13,8 +13,9 @@ type vStruct struct {
 	targetTag string // 结构体中的待指定的验证的 tag
 	endFlag   string // 用于分割 err
 	errBuf    *strings.Builder
-	ruleMap   RM                    // 验证规则
-	existMap  map[int][]*name2Value // 已存在的, 用于 either tag
+	ruleMap   RM                       // 验证规则
+	existMap  map[int][]*name2Value    // 已存在的, 用于 either tag
+	validFn   map[string]commonValidFn // 存放自定义的验证函数, 可以做到调用完就被清理
 }
 
 // name2Value
@@ -42,6 +43,8 @@ func NewVStruct(targetTag ...string) *vStruct {
 func (v *vStruct) free() {
 	v.errBuf.Reset()
 	v.ruleMap = nil
+	v.existMap = nil
+	v.validFn = nil
 	syncValidPool.Put(v)
 }
 
@@ -56,6 +59,30 @@ func (v *vStruct) SetRule(ruleMap RM) *vStruct {
 // Valid 验证
 func (v *vStruct) Valid(in interface{}) error {
 	return v.validate("", reflect.ValueOf(in)).getError()
+}
+
+// SetValidFn 自定义设置验证函数
+func (v *vStruct) SetValidFn(validName string, fn commonValidFn) *vStruct {
+	if v.validFn == nil {
+		v.validFn = make(map[string]commonValidFn)
+	}
+	v.validFn[validName] = fn
+	return v
+}
+
+// getValidFn 获取验证函数
+func (v *vStruct) getValidFn(validName string) (commonValidFn, error) {
+	// 先从本地找, 如果本地没有就从全局里找
+	fn, ok := v.validFn[validName]
+	if ok {
+		return fn, nil
+	}
+
+	fn, ok = validName2FuncMap[validName]
+	if !ok {
+		return nil, errors.New("valid: \"" + validName + "\" is not exist, You can call ValidStructForMyValidFn")
+	}
+	return fn, nil
 }
 
 // validate 验证执行体
@@ -105,7 +132,7 @@ func (v *vStruct) validate(structName string, value reflect.Value, isValidSlice 
 			}
 
 			validKey, _ := ParseValidNameKV(validName)
-			fn, err := GetValidFn(validKey)
+			fn, err := v.getValidFn(validKey)
 			if err != nil {
 				v.errBuf.WriteString(err.Error() + errEndFlag)
 				continue
@@ -214,4 +241,9 @@ func ValidateStruct(in interface{}, targetTag ...string) error {
 // 注: 通过字段名来匹配规则, 如果嵌套中如果有相同的名的都会走这个规则, 因此建议这种方式推荐使用非嵌套结构体
 func ValidStructForRule(ruleMap RM, in interface{}, targetTag ...string) error {
 	return NewVStruct(targetTag...).SetRule(ruleMap).Valid(in)
+}
+
+// ValidStructForMyValidFn 自定义验证规则
+func ValidStructForMyValidFn(in interface{}, validName string, validFn commonValidFn, targetTag ...string) error {
+	return NewVStruct(targetTag...).SetValidFn(validName, validFn).Valid(in)
 }
