@@ -48,7 +48,7 @@ var (
 )
 
 // 验证函数
-var validName2FuncMap = map[string]commonValidFn{
+var validName2FuncMap = map[string]CommonValidFn{
 	"required": nil,
 	"either":   nil,
 	"to":       To,
@@ -70,10 +70,10 @@ var validName2FuncMap = map[string]commonValidFn{
 	"float":    Float,
 }
 
-type commonValidFn func(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value)
+type CommonValidFn func(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value)
 
 // Deprecated 此函数会修改全局变量, 会导致内存释放不了, 此推荐 ValidStructForMyValidFn
 // SetCustomerValidFn 自定义验证函数
-func SetCustomerValidFn(validName string, fn commonValidFn) {
+func SetCustomerValidFn(validName string, fn CommonValidFn) {
 	validName2FuncMap[validName] = fn
 }

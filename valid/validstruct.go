@@ -15,7 +15,7 @@ type vStruct struct {
 	errBuf    *strings.Builder
 	ruleMap   RM                       // 验证规则
 	existMap  map[int][]*name2Value    // 已存在的, 用于 either tag
-	validFn   map[string]commonValidFn // 存放自定义的验证函数, 可以做到调用完就被清理
+	validFn   map[string]CommonValidFn // 存放自定义的验证函数, 可以做到调用完就被清理
 }
 
 // name2Value
@@ -62,16 +62,16 @@ func (v *vStruct) Valid(in interface{}) error {
 }
 
 // SetValidFn 自定义设置验证函数
-func (v *vStruct) SetValidFn(validName string, fn commonValidFn) *vStruct {
+func (v *vStruct) SetValidFn(validName string, fn CommonValidFn) *vStruct {
 	if v.validFn == nil {
-		v.validFn = make(map[string]commonValidFn)
+		v.validFn = make(map[string]CommonValidFn)
 	}
 	v.validFn[validName] = fn
 	return v
 }
 
 // getValidFn 获取验证函数
-func (v *vStruct) getValidFn(validName string) (commonValidFn, error) {
+func (v *vStruct) getValidFn(validName string) (CommonValidFn, error) {
 	// 先从本地找, 如果本地没有就从全局里找
 	fn, ok := v.validFn[validName]
 	if ok {
@@ -244,6 +244,6 @@ func ValidStructForRule(ruleMap RM, in interface{}, targetTag ...string) error {
 }
 
 // ValidStructForMyValidFn 自定义验证规则
-func ValidStructForMyValidFn(in interface{}, validName string, validFn commonValidFn, targetTag ...string) error {
+func ValidStructForMyValidFn(in interface{}, validName string, validFn CommonValidFn, targetTag ...string) error {
 	return NewVStruct(targetTag...).SetValidFn(validName, validFn).Valid(in)
 }
