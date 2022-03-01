@@ -144,7 +144,7 @@ func (v *vStruct) validate(structName string, value reflect.Value, isValidSlice 
 			} else if fn == nil && validKey == "either" { // 多选一
 				v.initEither(validName, structName+ty.Name(), structFiled.Name, filedValue)
 			} else {
-				if tv.IsZero() { // 空就直接跳过
+				if filedValue.IsZero() { // 空就直接跳过
 					continue
 				}
 				fn(v.errBuf, validName, structName+ty.Name(), structFiled.Name, filedValue)
