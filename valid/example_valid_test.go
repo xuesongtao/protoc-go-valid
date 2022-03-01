@@ -209,6 +209,7 @@ func ExampleSetCustomerValidFn() {
 		}
 	}
 
+	// 弃用
 	SetCustomerValidFn("num", isNumFn)
 	v := Tmp{Name: "12", Age: "1ha"}
 	fmt.Println(ValidateStruct(&v))
@@ -231,7 +232,6 @@ func ExampleSetCustomerValidFn1() {
 		}
 	}
 
-	SetCustomerValidFn("num", isNumFn)
 	v := Tmp{Name: "12", Age: "1ha"}
 	fmt.Println(ValidStructForMyValidFn(v, "num", isNumFn))
 
