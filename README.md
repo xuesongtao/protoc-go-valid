@@ -51,6 +51,8 @@ protoFileDirName="test" # proto 存放的目录
 | phone    | 手机号验证                                                                                                     |
 | email    | 邮箱验证                                                                                                       |
 | idcard   | 身份证号码验证                                                                                                  |
+| year     | 年验证, 格式为 "year=xxxx"                                                                              |
+| year2month| 年月验证, 格式为 "date=xxxx-xx"                                                                              |
 | date     | 日期验证, 格式为 "date=xxxx-xx-xx"                                                                              |
 | datetime | 时间验证, 格式为 "datetime=xxxx-xx-xx xx:xx:xx"                                                                 |
 | int      | 整数型验证(字段类型为字符串)                                                                                      |
@@ -65,7 +67,7 @@ protoFileDirName="test" # proto 存放的目录
 
 * 1. 默认按照 `tag` 进行处理, 如果设置 `RM` 对象会以此规则为准
 * 2. 如果验证方法没有实现的, 可以调用 `SetCustomerValidFn` 自定义
-* 3. 使用的可以参考 `example_test.go`,       `valid_test.go`
+* 3. 使用的可以参考 `example_test.go` 和 `valid_test.go`
 * 4. **会验证所有字段的内容, 最后输出不满足的规则的 err**  
 
 #### 5 使用示例:

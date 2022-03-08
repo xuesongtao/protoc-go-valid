@@ -243,6 +243,32 @@ func IDCard(errBuf *strings.Builder, validName, objName, filedName string, tv re
 	errBuf.WriteString(GetJoinValidErrStr(objName, filedName, tv.String(), "is not idcard"))
 }
 
+// Year 验证年
+func Year(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
+	if err := checkFieldIsString(objName, filedName, tv); err != nil {
+		errBuf.WriteString(err.Error())
+		return
+	}
+	matched, _ := regexp.MatchString("^\\d{4}", tv.String())
+	if matched {
+		return
+	}
+	errBuf.WriteString(GetJoinValidErrStr(objName, filedName, tv.String(), "is not year, eg: 1996"))
+}
+
+// Year2Month 验证年月
+func Year2Month(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
+	if err := checkFieldIsString(objName, filedName, tv); err != nil {
+		errBuf.WriteString(err.Error())
+		return
+	}
+	matched, _ := regexp.MatchString("^\\d{4}-\\d{2}", tv.String())
+	if matched {
+		return
+	}
+	errBuf.WriteString(GetJoinValidErrStr(objName, filedName, tv.String(), "is not year2month, eg: 1996-09"))
+}
+
 // Date 验证日期
 func Date(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
 	if err := checkFieldIsString(objName, filedName, tv); err != nil {
