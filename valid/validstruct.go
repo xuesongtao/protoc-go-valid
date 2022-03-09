@@ -35,7 +35,6 @@ func NewVStruct(targetTag ...string) *vStruct {
 	obj.targetTag = tagName
 	obj.endFlag = errEndFlag
 	obj.errBuf = new(strings.Builder)
-	obj.ruleObj = make(RM)
 	return obj
 }
 
@@ -52,6 +51,14 @@ func (v *vStruct) free() {
 func (v *vStruct) SetRule(ruleObj RM) *vStruct {
 	v.ruleObj = ruleObj
 	return v
+}
+
+// getCusRule 根据字段名获取自定义验证规则
+func (v *vStruct) getCusRule(structFieldName string) string {
+	if v.ruleObj == nil {
+		return ""
+	}
+	return v.ruleObj.Get(structFieldName)
 }
 
 // Valid 验证
@@ -114,7 +121,7 @@ func (v *vStruct) validate(structName string, value reflect.Value, isValidSlice 
 		validNames := structFiled.Tag.Get(v.targetTag)
 
 		// 如果设置了规则就覆盖 tag 中的验证内容
-		if rule := v.ruleObj.Get(structFiled.Name); rule != "" {
+		if rule := v.getCusRule(structFiled.Name); rule != "" {
 			validNames = rule
 		}
 
@@ -241,7 +248,7 @@ func ValidStructForRule(ruleObj RM, in interface{}, targetTag ...string) error {
 	return NewVStruct(targetTag...).SetRule(ruleObj).Valid(in)
 }
 
-// ValidStructForMyValidFn 自定义验证规则
+// ValidStructForMyValidFn 自定义单个验证函数
 func ValidStructForMyValidFn(in interface{}, validName string, validFn CommonValidFn, targetTag ...string) error {
 	return NewVStruct(targetTag...).SetValidFn(validName, validFn).Valid(in)
 }
