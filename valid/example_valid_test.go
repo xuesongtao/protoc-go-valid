@@ -266,34 +266,18 @@ func ExampleSetCustomerValidFn3() {
 
 func ExampleRule() {
 	type Tmp struct {
-		Name      string
-		Age       string
-		ClassName string
-	}
-	v := Tmp{Name: "xue", Age: "12a"}
-	rule := RM{"Name,Age,ClassName": "required", "Age": "int"}
-	if err := ValidStructForRule(rule, &v); err != nil {
-		fmt.Println(err)
-	}
-
-	// Output:
-	// "Tmp.Age" input "12a" is not integer; "Tmp.ClassName" input "" is required
-}
-
-func ExampleRule2() {
-	type Tmp struct {
 		Name string
-		Age  string
+		Age  int
 	}
-	v := Tmp{Name: "xue"}
-	ruleMap := NewRule()
+	v := Tmp{Name: "xue", Age: 101}
+	ruleObj := NewRule()
 	if v.Name == "xue" {
-		ruleMap.Set("Age", "required")
+		ruleObj.Set("Age", "required,le=100")
 	}
-	if err := ValidStructForRule(ruleMap, &v); err != nil {
+	if err := ValidStructForRule(ruleObj, &v); err != nil {
 		fmt.Println(err)
 	}
 
 	// Output:
-	// "Tmp.Age" input "" is required
+	// "Tmp.Age" input "101" size more than or equal 100
 }

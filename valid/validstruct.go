@@ -13,7 +13,7 @@ type vStruct struct {
 	targetTag string // 结构体中的待指定的验证的 tag
 	endFlag   string // 用于分割 err
 	errBuf    *strings.Builder
-	ruleMap   RM                       // 验证规则
+	ruleObj   RM                       // 验证规则
 	existMap  map[int][]*name2Value    // 已存在的, 用于 either tag
 	validFn   map[string]CommonValidFn // 存放自定义的验证函数, 可以做到调用完就被清理
 }
@@ -35,24 +35,22 @@ func NewVStruct(targetTag ...string) *vStruct {
 	obj.targetTag = tagName
 	obj.endFlag = errEndFlag
 	obj.errBuf = new(strings.Builder)
-	obj.ruleMap = make(RM)
+	obj.ruleObj = make(RM)
 	return obj
 }
 
 // free 释放
 func (v *vStruct) free() {
 	v.errBuf.Reset()
-	v.ruleMap = nil
+	v.ruleObj = nil
 	v.existMap = nil
 	v.validFn = nil
 	syncValidPool.Put(v)
 }
 
 // SetRule 添加验证规则
-func (v *vStruct) SetRule(ruleMap RM) *vStruct {
-	for filedNames, rules := range ruleMap {
-		v.ruleMap.Set(filedNames, rules)
-	}
+func (v *vStruct) SetRule(ruleObj RM) *vStruct {
+	v.ruleObj = ruleObj
 	return v
 }
 
@@ -116,7 +114,7 @@ func (v *vStruct) validate(structName string, value reflect.Value, isValidSlice 
 		validNames := structFiled.Tag.Get(v.targetTag)
 
 		// 如果设置了规则就覆盖 tag 中的验证内容
-		if rule := v.ruleMap.Get(structFiled.Name); rule != "" {
+		if rule := v.ruleObj.Get(structFiled.Name); rule != "" {
 			validNames = rule
 		}
 
@@ -239,8 +237,8 @@ func ValidateStruct(in interface{}, targetTag ...string) error {
 
 // ValidStructForRule 自定义验证规则并验证
 // 注: 通过字段名来匹配规则, 如果嵌套中如果有相同的名的都会走这个规则, 因此建议这种方式推荐使用非嵌套结构体
-func ValidStructForRule(ruleMap RM, in interface{}, targetTag ...string) error {
-	return NewVStruct(targetTag...).SetRule(ruleMap).Valid(in)
+func ValidStructForRule(ruleObj RM, in interface{}, targetTag ...string) error {
+	return NewVStruct(targetTag...).SetRule(ruleObj).Valid(in)
 }
 
 // ValidStructForMyValidFn 自定义验证规则
