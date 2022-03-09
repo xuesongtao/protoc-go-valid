@@ -31,12 +31,3 @@ func (r RM) Get(filedName string) string {
 	}
 	return r[filedName]
 }
-
-func (r RM) toLower(s string) string {
-	strByte := []byte(s)
-	l := len(strByte)
-	for i := 0; i < l; i++ {
-		strByte[i] |= ' '
-	}
-	return string(strByte)
-}
