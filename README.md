@@ -51,10 +51,10 @@ protoFileDirName="test" # proto 存放的目录
 | phone    | 手机号验证                                                                                                     |
 | email    | 邮箱验证                                                                                                       |
 | idcard   | 身份证号码验证                                                                                                  |
-| year     | 年验证, 格式为 "year=xxxx"                                                                              |
-| year2month| 年月验证, 格式为 "date=xxxx-xx"                                                                              |
-| date     | 日期验证, 格式为 "date=xxxx-xx-xx"                                                                              |
-| datetime | 时间验证, 格式为 "datetime=xxxx-xx-xx xx:xx:xx"                                                                 |
+| year     | 年验证                                                                                                         |
+| year2month| 年月验证, 支持分割符, 默认按照"-". 验证:xxxx/xx, 格式: "year2month=/"                                             |
+| date     | 日期验证, 支持分割符, 默认按照"-". 验证:xxxx/xx/xx, 格式: "date=/"                                                 |
+| datetime | 时间验证, 支持分割符, 默认按照"-". 验证:xxxx/xx/xx xx:xx:xx, 格式: "datetime=/"                                     |
 | int      | 整数型验证(字段类型为字符串)                                                                                      |
 | float    | 浮动数型验证(字段类型为字符串)                                                                                    |
 

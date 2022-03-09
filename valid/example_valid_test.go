@@ -83,14 +83,14 @@ func ExampleNoEq() {
 func ExampleDate() {
 	type Tmp struct {
 		Year       string `valid:"year"`
-		Year2Month string `valid:"year2month"`
-		Date       string `valid:"date"`
+		Year2Month string `valid:"year2month=/"`
+		Date       string `valid:"date=/"`
 		Datetime   string `valid:"datetime"`
 	}
-	v := &Tmp{Year: "2000", Year2Month: "2000-01", Date: "2021-1", Datetime: "2021-01-11"}
+	v := &Tmp{Year: "2001", Year2Month: "2000/01", Date: "2021/01/22", Datetime: "2021-01-11 23:22"}
 	fmt.Println(ValidateStruct(v))
 	// Output:
-	// "Tmp.Date" input "2021-1" is not date, eg: 1996-09-28; "Tmp.Datetime" input "2021-01-11" is not datetime, eg: 1996-09-28 23:00:00
+	// "Tmp.Datetime" input "2021-01-11 23:22" is not datetime, eg: 1996-09-28 23:00:00
 }
 
 func ExampleEither() {

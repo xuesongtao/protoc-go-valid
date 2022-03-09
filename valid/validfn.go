@@ -249,7 +249,7 @@ func Year(errBuf *strings.Builder, validName, objName, filedName string, tv refl
 		errBuf.WriteString(err.Error())
 		return
 	}
-	matched, _ := regexp.MatchString("^\\d{4}", tv.String())
+	matched, _ := regexp.MatchString("^\\d{4}$", tv.String())
 	if matched {
 		return
 	}
@@ -257,42 +257,60 @@ func Year(errBuf *strings.Builder, validName, objName, filedName string, tv refl
 }
 
 // Year2Month 验证年月
+// 默认匹配 xxxx-xx, 可以指定分割符
 func Year2Month(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
 	if err := checkFieldIsString(objName, filedName, tv); err != nil {
 		errBuf.WriteString(err.Error())
 		return
 	}
-	matched, _ := regexp.MatchString("^\\d{4}-\\d{2}", tv.String())
+	defaultDateSplit := "-" // 默认时间拼接符号
+	_, val := ParseValidNameKV(validName)
+	if val != "" {
+		defaultDateSplit = val
+	}
+	matched, _ := regexp.MatchString("^\\d{4}"+defaultDateSplit+"\\d{2}$", tv.String())
 	if matched {
 		return
 	}
-	errBuf.WriteString(GetJoinValidErrStr(objName, filedName, tv.String(), "is not year2month, eg: 1996-09"))
+	errBuf.WriteString(GetJoinValidErrStr(objName, filedName, tv.String(), "is not year2month, eg: 1996"+defaultDateSplit+"09"))
 }
 
 // Date 验证日期
+// 默认匹配 xxxx-xx-xx, 可以指定分割符
 func Date(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
 	if err := checkFieldIsString(objName, filedName, tv); err != nil {
 		errBuf.WriteString(err.Error())
 		return
 	}
-	matched, _ := regexp.MatchString("^\\d{4}-\\d{2}-\\d{2}", tv.String())
+	defaultDateSplit := "-" // 默认时间拼接符号
+	_, val := ParseValidNameKV(validName)
+	if val != "" {
+		defaultDateSplit = val
+	}
+	matched, _ := regexp.MatchString("^\\d{4}"+defaultDateSplit+"\\d{2}"+defaultDateSplit+"\\d{2}$", tv.String())
 	if matched {
 		return
 	}
-	errBuf.WriteString(GetJoinValidErrStr(objName, filedName, tv.String(), "is not date, eg: 1996-09-28"))
+	errBuf.WriteString(GetJoinValidErrStr(objName, filedName, tv.String(), "is not date, eg: 1996"+defaultDateSplit+"09"+defaultDateSplit+"28"))
 }
 
 // Datetime 验证时间
+// 默认匹配 xxxx-xx-xx xx:xx:xx, 可以指定分割符
 func Datetime(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
 	if err := checkFieldIsString(objName, filedName, tv); err != nil {
 		errBuf.WriteString(err.Error())
 		return
 	}
-	matched, _ := regexp.MatchString("^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}", tv.String())
+	defaultDateSplit := "-" // 默认时间拼接符号
+	_, val := ParseValidNameKV(validName)
+	if val != "" {
+		defaultDateSplit = val
+	}
+	matched, _ := regexp.MatchString("^\\d{4}"+defaultDateSplit+"\\d{2}"+defaultDateSplit+"\\d{2} \\d{2}:\\d{2}:\\d{2}$", tv.String())
 	if matched {
 		return
 	}
-	errBuf.WriteString(GetJoinValidErrStr(objName, filedName, tv.String(), "is not datetime, eg: 1996-09-28 23:00:00"))
+	errBuf.WriteString(GetJoinValidErrStr(objName, filedName, tv.String(), "is not datetime, eg: 1996"+defaultDateSplit+"09"+defaultDateSplit+"28 23:00:00"))
 }
 
 // Int 验证整数
