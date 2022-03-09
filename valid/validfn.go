@@ -206,7 +206,7 @@ func in(errBuf *strings.Builder, validName, objName, filedName string, tv reflec
 
 // Phone 验证手机号
 func Phone(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
-	if err := checkFieldIsString(objName, filedName, tv); err != nil {
+	if err := CheckFieldIsStr(objName, filedName, tv); err != nil {
 		errBuf.WriteString(err.Error())
 		return
 	}
@@ -219,7 +219,7 @@ func Phone(errBuf *strings.Builder, validName, objName, filedName string, tv ref
 
 // Email 验证邮箱
 func Email(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
-	if err := checkFieldIsString(objName, filedName, tv); err != nil {
+	if err := CheckFieldIsStr(objName, filedName, tv); err != nil {
 		errBuf.WriteString(err.Error())
 		return
 	}
@@ -232,7 +232,7 @@ func Email(errBuf *strings.Builder, validName, objName, filedName string, tv ref
 
 // IDCard 验证身份证
 func IDCard(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
-	if err := checkFieldIsString(objName, filedName, tv); err != nil {
+	if err := CheckFieldIsStr(objName, filedName, tv); err != nil {
 		errBuf.WriteString(err.Error())
 		return
 	}
@@ -245,7 +245,7 @@ func IDCard(errBuf *strings.Builder, validName, objName, filedName string, tv re
 
 // Year 验证年
 func Year(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
-	if err := checkFieldIsString(objName, filedName, tv); err != nil {
+	if err := CheckFieldIsStr(objName, filedName, tv); err != nil {
 		errBuf.WriteString(err.Error())
 		return
 	}
@@ -259,7 +259,7 @@ func Year(errBuf *strings.Builder, validName, objName, filedName string, tv refl
 // Year2Month 验证年月
 // 默认匹配 xxxx-xx, 可以指定分割符
 func Year2Month(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
-	if err := checkFieldIsString(objName, filedName, tv); err != nil {
+	if err := CheckFieldIsStr(objName, filedName, tv); err != nil {
 		errBuf.WriteString(err.Error())
 		return
 	}
@@ -278,7 +278,7 @@ func Year2Month(errBuf *strings.Builder, validName, objName, filedName string, t
 // Date 验证日期
 // 默认匹配 xxxx-xx-xx, 可以指定分割符
 func Date(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
-	if err := checkFieldIsString(objName, filedName, tv); err != nil {
+	if err := CheckFieldIsStr(objName, filedName, tv); err != nil {
 		errBuf.WriteString(err.Error())
 		return
 	}
@@ -297,7 +297,7 @@ func Date(errBuf *strings.Builder, validName, objName, filedName string, tv refl
 // Datetime 验证时间
 // 默认匹配 xxxx-xx-xx xx:xx:xx, 可以指定分割符
 func Datetime(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
-	if err := checkFieldIsString(objName, filedName, tv); err != nil {
+	if err := CheckFieldIsStr(objName, filedName, tv); err != nil {
 		errBuf.WriteString(err.Error())
 		return
 	}

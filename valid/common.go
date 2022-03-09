@@ -43,8 +43,8 @@ func GetJoinValidErrStr(objName, filedName, inputVal string, others ...string) (
 	return
 }
 
-// checkfieldIsString 验证字段类型是否为字符串
-func checkFieldIsString(objName, filedName string, tv reflect.Value) (err error) {
+// CheckFieldIsStr 验证字段类型是否为字符串
+func CheckFieldIsStr(objName, filedName string, tv reflect.Value) (err error) {
 	switch tv.Kind() {
 	case reflect.String:
 	default:
