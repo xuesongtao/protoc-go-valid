@@ -19,6 +19,33 @@ func ExampleRequired() {
 	// "Tmp.Name" input "" is required
 }
 
+func ExampleExist() {
+	type Man struct {
+		Name string `valid:"required"`
+		Age  int32  `valid:"le=0"`
+	}
+
+	type Student struct {
+		M Man `valid:"exist"`
+	}
+
+	type Teather struct {
+		M   *Man       `valid:"exist"`
+		Stu []*Student `valid:"exist"`
+	}
+	teather := Teather{
+		M: &Man{
+			Name: "",
+			Age:  0,
+		},
+		Stu: []*Student{{Man{Name: "test1", Age: 10}}},
+	}
+	fmt.Println(ValidateStruct(teather))
+
+	// Output:
+	// "Teather.Man.Name" input "" is required; "Teather-0.Student.Man.Age" input "10" size more than or equal 0
+}
+
 func ExampleTo() {
 	type Tmp struct {
 		Name string `valid:"to=1~3"`
@@ -31,7 +58,7 @@ func ExampleTo() {
 	// "Tmp.Age" input "100" size more than or equal 99
 }
 
-func ExampleGe()  {
+func ExampleGe() {
 	type Tmp struct {
 		Name string `valid:"ge=1"`
 		Age  int32  `valid:"ge=0"`
@@ -42,7 +69,7 @@ func ExampleGe()  {
 	// "Tmp.Age" input "-1" size less than or equal 0
 }
 
-func ExampleLe()  {
+func ExampleLe() {
 	type Tmp struct {
 		Name string `valid:"le=2"`
 		Age  int32  `valid:"le=0"`
@@ -66,7 +93,7 @@ func ExampleOto() {
 	// "Tmp.Addr" input "tets" length more than 3
 }
 
-func ExampleGt()  {
+func ExampleGt() {
 	type Tmp struct {
 		Name string `valid:"gt=2"`
 		Age  int32  `valid:"gt=0"`
@@ -77,7 +104,7 @@ func ExampleGt()  {
 	// "Tmp.Name" input "测试" length less than 2; "Tmp.Age" input "-1" size less than 0
 }
 
-func ExampleLt()  {
+func ExampleLt() {
 	type Tmp struct {
 		Name string `valid:"lt=2"`
 		Age  int32  `valid:"lt=40"`

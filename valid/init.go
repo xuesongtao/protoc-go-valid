@@ -54,8 +54,9 @@ var (
 
 // 验证函数
 var validName2FuncMap = map[string]CommonValidFn{
-	"required":   nil,
-	"either":     nil,
+	Required:     nil,
+	Exist:        nil,
+	Either:       nil,
 	"to":         To,
 	"ge":         Ge,
 	"le":         Le,

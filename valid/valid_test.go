@@ -12,7 +12,7 @@ type TestOrder struct {
 	AppName              string                  `alipay:"to=2~10" validate:"minLen:2|maxLen:10"` //应用名
 	TotalFeeFloat        float64                 `alipay:"to=2~5" validate:"min:2|max:5"`         //订单总金额，单位为分，详见支付金额
 	TestOrderDetailPtr   *TestOrderDetailPtr     `alipay:"required" validate:"required"`          // 商品详细描述
-	TestOrderDetailSlice []*TestOrderDetailSlice `alipay:"required" validate:"required"`           // 商品详细描述
+	TestOrderDetailSlice []*TestOrderDetailSlice `alipay:"required" validate:"required"`          // 商品详细描述
 }
 
 type TestOrderDetailPtr struct {

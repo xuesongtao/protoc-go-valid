@@ -8,6 +8,12 @@ import (
 	"strings"
 )
 
+const (
+	Required = "required" // 必填
+	Exist    = "exist"    // 强制验证
+	Either   = "either"   // 多个必须一个
+)
+
 // vStruct 验证结构体
 type vStruct struct {
 	targetTag string // 结构体中的待指定的验证的 tag
@@ -143,10 +149,13 @@ func (v *vStruct) validate(structName string, value reflect.Value, isValidSlice 
 				continue
 			}
 
+			// fmt.Printf("structName: %s, structFieldName: %s, tv: %v\n", structName+ty.Name(), structFiled.Name, filedValue)
 			// 开始验证
-			if fn == nil && validKey == "required" { // 必填
+			if fn == nil && validKey == Required { // 必填
 				v.required(structName+ty.Name(), structFiled.Name, filedValue)
-			} else if fn == nil && validKey == "either" { // 多选一
+			} else if fn == nil && validKey == Exist {
+				v.exist(true, structName+ty.Name(), structFiled.Name, filedValue)
+			} else if fn == nil && validKey == Either { // 多选一
 				v.initEither(validName, structName+ty.Name(), structFiled.Name, filedValue)
 			} else {
 				if filedValue.IsZero() { // 空就直接跳过
@@ -163,12 +172,31 @@ func (v *vStruct) validate(structName string, value reflect.Value, isValidSlice 
 func (v *vStruct) required(structName, filedName string, tv reflect.Value) {
 	if tv.IsZero() { // 验证必填
 		// 生成如: "TestOrderDetailSlice.Price" is required
-		v.errBuf.WriteString(GetJoinValidErrStr(structName, filedName, "", "is required"))
-	} else if tv.Kind() == reflect.Ptr || (tv.Kind() == reflect.Struct && structName != "Time") { // 结构体
+		v.errBuf.WriteString(GetJoinValidErrStr(structName, filedName, "", "is", Required))
+	} else { // 有值的话需要判断下嵌套的类型
+		v.exist(false, structName, filedName, tv)
+	}
+}
+
+// exist 存在验证, 用于验证嵌套结构, 切片
+func (v *vStruct) exist(isValidTvKind bool, structName, filedName string, tv reflect.Value) {
+	// 如果空的就没必要验证了
+	if tv.IsZero() {
+		return
+	}
+	switch tv.Kind() {
+	case reflect.Ptr, reflect.Struct:
+		if structName == "Time" {
+			return
+		}
 		v.validate(structName, tv)
-	} else if tv.Kind() == reflect.Slice { // 切片
+	case reflect.Slice:
 		for i := 0; i < tv.Len(); i++ {
 			v.validate(fmt.Sprintf("%s-%d", structName, i), tv.Index(i), true)
+		}
+	default:
+		if isValidTvKind {
+			v.errBuf.WriteString(GetJoinValidErrStr(structName, filedName, tv.String(), "is nonsupport", Exist))
 		}
 	}
 }
@@ -214,7 +242,7 @@ func (v *vStruct) either() {
 
 		// 判断下是否全部为空
 		if l == isZeroLen {
-			zeroInfoStr = strings.TrimRight(zeroInfoStr, ", ")
+			zeroInfoStr = strings.TrimSuffix(zeroInfoStr, ", ")
 			v.errBuf.WriteString(zeroInfoStr + " they shouldn't all be empty" + v.endFlag)
 		}
 	}
@@ -232,7 +260,7 @@ func (v *vStruct) getError() error {
 	}
 
 	// 这里需要去掉最后一个 endFlag
-	return errors.New(strings.TrimRight(v.errBuf.String(), v.endFlag))
+	return errors.New(strings.TrimSuffix(v.errBuf.String(), v.endFlag))
 }
 
 // =========================== 常用方法进行封装 =======================================
