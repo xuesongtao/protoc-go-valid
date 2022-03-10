@@ -30,6 +30,11 @@ var (
 		"    Name string `valid:\"to=1~10\"`\n" +
 		"}")
 
+	otoValErr = errors.New(defaultTargetTag + " \"to\" is not ok, eg: " +
+		"type Test struct {\n" +
+		"    Name string `valid:\"oto=1~10\"`\n" +
+		"}")
+
 	eitherValErr = errors.New(defaultTargetTag + " \"either\" is not ok, eg: " +
 		"type Test struct {\n" +
 		"    OrderNo string `valid:\"either=1\"`\n" +

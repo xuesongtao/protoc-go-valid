@@ -11,7 +11,7 @@ import (
 // To 验证输入的大小区间, 如果为字符串则是验证字符个数, 如果是数字的话就验证数字的大小, 注: 左右都为闭区间
 func To(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
 	_, toVal := ParseValidNameKV(validName)
-	min, max, err := parseTagTo(toVal)
+	min, max, err := parseTagTo(toVal, true)
 	if err != nil {
 		errBuf.WriteString(err.Error())
 		return
@@ -54,7 +54,7 @@ func Le(errBuf *strings.Builder, validName, objName, filedName string, tv reflec
 // OTo 验证输入的大小区间, 如果为字符串则是验证字符个数, 如果是数字的话就验证数字的大小, 注: 左右都为开区间
 func OTo(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
 	_, toVal := ParseValidNameKV(validName)
-	min, max, err := parseTagTo(toVal)
+	min, max, err := parseTagTo(toVal, false)
 	if err != nil {
 		errBuf.WriteString(err.Error())
 		return

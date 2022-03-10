@@ -23,7 +23,7 @@ func ExampleTo() {
 	type Tmp struct {
 		Name string `valid:"to=1~3"`
 		Age  int32  `valid:"to=0~99"`
-		Addr string `valid:"le=3.2"`
+		Addr string `valid:"to=3~10"`
 	}
 	v := &Tmp{Name: "测试调", Age: 100, Addr: "tets"}
 	fmt.Println(ValidateStruct(v))
@@ -31,17 +31,61 @@ func ExampleTo() {
 	// "Tmp.Age" input "100" size more than or equal 99
 }
 
+func ExampleGe()  {
+	type Tmp struct {
+		Name string `valid:"ge=1"`
+		Age  int32  `valid:"ge=0"`
+	}
+	v := &Tmp{Name: "测试调", Age: -1}
+	fmt.Println(ValidateStruct(v))
+	// Output:
+	// "Tmp.Age" input "-1" size less than or equal 0
+}
+
+func ExampleLe()  {
+	type Tmp struct {
+		Name string `valid:"le=2"`
+		Age  int32  `valid:"le=0"`
+	}
+	v := &Tmp{Name: "测试调", Age: 1}
+	fmt.Println(ValidateStruct(v))
+	// Output:
+	// "Tmp.Name" input "测试调" length more than or equal 2; "Tmp.Age" input "1" size more than or equal 0
+}
+
 func ExampleOto() {
 	type Tmp struct {
 		Name     string `valid:"oto=1~3"`
-		Age      int32  `valid:"oto=0~100"`
-		NickName string `valid:"gt=1"`
-		Addr     string `valid:"lt=3"`
+		Age      int32  `valid:"oto=1~100"`
+		NickName string `valid:"oto=0~10"`
+		Addr     string `valid:"oto=1~3"`
 	}
 	v := &Tmp{Name: "测试", Age: 0, NickName: "h1", Addr: "tets"}
 	fmt.Println(ValidateStruct(v))
 	// Output:
 	// "Tmp.Addr" input "tets" length more than 3
+}
+
+func ExampleGt()  {
+	type Tmp struct {
+		Name string `valid:"gt=2"`
+		Age  int32  `valid:"gt=0"`
+	}
+	v := &Tmp{Name: "测试", Age: -1}
+	fmt.Println(ValidateStruct(v))
+	// Output:
+	// "Tmp.Name" input "测试" length less than 2; "Tmp.Age" input "-1" size less than 0
+}
+
+func ExampleLt()  {
+	type Tmp struct {
+		Name string `valid:"lt=2"`
+		Age  int32  `valid:"lt=40"`
+	}
+	v := &Tmp{Name: "测试", Age: 99}
+	fmt.Println(ValidateStruct(v))
+	// Output:
+	// "Tmp.Name" input "测试" length more than 2; "Tmp.Age" input "99" size more than 40
 }
 
 func ExampleEq() {
