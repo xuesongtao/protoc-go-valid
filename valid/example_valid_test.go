@@ -11,12 +11,13 @@ func ExampleRequired() {
 	type Tmp struct {
 		Name string `valid:"required"`
 		Age  int32  `valid:"ge=0"`
+		Hobby []int32 `valid:"required,le=3"`
 	}
-	v := &Tmp{Name: "", Age: 10}
+	v := &Tmp{Name: "", Age: 10, Hobby: []int32{1, 2, 3, 4}}
 	fmt.Println(ValidateStruct(v))
 
 	// Output:
-	// "Tmp.Name" input "" is required
+	// "Tmp.Name" input "" is required; "Tmp.Hobby" input "4" sliceLen more than or equal 3
 }
 
 func ExampleExist() {
