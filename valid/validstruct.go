@@ -116,7 +116,8 @@ func (v *vStruct) validate(structName string, value reflect.Value, isValidSlice 
 		return v
 	}
 
-	for filedNum := 0; filedNum < tv.NumField(); filedNum++ {
+	totalFieldNum := tv.NumField()
+	for filedNum := 0; filedNum < totalFieldNum; filedNum++ {
 		filedValue := tv.Field(filedNum)
 		// 不能导出就跳过
 		if !filedValue.CanInterface() {
