@@ -138,6 +138,25 @@ func validInputSize(min, max int, tv reflect.Value, isHasEqual ...bool) (isLessT
 		if val > uint64(max) {
 			isMoreThan = true
 		}
+	case reflect.Slice:
+		unitStr = sliceLenUnitStr
+		l := tv.Len()
+		valStr = fmt.Sprintf("%d", l)
+		if hasEqual {
+			if l < min {
+				isLessThan = true
+			}
+			if l > max {
+				isMoreThan = true
+			}
+			return
+		}
+		if l < min {
+			isLessThan = true
+		}
+		if l > max {
+			isMoreThan = true
+		}
 	}
 	return
 }

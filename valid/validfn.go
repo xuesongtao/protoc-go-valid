@@ -8,7 +8,10 @@ import (
 	"strings"
 )
 
-// To 验证输入的大小区间, 如果为字符串则是验证字符个数, 如果是数字的话就验证数字的大小, 注: 左右都为闭区间
+// To 验证输入的大小区间, 注: 左右都为闭区间
+// 1. 如果为字符串则是验证字符个数
+// 2. 如果是数字的话就验证数字的大小
+// 3. 如果是切片的话就验证的长度 
 func To(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
 	_, toVal := ParseValidNameKV(validName)
 	min, max, err := parseTagTo(toVal, true)
@@ -29,7 +32,10 @@ func To(errBuf *strings.Builder, validName, objName, filedName string, tv reflec
 	}
 }
 
-// Ge 大于或等于验证, 如果为字符串则是验证字符个数, 如果是数字的话就验证数字的大小
+// Ge 大于或等于验证
+// 1. 如果为字符串则是验证字符个数
+// 2. 如果是数字的话就验证数字的大小
+// 3. 如果是切片的话就验证的长度 
 func Ge(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
 	_, minStr := ParseValidNameKV(validName)
 	min, _ := strconv.Atoi(minStr)
@@ -40,7 +46,10 @@ func Ge(errBuf *strings.Builder, validName, objName, filedName string, tv reflec
 	}
 }
 
-// Le 小于或等于验证, 如果为字符串则是验证字符个数, 如果是数字的话就验证数字的大小
+// Le 小于或等于验证
+// 1. 如果为字符串则是验证字符个数
+// 2. 如果是数字的话就验证数字的大小
+// 3. 如果是切片的话就验证的长度 
 func Le(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
 	_, maxStr := ParseValidNameKV(validName)
 	max, _ := strconv.Atoi(maxStr)
@@ -51,7 +60,10 @@ func Le(errBuf *strings.Builder, validName, objName, filedName string, tv reflec
 	}
 }
 
-// OTo 验证输入的大小区间, 如果为字符串则是验证字符个数, 如果是数字的话就验证数字的大小, 注: 左右都为开区间
+// OTo 验证输入的大小区间, 注: 左右都为开区间
+// 1. 如果为字符串则是验证字符个数
+// 2. 如果是数字的话就验证数字的大小
+// 3. 如果是切片的话就验证的长度 
 func OTo(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
 	_, toVal := ParseValidNameKV(validName)
 	min, max, err := parseTagTo(toVal, false)
@@ -72,7 +84,10 @@ func OTo(errBuf *strings.Builder, validName, objName, filedName string, tv refle
 	}
 }
 
-// Gt 大于验证, 如果为字符串则是验证字符个数, 如果是数字的话就验证数字的大小
+// Gt 大于验证
+// 1. 如果为字符串则是验证字符个数
+// 2. 如果是数字的话就验证数字的大小
+// 3. 如果是切片的话就验证的长度 
 func Gt(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
 	_, minStr := ParseValidNameKV(validName)
 	min, _ := strconv.Atoi(minStr)
@@ -94,7 +109,10 @@ func Lt(errBuf *strings.Builder, validName, objName, filedName string, tv reflec
 	}
 }
 
-// Eq 等于验证, 如果为字符串则是验证字符个数, 如果是数字的话就验证数字的大小
+// Eq 等于验证
+// 1. 如果为字符串则是验证字符个数
+// 2. 如果是数字的话就验证数字的大小
+// 3. 如果是切片的话就验证的长度 
 func Eq(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
 	eqStr, uintStr, isEq := eq(validName, tv)
 	if isEq {
@@ -103,7 +121,10 @@ func Eq(errBuf *strings.Builder, validName, objName, filedName string, tv reflec
 	errBuf.WriteString(GetJoinValidErrStr(objName, filedName, fmt.Sprintf("%v", tv.Interface()), uintStr, "should equal", eqStr))
 }
 
-// NoEq 不等于验证, 如果为字符串则是验证字符个数, 如果是数字的话就验证数字的大小
+// NoEq 不等于验证
+// 1. 如果为字符串则是验证字符个数
+// 2. 如果是数字的话就验证数字的大小
+// 3. 如果是切片的话就验证的长度 
 func NoEq(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
 	eqStr, uintStr, isEq := eq(validName, tv)
 	if !isEq {
