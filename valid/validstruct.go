@@ -10,7 +10,7 @@ import (
 
 const (
 	Required = "required" // 必填
-	Exist    = "exist"    // 强制验证
+	Exist    = "exist"    // 有值才验证
 	Either   = "either"   // 多个必须一个
 )
 
