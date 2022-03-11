@@ -8,9 +8,9 @@ import (
 )
 
 const (
-	strUnitStr      = "length"
-	numUnitStr      = "size"
-	sliceLenUnitStr = "len"
+	strUnitStr      = "strLength"
+	numUnitStr      = "numSize"
+	sliceLenUnitStr = "sliceLen"
 )
 
 // 对象
