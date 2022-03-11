@@ -154,7 +154,7 @@ func (v *vStruct) validate(structName string, value reflect.Value, isValidSlice 
 			// 开始验证
 			if fn == nil && validKey == Required { // 必填
 				v.required(structName+ty.Name(), structFiled.Name, filedValue)
-			} else if fn == nil && validKey == Exist {
+			} else if fn == nil && validKey == Exist { // 有值才验证
 				v.exist(true, structName+ty.Name(), structFiled.Name, filedValue)
 			} else if fn == nil && validKey == Either { // 多选一
 				v.initEither(validName, structName+ty.Name(), structFiled.Name, filedValue)
