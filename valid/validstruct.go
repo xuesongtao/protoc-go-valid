@@ -118,13 +118,12 @@ func (v *vStruct) validate(structName string, value reflect.Value, isValidSlice 
 
 	totalFieldNum := tv.NumField()
 	for filedNum := 0; filedNum < totalFieldNum; filedNum++ {
-		filedValue := tv.Field(filedNum)
-		// 不能导出就跳过
-		if !filedValue.CanInterface() {
+		structFiled := ty.Field(filedNum)
+		// 判断下是否可导出
+		if !isExported(structFiled.Name) {
 			continue
 		}
-
-		structFiled := ty.Field(filedNum)
+		filedValue := tv.Field(filedNum)
 		validNames := structFiled.Tag.Get(v.targetTag)
 
 		// 如果设置了规则就覆盖 tag 中的验证内容

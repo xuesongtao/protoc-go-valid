@@ -53,6 +53,15 @@ func CheckFieldIsStr(objName, filedName string, tv reflect.Value) (err error) {
 	return
 }
 
+// isExported 是可导出
+func isExported(filedName string) bool {
+	if filedName == "" {
+		return false
+	}
+	first := filedName[0]
+	return first >= 'A' && first <= 'Z'
+}
+
 // validInputSize 验证输入的大小
 func validInputSize(min, max int, tv reflect.Value, isHasEqual ...bool) (isLessThan, isMoreThan bool, valStr, unitStr string) {
 	hasEqual := true // 标记对结果默认包含闭区间
