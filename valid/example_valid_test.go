@@ -9,8 +9,8 @@ import (
 
 func ExampleRequired() {
 	type Tmp struct {
-		Name string `valid:"required"`
-		Age  int32  `valid:"ge=0"`
+		Name  string  `valid:"required"`
+		Age   int32   `valid:"ge=0"`
 		Hobby []int32 `valid:"required,le=3"`
 	}
 	v := &Tmp{Name: "", Age: 10, Hobby: []int32{1, 2, 3, 4}}
@@ -176,6 +176,33 @@ func ExampleEither() {
 	// "Tmp.Either1", "Tmp.Either2" they shouldn't all be empty
 }
 
+func ExampleBothExist() {
+	type Tmp struct {
+		BothExist1 int32 `valid:"bothexist=1"`
+		BothExist2 int32 `valid:"bothexist=1"`
+	}
+	v := &Tmp{BothExist1: 1, BothExist2: 2}
+	fmt.Println(ValidateStruct(v))
+	// Output:
+
+}
+
+func ExampleBothEq() {
+	type Tmp struct {
+		BothEq1 int32 `valid:"botheq=1"`
+		BothEq2 int32 `valid:"botheq=1"`
+		BothEq3 int32 `valid:"botheq=1"`
+	}
+	v := &Tmp{
+		BothEq1: 1,
+		BothEq2: 1,
+		BothEq3: 10,
+	}
+	fmt.Println(ValidateStruct(v))
+	// Output:
+	// "Tmp.BothEq1", "Tmp.BothEq2", "Tmp.BothEq3" they shouldn't is both equal
+}
+
 func ExampleIn() {
 	type Tmp struct {
 		SelectNum int32  `valid:"in=(1/2/3/4)"`
@@ -275,10 +302,10 @@ func ExampleSetCustomerValidFn() {
 		Age  string `valid:"num"`
 	}
 
-	isNumFn := func(errBuf *strings.Builder, validName, structName, filedName string, tv reflect.Value) {
+	isNumFn := func(errBuf *strings.Builder, validName, structName, fieldName string, tv reflect.Value) {
 		ok, _ := regexp.MatchString("^\\d+$", tv.String())
 		if !ok {
-			errBuf.WriteString(fmt.Sprintf("%q is not num", structName+"."+filedName))
+			errBuf.WriteString(fmt.Sprintf("%q is not num", structName+"."+fieldName))
 			return
 		}
 	}
@@ -298,10 +325,10 @@ func ExampleSetCustomerValidFn1() {
 		Age  string `valid:"num"`
 	}
 
-	isNumFn := func(errBuf *strings.Builder, validName, structName, filedName string, tv reflect.Value) {
+	isNumFn := func(errBuf *strings.Builder, validName, structName, fieldName string, tv reflect.Value) {
 		ok, _ := regexp.MatchString("^\\d+$", tv.String())
 		if !ok {
-			errBuf.WriteString(fmt.Sprintf("%q is not num", structName+"."+filedName))
+			errBuf.WriteString(fmt.Sprintf("%q is not num", structName+"."+fieldName))
 			return
 		}
 	}
@@ -319,10 +346,10 @@ func ExampleSetCustomerValidFn3() {
 		Age  string `valid:"num"`
 	}
 
-	isNumFn := func(errBuf *strings.Builder, validName, structName, filedName string, tv reflect.Value) {
+	isNumFn := func(errBuf *strings.Builder, validName, structName, fieldName string, tv reflect.Value) {
 		ok, _ := regexp.MatchString("^\\d+$", tv.String())
 		if !ok {
-			errBuf.WriteString(fmt.Sprintf("%q is not num", structName+"."+filedName))
+			errBuf.WriteString(fmt.Sprintf("%q is not num", structName+"."+fieldName))
 			return
 		}
 	}

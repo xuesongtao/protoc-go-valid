@@ -42,6 +42,18 @@ var (
 		"    TradeNo sting `valid:\"either=1\"`\n" +
 		"}, errMsg: \"OrderNo\" either \"TradeNo\" they shouldn't all be empty")
 
+	bothExistValErr = errors.New(defaultTargetTag + " \"bothexist\" is not ok, eg: " +
+		"type Test struct {\n" +
+		"    OrderNo string `valid:\"bothexist=1\"`\n" +
+		"    TradeNo sting `valid:\"bothexist=1\"`\n" +
+		"}, errMsg: \"OrderNo\" either \"TradeNo\" they shouldn't is both exist")
+
+	bothEqValErr = errors.New(defaultTargetTag + " \"botheq\" is not ok, eg: " +
+		"type Test struct {\n" +
+		"    OrderNo string `valid:\"botheq=1\"`\n" +
+		"    TradeNo sting `valid:\"botheq=1\"`\n" +
+		"}, errMsg: \"OrderNo\" either \"TradeNo\" they shouldn't is no equal")
+
 	inValErr = errors.New(defaultTargetTag + " \"in\" is not ok, eg: " +
 		"type Test struct {\n" +
 		"   hobby int `valid:\"in=(1/2/3)\"`\n" +
@@ -58,6 +70,8 @@ var validName2FuncMap = map[string]CommonValidFn{
 	Required:     nil,
 	Exist:        nil,
 	Either:       nil,
+	BothExist:    nil,
+	BothEq:       nil,
 	"to":         To,
 	"ge":         Ge,
 	"le":         Le,
@@ -79,7 +93,7 @@ var validName2FuncMap = map[string]CommonValidFn{
 	"float":      Float,
 }
 
-type CommonValidFn func(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value)
+type CommonValidFn func(errBuf *strings.Builder, validName, objName, fieldName string, tv reflect.Value)
 
 // Deprecated 此函数会修改全局变量, 会导致内存释放不了, 此推荐 ValidStructForMyValidFn
 // SetCustomerValidFn 自定义验证函数

@@ -11,8 +11,8 @@ import (
 // To 验证输入的大小区间, 注: 左右都为闭区间
 // 1. 如果为字符串则是验证字符个数
 // 2. 如果是数字的话就验证数字的大小
-// 3. 如果是切片的话就验证的长度 
-func To(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
+// 3. 如果是切片的话就验证的长度
+func To(errBuf *strings.Builder, validName, objName, fieldName string, tv reflect.Value) {
 	_, toVal := ParseValidNameKV(validName)
 	min, max, err := parseTagTo(toVal, true)
 	if err != nil {
@@ -23,48 +23,48 @@ func To(errBuf *strings.Builder, validName, objName, filedName string, tv reflec
 	isLessThan, isMoreThan, valStr, unitStr := validInputSize(min, max, tv)
 	if isLessThan {
 		// 生成如: "TestOrder.AppName" input "xxx" len less than 2
-		errBuf.WriteString(GetJoinValidErrStr(objName, filedName, valStr, unitStr, "less than or equal", strconv.Itoa(min)))
+		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, unitStr, "less than or equal", strconv.Itoa(min)))
 	}
 
 	if isMoreThan {
 		// 生成如: "TestOrder.AppName" input "xxx" len more than 30
-		errBuf.WriteString(GetJoinValidErrStr(objName, filedName, valStr, unitStr, "more than or equal", strconv.Itoa(max)))
+		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, unitStr, "more than or equal", strconv.Itoa(max)))
 	}
 }
 
 // Ge 大于或等于验证
 // 1. 如果为字符串则是验证字符个数
 // 2. 如果是数字的话就验证数字的大小
-// 3. 如果是切片的话就验证的长度 
-func Ge(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
+// 3. 如果是切片的话就验证的长度
+func Ge(errBuf *strings.Builder, validName, objName, fieldName string, tv reflect.Value) {
 	_, minStr := ParseValidNameKV(validName)
 	min, _ := strconv.Atoi(minStr)
 	isLessThan, _, valStr, unitStr := validInputSize(min, 0, tv)
 	if isLessThan {
 		// 生成如: "TestOrder.AppName" input "xxx" len less than 2
-		errBuf.WriteString(GetJoinValidErrStr(objName, filedName, valStr, unitStr, "less than or equal", strconv.Itoa(min)))
+		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, unitStr, "less than or equal", strconv.Itoa(min)))
 	}
 }
 
 // Le 小于或等于验证
 // 1. 如果为字符串则是验证字符个数
 // 2. 如果是数字的话就验证数字的大小
-// 3. 如果是切片的话就验证的长度 
-func Le(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
+// 3. 如果是切片的话就验证的长度
+func Le(errBuf *strings.Builder, validName, objName, fieldName string, tv reflect.Value) {
 	_, maxStr := ParseValidNameKV(validName)
 	max, _ := strconv.Atoi(maxStr)
 	_, isMoreThan, valStr, unitStr := validInputSize(0, max, tv)
 	if isMoreThan {
 		// 生成如: "TestOrder.AppName" input "xxx" len more than 30
-		errBuf.WriteString(GetJoinValidErrStr(objName, filedName, valStr, unitStr, "more than or equal", strconv.Itoa(max)))
+		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, unitStr, "more than or equal", strconv.Itoa(max)))
 	}
 }
 
 // OTo 验证输入的大小区间, 注: 左右都为开区间
 // 1. 如果为字符串则是验证字符个数
 // 2. 如果是数字的话就验证数字的大小
-// 3. 如果是切片的话就验证的长度 
-func OTo(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
+// 3. 如果是切片的话就验证的长度
+func OTo(errBuf *strings.Builder, validName, objName, fieldName string, tv reflect.Value) {
 	_, toVal := ParseValidNameKV(validName)
 	min, max, err := parseTagTo(toVal, false)
 	if err != nil {
@@ -75,62 +75,62 @@ func OTo(errBuf *strings.Builder, validName, objName, filedName string, tv refle
 	isLessThan, isMoreThan, valStr, unitStr := validInputSize(min, max, tv, false)
 	if isLessThan {
 		// 生成如: "TestOrder.AppName" input "xxx" len less than 2
-		errBuf.WriteString(GetJoinValidErrStr(objName, filedName, valStr, unitStr, "less than", strconv.Itoa(min)))
+		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, unitStr, "less than", strconv.Itoa(min)))
 	}
 
 	if isMoreThan {
 		// 生成如: "TestOrder.AppName" input "xxx" len more than 30
-		errBuf.WriteString(GetJoinValidErrStr(objName, filedName, valStr, unitStr, "more than", strconv.Itoa(max)))
+		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, unitStr, "more than", strconv.Itoa(max)))
 	}
 }
 
 // Gt 大于验证
 // 1. 如果为字符串则是验证字符个数
 // 2. 如果是数字的话就验证数字的大小
-// 3. 如果是切片的话就验证的长度 
-func Gt(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
+// 3. 如果是切片的话就验证的长度
+func Gt(errBuf *strings.Builder, validName, objName, fieldName string, tv reflect.Value) {
 	_, minStr := ParseValidNameKV(validName)
 	min, _ := strconv.Atoi(minStr)
 	isLessThan, _, valStr, unitStr := validInputSize(min, 0, tv, false)
 	if isLessThan {
 		// 生成如: "TestOrder.AppName" input "xxx" len less than 2
-		errBuf.WriteString(GetJoinValidErrStr(objName, filedName, valStr, unitStr, "less than", strconv.Itoa(min)))
+		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, unitStr, "less than", strconv.Itoa(min)))
 	}
 }
 
 // Lt 小于验证, 如果为字符串则是验证字符个数, 如果是数字的话就验证数字的大小
-func Lt(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
+func Lt(errBuf *strings.Builder, validName, objName, fieldName string, tv reflect.Value) {
 	_, maxStr := ParseValidNameKV(validName)
 	max, _ := strconv.Atoi(maxStr)
 	_, isMoreThan, valStr, unitStr := validInputSize(0, max, tv, false)
 	if isMoreThan {
 		// 生成如: "TestOrder.AppName" input "xxx" len more than 30
-		errBuf.WriteString(GetJoinValidErrStr(objName, filedName, valStr, unitStr, "more than", strconv.Itoa(max)))
+		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, unitStr, "more than", strconv.Itoa(max)))
 	}
 }
 
 // Eq 等于验证
 // 1. 如果为字符串则是验证字符个数
 // 2. 如果是数字的话就验证数字的大小
-// 3. 如果是切片的话就验证的长度 
-func Eq(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
+// 3. 如果是切片的话就验证的长度
+func Eq(errBuf *strings.Builder, validName, objName, fieldName string, tv reflect.Value) {
 	eqStr, uintStr, isEq := eq(validName, tv)
 	if isEq {
 		return
 	}
-	errBuf.WriteString(GetJoinValidErrStr(objName, filedName, fmt.Sprintf("%v", tv.Interface()), uintStr, "should equal", eqStr))
+	errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, fmt.Sprintf("%v", tv.Interface()), uintStr, "should equal", eqStr))
 }
 
 // NoEq 不等于验证
 // 1. 如果为字符串则是验证字符个数
 // 2. 如果是数字的话就验证数字的大小
-// 3. 如果是切片的话就验证的长度 
-func NoEq(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
+// 3. 如果是切片的话就验证的长度
+func NoEq(errBuf *strings.Builder, validName, objName, fieldName string, tv reflect.Value) {
 	eqStr, uintStr, isEq := eq(validName, tv)
 	if !isEq {
 		return
 	}
-	errBuf.WriteString(GetJoinValidErrStr(objName, filedName, fmt.Sprintf("%v", tv.Interface()), uintStr, "should no equal", eqStr))
+	errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, fmt.Sprintf("%v", tv.Interface()), uintStr, "should no equal", eqStr))
 }
 
 // eq 相等
@@ -164,21 +164,21 @@ func eq(validName string, tv reflect.Value) (eqStr, uintStr string, isEq bool) {
 }
 
 // In 指定输入选项(精准匹配)
-func In(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
-	in(errBuf, validName, objName, filedName, tv, func(tvVal, v string) bool {
+func In(errBuf *strings.Builder, validName, objName, fieldName string, tv reflect.Value) {
+	in(errBuf, validName, objName, fieldName, tv, func(tvVal, v string) bool {
 		return tvVal == v
 	})
 }
 
 // Include 指定包含什么字符串(模糊匹配)
-func Include(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
-	in(errBuf, validName, objName, filedName, tv, func(tvVal, v string) bool {
+func Include(errBuf *strings.Builder, validName, objName, fieldName string, tv reflect.Value) {
+	in(errBuf, validName, objName, fieldName, tv, func(tvVal, v string) bool {
 		return strings.Contains(tvVal, v)
 	})
 }
 
 // in 是否包含
-func in(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value, fn func(string, string) bool) {
+func in(errBuf *strings.Builder, validName, objName, fieldName string, tv reflect.Value, fn func(string, string) bool) {
 	key, val := ParseValidNameKV(validName)
 	// 取左括号的下标
 	leftBracketIndex := strings.Index(val, "(")
@@ -221,13 +221,13 @@ func in(errBuf *strings.Builder, validName, objName, filedName string, tv reflec
 	}
 
 	if !isIn {
-		errBuf.WriteString(GetJoinValidErrStr(objName, filedName, tvVal, "should "+key+" ("+inVals+")"))
+		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, tvVal, "should "+key+" ("+inVals+")"))
 	}
 }
 
 // Phone 验证手机号
-func Phone(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
-	if err := CheckFieldIsStr(objName, filedName, tv); err != nil {
+func Phone(errBuf *strings.Builder, validName, objName, fieldName string, tv reflect.Value) {
+	if err := CheckFieldIsStr(objName, fieldName, tv); err != nil {
 		errBuf.WriteString(err.Error())
 		return
 	}
@@ -235,12 +235,12 @@ func Phone(errBuf *strings.Builder, validName, objName, filedName string, tv ref
 	if matched {
 		return
 	}
-	errBuf.WriteString(GetJoinValidErrStr(objName, filedName, tv.String(), "is not phone"))
+	errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, tv.String(), "is not phone"))
 }
 
 // Email 验证邮箱
-func Email(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
-	if err := CheckFieldIsStr(objName, filedName, tv); err != nil {
+func Email(errBuf *strings.Builder, validName, objName, fieldName string, tv reflect.Value) {
+	if err := CheckFieldIsStr(objName, fieldName, tv); err != nil {
 		errBuf.WriteString(err.Error())
 		return
 	}
@@ -248,12 +248,12 @@ func Email(errBuf *strings.Builder, validName, objName, filedName string, tv ref
 	if matched {
 		return
 	}
-	errBuf.WriteString(GetJoinValidErrStr(objName, filedName, tv.String(), "is not email"))
+	errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, tv.String(), "is not email"))
 }
 
 // IDCard 验证身份证
-func IDCard(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
-	if err := CheckFieldIsStr(objName, filedName, tv); err != nil {
+func IDCard(errBuf *strings.Builder, validName, objName, fieldName string, tv reflect.Value) {
+	if err := CheckFieldIsStr(objName, fieldName, tv); err != nil {
 		errBuf.WriteString(err.Error())
 		return
 	}
@@ -261,12 +261,12 @@ func IDCard(errBuf *strings.Builder, validName, objName, filedName string, tv re
 	if matched {
 		return
 	}
-	errBuf.WriteString(GetJoinValidErrStr(objName, filedName, tv.String(), "is not idcard"))
+	errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, tv.String(), "is not idcard"))
 }
 
 // Year 验证年
-func Year(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
-	if err := CheckFieldIsStr(objName, filedName, tv); err != nil {
+func Year(errBuf *strings.Builder, validName, objName, fieldName string, tv reflect.Value) {
+	if err := CheckFieldIsStr(objName, fieldName, tv); err != nil {
 		errBuf.WriteString(err.Error())
 		return
 	}
@@ -274,13 +274,13 @@ func Year(errBuf *strings.Builder, validName, objName, filedName string, tv refl
 	if matched {
 		return
 	}
-	errBuf.WriteString(GetJoinValidErrStr(objName, filedName, tv.String(), "is not year, eg: 1996"))
+	errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, tv.String(), "is not year, eg: 1996"))
 }
 
 // Year2Month 验证年月
 // 默认匹配 xxxx-xx, 可以指定分割符
-func Year2Month(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
-	if err := CheckFieldIsStr(objName, filedName, tv); err != nil {
+func Year2Month(errBuf *strings.Builder, validName, objName, fieldName string, tv reflect.Value) {
+	if err := CheckFieldIsStr(objName, fieldName, tv); err != nil {
 		errBuf.WriteString(err.Error())
 		return
 	}
@@ -293,13 +293,13 @@ func Year2Month(errBuf *strings.Builder, validName, objName, filedName string, t
 	if matched {
 		return
 	}
-	errBuf.WriteString(GetJoinValidErrStr(objName, filedName, tv.String(), "is not year2month, eg: 1996"+defaultDateSplit+"09"))
+	errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, tv.String(), "is not year2month, eg: 1996"+defaultDateSplit+"09"))
 }
 
 // Date 验证日期
 // 默认匹配 xxxx-xx-xx, 可以指定分割符
-func Date(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
-	if err := CheckFieldIsStr(objName, filedName, tv); err != nil {
+func Date(errBuf *strings.Builder, validName, objName, fieldName string, tv reflect.Value) {
+	if err := CheckFieldIsStr(objName, fieldName, tv); err != nil {
 		errBuf.WriteString(err.Error())
 		return
 	}
@@ -312,13 +312,13 @@ func Date(errBuf *strings.Builder, validName, objName, filedName string, tv refl
 	if matched {
 		return
 	}
-	errBuf.WriteString(GetJoinValidErrStr(objName, filedName, tv.String(), "is not date, eg: 1996"+defaultDateSplit+"09"+defaultDateSplit+"28"))
+	errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, tv.String(), "is not date, eg: 1996"+defaultDateSplit+"09"+defaultDateSplit+"28"))
 }
 
 // Datetime 验证时间
 // 默认匹配 xxxx-xx-xx xx:xx:xx, 可以指定分割符
-func Datetime(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
-	if err := CheckFieldIsStr(objName, filedName, tv); err != nil {
+func Datetime(errBuf *strings.Builder, validName, objName, fieldName string, tv reflect.Value) {
+	if err := CheckFieldIsStr(objName, fieldName, tv); err != nil {
 		errBuf.WriteString(err.Error())
 		return
 	}
@@ -331,11 +331,11 @@ func Datetime(errBuf *strings.Builder, validName, objName, filedName string, tv 
 	if matched {
 		return
 	}
-	errBuf.WriteString(GetJoinValidErrStr(objName, filedName, tv.String(), "is not datetime, eg: 1996"+defaultDateSplit+"09"+defaultDateSplit+"28 23:00:00"))
+	errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, tv.String(), "is not datetime, eg: 1996"+defaultDateSplit+"09"+defaultDateSplit+"28 23:00:00"))
 }
 
 // Int 验证整数
-func Int(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
+func Int(errBuf *strings.Builder, validName, objName, fieldName string, tv reflect.Value) {
 	matched := true
 	valStr := ""
 	switch tv.Kind() {
@@ -352,11 +352,11 @@ func Int(errBuf *strings.Builder, validName, objName, filedName string, tv refle
 	if matched {
 		return
 	}
-	errBuf.WriteString(GetJoinValidErrStr(objName, filedName, valStr, "is not integer"))
+	errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, "is not integer"))
 }
 
 // Float 验证浮动数
-func Float(errBuf *strings.Builder, validName, objName, filedName string, tv reflect.Value) {
+func Float(errBuf *strings.Builder, validName, objName, fieldName string, tv reflect.Value) {
 	matched := true
 	valStr := ""
 	switch tv.Kind() {
@@ -372,5 +372,5 @@ func Float(errBuf *strings.Builder, validName, objName, filedName string, tv ref
 	if matched {
 		return
 	}
-	errBuf.WriteString(GetJoinValidErrStr(objName, filedName, valStr, "is not float"))
+	errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, "is not float"))
 }

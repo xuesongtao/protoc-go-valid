@@ -4,30 +4,31 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
-	"strconv"
 	"strings"
 )
 
 const (
-	Required = "required" // 必填
-	Exist    = "exist"    // 有值才验证
-	Either   = "either"   // 多个必须一个
+	Required  = "required"  // 必填
+	Exist     = "exist"     // 有值才验证
+	Either    = "either"    // 多个必须一个
+	BothExist = "bothexist" // 两者都存在
+	BothEq    = "botheq"    // 两者相等
 )
 
 // vStruct 验证结构体
 type vStruct struct {
-	targetTag string // 结构体中的待指定的验证的 tag
-	endFlag   string // 用于分割 err
-	errBuf    *strings.Builder
-	ruleObj   RM                       // 验证规则
-	existMap  map[int][]*name2Value    // 已存在的, 用于 either tag
-	validFn   map[string]CommonValidFn // 存放自定义的验证函数, 可以做到调用完就被清理
+	targetTag       string // 结构体中的待指定的验证的 tag
+	endFlag         string // 用于分割 err
+	errBuf          *strings.Builder
+	ruleObj         RM                       // 验证规则
+	valid2FieldsMap map[string][]*name2Value // 已存在的, 用于辅助 either, bothexist, botheq tag
+	validFn         map[string]CommonValidFn // 存放自定义的验证函数, 可以做到调用完就被清理
 }
 
 // name2Value
 type name2Value struct {
 	structName string
-	filedName  string
+	fieldName  string
 	val        reflect.Value
 }
 
@@ -48,7 +49,7 @@ func NewVStruct(targetTag ...string) *vStruct {
 func (v *vStruct) free() {
 	v.errBuf.Reset()
 	v.ruleObj = nil
-	v.existMap = nil
+	v.valid2FieldsMap = nil
 	v.validFn = nil
 	syncValidPool.Put(v)
 }
@@ -118,16 +119,16 @@ func (v *vStruct) validate(structName string, value reflect.Value, isValidSlice 
 
 	totalFieldNum := tv.NumField()
 	for filedNum := 0; filedNum < totalFieldNum; filedNum++ {
-		structFiled := ty.Field(filedNum)
+		structField := ty.Field(filedNum)
 		// 判断下是否可导出
-		if !isExported(structFiled.Name) {
+		if !isExported(structField.Name) {
 			continue
 		}
 		filedValue := tv.Field(filedNum)
-		validNames := structFiled.Tag.Get(v.targetTag)
+		validNames := structField.Tag.Get(v.targetTag)
 
 		// 如果设置了规则就覆盖 tag 中的验证内容
-		if rule := v.getCusRule(structFiled.Name); rule != "" {
+		if rule := v.getCusRule(structField.Name); rule != "" {
 			validNames = rule
 		}
 
@@ -149,19 +150,19 @@ func (v *vStruct) validate(structName string, value reflect.Value, isValidSlice 
 				continue
 			}
 
-			// fmt.Printf("structName: %s, structFieldName: %s, tv: %v\n", structName+ty.Name(), structFiled.Name, filedValue)
+			// fmt.Printf("structName: %s, structFieldName: %s, tv: %v\n", structName+ty.Name(), structField.Name, filedValue)
 			// 开始验证
 			if fn == nil && validKey == Required { // 必填
-				v.required(structName+ty.Name(), structFiled.Name, filedValue)
+				v.required(structName+ty.Name(), structField.Name, filedValue)
 			} else if fn == nil && validKey == Exist { // 有值才验证
-				v.exist(true, structName+ty.Name(), structFiled.Name, filedValue)
-			} else if fn == nil && validKey == Either { // 多选一
-				v.initEither(validName, structName+ty.Name(), structFiled.Name, filedValue)
+				v.exist(true, structName+ty.Name(), structField.Name, filedValue)
+			} else if fn == nil && (validKey == Either || validKey == BothExist || validKey == BothEq) {
+				v.initExistMap(validName, structName+ty.Name(), structField.Name, filedValue)
 			} else {
 				if filedValue.IsZero() { // 空就直接跳过
 					continue
 				}
-				fn(v.errBuf, validName, structName+ty.Name(), structFiled.Name, filedValue)
+				fn(v.errBuf, validName, structName+ty.Name(), structField.Name, filedValue)
 			}
 		}
 	}
@@ -169,17 +170,17 @@ func (v *vStruct) validate(structName string, value reflect.Value, isValidSlice 
 }
 
 // required 验证 required
-func (v *vStruct) required(structName, filedName string, tv reflect.Value) {
+func (v *vStruct) required(structName, fieldName string, tv reflect.Value) {
 	if tv.IsZero() { // 验证必填
 		// 生成如: "TestOrderDetailSlice.Price" is required
-		v.errBuf.WriteString(GetJoinValidErrStr(structName, filedName, "", "is", Required))
+		v.errBuf.WriteString(GetJoinValidErrStr(structName, fieldName, "", "is", Required))
 	} else { // 有值的话需要判断下嵌套的类型
-		v.exist(false, structName, filedName, tv)
+		v.exist(false, structName, fieldName, tv)
 	}
 }
 
 // exist 存在验证, 用于验证嵌套结构, 切片
-func (v *vStruct) exist(isValidTvKind bool, structName, filedName string, tv reflect.Value) {
+func (v *vStruct) exist(isValidTvKind bool, structName, fieldName string, tv reflect.Value) {
 	// 如果空的就没必要验证了
 	if tv.IsZero() {
 		return
@@ -196,54 +197,118 @@ func (v *vStruct) exist(isValidTvKind bool, structName, filedName string, tv ref
 		}
 	default:
 		if isValidTvKind {
-			v.errBuf.WriteString(GetJoinValidErrStr(structName, filedName, tv.String(), "is nonsupport", Exist))
+			v.errBuf.WriteString(GetJoinValidErrStr(structName, fieldName, tv.String(), "is nonsupport", Exist))
 		}
 	}
 }
 
-// initEither 为验证 either 进行准备
-func (v *vStruct) initEither(validName, structName, filedName string, tv reflect.Value) {
-	_, eitherNum := ParseValidNameKV(validName)
-	if eitherNum == "" {
-		v.errBuf.WriteString(eitherValErr.Error() + v.endFlag)
-		return
+// initExistMap 为验证 either/bothexist/botheq 进行准备
+func (v *vStruct) initExistMap(validName, structName, fieldName string, tv reflect.Value) {
+	if v.valid2FieldsMap == nil {
+		v.valid2FieldsMap = make(map[string][]*name2Value, 5)
 	}
 
-	if v.existMap == nil {
-		v.existMap = make(map[int][]*name2Value, 5)
+	if _, ok := v.valid2FieldsMap[validName]; !ok {
+		v.valid2FieldsMap[validName] = make([]*name2Value, 0, 2)
 	}
-
-	num, _ := strconv.Atoi(eitherNum)
-	if _, ok := v.existMap[num]; !ok {
-		v.existMap[num] = make([]*name2Value, 0, 2)
-	}
-	v.existMap[num] = append(v.existMap[num], &name2Value{structName: structName, filedName: filedName, val: tv})
+	v.valid2FieldsMap[validName] = append(v.valid2FieldsMap[validName], &name2Value{structName: structName, fieldName: fieldName, val: tv})
 }
 
 // validEither 验证 either
-func (v *vStruct) either() {
-	// 判断下是否有值, 有就说明有 either 验证
-	if len(v.existMap) == 0 {
+func (v *vStruct) either(fieldInfos []*name2Value) {
+	l := len(fieldInfos)
+	if l <= 1 { // 如果只有 1 个就没有必要向下执行了
+		v.errBuf.WriteString(eitherValErr.Error() + v.endFlag)
 		return
 	}
-	for _, objs := range v.existMap {
-		l := len(objs)
-		if l <= 1 { // 如果只有 1 个就没有必要向下执行了
+	isZeroLen := 0
+	fieldInfoStr := "" // 拼接空的 structName, fliedName
+	for _, fieldInfo := range fieldInfos {
+		fieldInfoStr += "\"" + fieldInfo.structName + "." + fieldInfo.fieldName + "\", "
+		if fieldInfo.val.IsZero() {
+			isZeroLen++
+		}
+	}
+
+	// 判断下是否全部为空
+	if l == isZeroLen {
+		fieldInfoStr = strings.TrimSuffix(fieldInfoStr, ", ")
+		v.errBuf.WriteString(fieldInfoStr + " they shouldn't all be empty" + v.endFlag)
+	}
+}
+
+// bothExist 两者都存在, 验证 bothexist
+func (v *vStruct) bothExist(fieldInfos []*name2Value) {
+	l := len(fieldInfos)
+	if l <= 1 { // 如果只有 1 个就没有必要向下执行了
+		v.errBuf.WriteString(BothExist + v.endFlag)
+		return
+	}
+
+	isNoZeroLen := 0
+	fieldInfoStr := "" // 拼接空的 structName, fliedName
+	for _, fieldInfo := range fieldInfos {
+		fieldInfoStr += "\"" + fieldInfo.structName + "." + fieldInfo.fieldName + "\", "
+		if !fieldInfo.val.IsZero() {
+			isNoZeroLen++
+		}
+	}
+
+	// 判断全不为空
+	if l != isNoZeroLen {
+		fieldInfoStr = strings.TrimSuffix(fieldInfoStr, ", ")
+		v.errBuf.WriteString(fieldInfoStr + " they shouldn't is both exist" + v.endFlag)
+	}
+}
+
+// bothEq 判断两者相等
+func (v *vStruct) bothEq(fieldInfos []*name2Value) {
+	l := len(fieldInfos)
+	if l <= 1 { // 如果只有 1 个就没有必要向下执行了
+		v.errBuf.WriteString(bothExistValErr.Error() + v.endFlag)
+		return
+	}
+
+	var (
+		tmp          interface{}
+		fieldInfoStr string // 拼接空的 structName, fliedName
+		eq           = true
+	)
+	for i, fieldInfo := range fieldInfos {
+		fieldInfoStr += "\"" + fieldInfo.structName + "." + fieldInfo.fieldName + "\", "
+		if i == 0 {
+			tmp = fieldInfo.val.Interface()
 			continue
 		}
-		isZeroLen := 0
-		zeroInfoStr := "" // 拼接空的 structName, fliedName
-		for _, obj := range objs {
-			if obj.val.IsZero() {
-				isZeroLen++
-				zeroInfoStr += "\"" + obj.structName + "." + obj.filedName + "\", "
-			}
-		}
 
-		// 判断下是否全部为空
-		if l == isZeroLen {
-			zeroInfoStr = strings.TrimSuffix(zeroInfoStr, ", ")
-			v.errBuf.WriteString(zeroInfoStr + " they shouldn't all be empty" + v.endFlag)
+		if !reflect.DeepEqual(tmp, fieldInfo.val.Interface()) {
+			eq = false
+		}
+	}
+
+	if !eq {
+		fieldInfoStr = strings.TrimSuffix(fieldInfoStr, ", ")
+		v.errBuf.WriteString(fieldInfoStr + " they shouldn't is both equal" + v.endFlag)
+	}
+}
+
+// againValid 最后再一次验证
+func (v *vStruct) againValid() {
+	// 判断下是否有值, 有就说明有 either 验证
+	if len(v.valid2FieldsMap) == 0 {
+		v.errBuf.WriteString(bothEqValErr.Error() + errEndFlag)
+		return
+	}
+
+	for validName, fieldInfos := range v.valid2FieldsMap {
+		valid, _ := ParseValidNameKV(validName)
+		switch valid {
+		case Either:
+			v.either(fieldInfos)
+		case BothExist:
+			v.bothExist(fieldInfos)
+		case BothEq:
+			v.bothEq(fieldInfos)
 		}
 	}
 }
@@ -252,8 +317,7 @@ func (v *vStruct) either() {
 func (v *vStruct) getError() error {
 	defer v.free()
 
-	// 验证下 either
-	v.either()
+	v.againValid()
 
 	if v.errBuf.Len() == 0 {
 		return nil
