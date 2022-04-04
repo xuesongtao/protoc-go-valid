@@ -42,12 +42,6 @@ var (
 		"    TradeNo sting `valid:\"either=1\"`\n" +
 		"}, errMsg: \"OrderNo\" either \"TradeNo\" they shouldn't all be empty")
 
-	bothExistValErr = errors.New(defaultTargetTag + " \"bothexist\" is not ok, eg: " +
-		"type Test struct {\n" +
-		"    OrderNo string `valid:\"bothexist=1\"`\n" +
-		"    TradeNo sting `valid:\"bothexist=1\"`\n" +
-		"}, errMsg: \"OrderNo\" either \"TradeNo\" they shouldn't is both exist")
-
 	bothEqValErr = errors.New(defaultTargetTag + " \"botheq\" is not ok, eg: " +
 		"type Test struct {\n" +
 		"    OrderNo string `valid:\"botheq=1\"`\n" +
@@ -70,7 +64,6 @@ var validName2FuncMap = map[string]CommonValidFn{
 	Required:     nil,
 	Exist:        nil,
 	Either:       nil,
-	BothExist:    nil,
 	BothEq:       nil,
 	"to":         To,
 	"ge":         Ge,

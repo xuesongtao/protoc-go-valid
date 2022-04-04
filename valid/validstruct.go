@@ -8,11 +8,10 @@ import (
 )
 
 const (
-	Required  = "required"  // 必填
-	Exist     = "exist"     // 有值才验证
-	Either    = "either"    // 多个必须一个
-	BothExist = "bothexist" // 两者都存在
-	BothEq    = "botheq"    // 两者相等
+	Required = "required" // 必填
+	Exist    = "exist"    // 有值才验证
+	Either   = "either"   // 多个必须一个
+	BothEq   = "botheq"   // 两者相等
 )
 
 // vStruct 验证结构体
@@ -92,7 +91,7 @@ func (v *vStruct) getValidFn(validName string) (CommonValidFn, error) {
 
 	fn, ok = validName2FuncMap[validName]
 	if !ok {
-		return nil, errors.New("valid: \"" + validName + "\" is not exist, You can call ValidStructForMyValidFn")
+		return nil, errors.New("valid: \"" + validName + "\" is not exist, You can call SetValidFn")
 	}
 	return fn, nil
 }
@@ -152,18 +151,24 @@ func (v *vStruct) validate(structName string, value reflect.Value, isValidSlice 
 
 			// fmt.Printf("structName: %s, structFieldName: %s, tv: %v\n", structName+ty.Name(), structField.Name, filedValue)
 			// 开始验证
-			if fn == nil && validKey == Required { // 必填
-				v.required(structName+ty.Name(), structField.Name, filedValue)
-			} else if fn == nil && validKey == Exist { // 有值才验证
-				v.exist(true, structName+ty.Name(), structField.Name, filedValue)
-			} else if fn == nil && (validKey == Either || validKey == BothExist || validKey == BothEq) {
-				v.initExistMap(validName, structName+ty.Name(), structField.Name, filedValue)
-			} else {
-				if filedValue.IsZero() { // 空就直接跳过
-					continue
+			// vStruct 内的验证方法
+			if fn == nil {
+				switch validKey {
+				case Required:
+					v.required(structName+ty.Name(), structField.Name, filedValue)
+				case Exist:
+					v.exist(true, structName+ty.Name(), structField.Name, filedValue)
+				case Either, BothEq:
+					v.initValid2FieldsMap(validName, structName+ty.Name(), structField.Name, filedValue)
 				}
-				fn(v.errBuf, validName, structName+ty.Name(), structField.Name, filedValue)
+				continue
 			}
+
+			// vStruct 外拓展的验证方法
+			if filedValue.IsZero() { // 空就直接跳过
+				continue
+			}
+			fn(v.errBuf, validName, structName+ty.Name(), structField.Name, filedValue)
 		}
 	}
 	return v
@@ -202,8 +207,8 @@ func (v *vStruct) exist(isValidTvKind bool, structName, fieldName string, tv ref
 	}
 }
 
-// initExistMap 为验证 either/bothexist/botheq 进行准备
-func (v *vStruct) initExistMap(validName, structName, fieldName string, tv reflect.Value) {
+// initValid2FieldsMap 为验证 either/bothexist/botheq 进行准备
+func (v *vStruct) initValid2FieldsMap(validName, structName, fieldName string, tv reflect.Value) {
 	if v.valid2FieldsMap == nil {
 		v.valid2FieldsMap = make(map[string][]*name2Value, 5)
 	}
@@ -237,35 +242,11 @@ func (v *vStruct) either(fieldInfos []*name2Value) {
 	}
 }
 
-// bothExist 两者都存在, 验证 bothexist
-func (v *vStruct) bothExist(fieldInfos []*name2Value) {
-	l := len(fieldInfos)
-	if l <= 1 { // 如果只有 1 个就没有必要向下执行了
-		v.errBuf.WriteString(BothExist + v.endFlag)
-		return
-	}
-
-	isNoZeroLen := 0
-	fieldInfoStr := "" // 拼接空的 structName, fliedName
-	for _, fieldInfo := range fieldInfos {
-		fieldInfoStr += "\"" + fieldInfo.structName + "." + fieldInfo.fieldName + "\", "
-		if !fieldInfo.val.IsZero() {
-			isNoZeroLen++
-		}
-	}
-
-	// 判断全不为空
-	if l != isNoZeroLen {
-		fieldInfoStr = strings.TrimSuffix(fieldInfoStr, ", ")
-		v.errBuf.WriteString(fieldInfoStr + " they shouldn't is both exist" + v.endFlag)
-	}
-}
-
 // bothEq 判断两者相等
 func (v *vStruct) bothEq(fieldInfos []*name2Value) {
 	l := len(fieldInfos)
 	if l <= 1 { // 如果只有 1 个就没有必要向下执行了
-		v.errBuf.WriteString(bothExistValErr.Error() + v.endFlag)
+		v.errBuf.WriteString(bothEqValErr.Error() + v.endFlag)
 		return
 	}
 
@@ -276,6 +257,10 @@ func (v *vStruct) bothEq(fieldInfos []*name2Value) {
 	)
 	for i, fieldInfo := range fieldInfos {
 		fieldInfoStr += "\"" + fieldInfo.structName + "." + fieldInfo.fieldName + "\", "
+		if !eq { // 避免多次比较
+			continue
+		}
+
 		if i == 0 {
 			tmp = fieldInfo.val.Interface()
 			continue
@@ -292,7 +277,7 @@ func (v *vStruct) bothEq(fieldInfos []*name2Value) {
 	}
 }
 
-// againValid 最后再一次验证
+// againValid 再一次验证
 func (v *vStruct) againValid() {
 	// 判断下是否有值, 有就说明有 either 验证
 	if len(v.valid2FieldsMap) == 0 {
@@ -301,12 +286,10 @@ func (v *vStruct) againValid() {
 	}
 
 	for validName, fieldInfos := range v.valid2FieldsMap {
-		valid, _ := ParseValidNameKV(validName)
-		switch valid {
+		validKey, _ := ParseValidNameKV(validName)
+		switch validKey {
 		case Either:
 			v.either(fieldInfos)
-		case BothExist:
-			v.bothExist(fieldInfos)
 		case BothEq:
 			v.bothEq(fieldInfos)
 		}

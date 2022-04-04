@@ -176,17 +176,6 @@ func ExampleEither() {
 	// "Tmp.Either1", "Tmp.Either2" they shouldn't all be empty
 }
 
-func ExampleBothExist() {
-	type Tmp struct {
-		BothExist1 int32 `valid:"bothexist=1"`
-		BothExist2 int32 `valid:"bothexist=1"`
-	}
-	v := &Tmp{BothExist1: 1, BothExist2: 2}
-	fmt.Println(ValidateStruct(v))
-	// Output:
-
-}
-
 func ExampleBothEq() {
 	type Tmp struct {
 		BothEq1 int32 `valid:"botheq=1"`
