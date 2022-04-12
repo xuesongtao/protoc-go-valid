@@ -281,7 +281,6 @@ func (v *vStruct) bothEq(fieldInfos []*name2Value) {
 func (v *vStruct) againValid() {
 	// 判断下是否有值, 有就说明有 either 验证
 	if len(v.valid2FieldsMap) == 0 {
-		v.errBuf.WriteString(bothEqValErr.Error() + errEndFlag)
 		return
 	}
 
