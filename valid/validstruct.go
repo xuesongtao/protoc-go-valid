@@ -219,7 +219,7 @@ func (v *vStruct) initValid2FieldsMap(validName, structName, fieldName string, t
 	v.valid2FieldsMap[validName] = append(v.valid2FieldsMap[validName], &name2Value{structName: structName, fieldName: fieldName, val: tv})
 }
 
-// validEither 验证 either
+// either 判断两者不能都为空
 func (v *vStruct) either(fieldInfos []*name2Value) {
 	l := len(fieldInfos)
 	if l <= 1 { // 如果只有 1 个就没有必要向下执行了
