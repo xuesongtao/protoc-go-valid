@@ -1,6 +1,7 @@
 package valid
 
 import (
+	"encoding/json"
 	"reflect"
 	"strconv"
 	"strings"
@@ -19,7 +20,7 @@ func NewDumpStruct() *dumpStruct {
 }
 
 func (d *dumpStruct) HandleDumpStruct(v reflect.Value, isSlice ...bool) *dumpStruct {
-	tv := removeValuePtr(v)
+	tv := reflect.Indirect(v)
 	if !tv.IsValid() {
 		d.buf.WriteString("null")
 		return d
@@ -34,13 +35,18 @@ func (d *dumpStruct) HandleDumpStruct(v reflect.Value, isSlice ...bool) *dumpStr
 		return d
 	}
 
+	// 结构体
 	d.buf.WriteByte('{')
 	maxIndex := tv.NumField()
 	for i := 0; i < maxIndex; i++ {
+		structField := ty.Field(i)
+		if !isExported(structField.Name) {
+			continue
+		}
 		d.loopHandleKV(ty.Field(i), tv.Field(i))
 
 		// 去掉最后一个逗号
-		if i < maxIndex-1 {
+		if i < maxIndex-1 && isExported(ty.Field(i+1).Name) {
 			d.buf.WriteString(", ")
 		}
 	}
@@ -56,10 +62,6 @@ func (d *dumpStruct) Get() string {
 func (d *dumpStruct) loopHandleKV(s reflect.StructField, tv reflect.Value, isNeedFileName ...bool) {
 	// fmt.Printf("s: %+v\n", s)
 	// fmt.Printf("tv: %+v\n", filedValue)
-
-	if isExported(s.Name) {
-		return
-	}
 
 	needFiledName := true
 	if len(isNeedFileName) > 0 {
@@ -132,4 +134,10 @@ func (d *dumpStruct) loopHandleKV(s reflect.StructField, tv reflect.Value, isNee
 // GetDumpStructStr 获取待 dump 的结构体字符串, 支持json格式化
 func GetDumpStructStr(v interface{}) string {
 	return NewDumpStruct().HandleDumpStruct(reflect.ValueOf(v)).Get()
+}
+
+// GetDumpStructStrForJson 先 json 序列化, 再获取
+func GetDumpStructStrForJson(v interface{}) string {
+	b, _ := json.Marshal(v)
+	return string(b)
 }
