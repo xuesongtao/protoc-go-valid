@@ -57,6 +57,10 @@ func (d *dumpStruct) loopHandleKV(s reflect.StructField, tv reflect.Value, isNee
 	// fmt.Printf("s: %+v\n", s)
 	// fmt.Printf("tv: %+v\n", filedValue)
 
+	if isExported(s.Name) {
+		return
+	}
+
 	needFiledName := true
 	if len(isNeedFileName) > 0 {
 		needFiledName = isNeedFileName[0]
