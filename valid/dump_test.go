@@ -102,6 +102,7 @@ func TestDump4(t *testing.T) {
 			Man: Man{
 				Name: "xue1",
 				Age:  10,
+				addr: "ttt",
 			},
 		},
 		Map: map[int32]string{1: "TEST"},

@@ -47,7 +47,7 @@ func (d *dumpStruct) HandleDumpStruct(v reflect.Value, isSlice ...bool) *dumpStr
 
 		// 去掉最后一个逗号
 		if i < maxIndex-1 && isExported(ty.Field(i+1).Name) {
-			d.buf.WriteString(", ")
+			d.buf.WriteString(",")
 		}
 	}
 	d.buf.WriteByte('}')
@@ -70,7 +70,7 @@ func (d *dumpStruct) loopHandleKV(s reflect.StructField, tv reflect.Value, isNee
 
 	// 写入字段名
 	if needFiledName {
-		d.buf.WriteString("\"" + s.Name + "\": ")
+		d.buf.WriteString("\"" + s.Name + "\":")
 	}
 
 	// 不处理的内容
@@ -102,7 +102,7 @@ func (d *dumpStruct) loopHandleKV(s reflect.StructField, tv reflect.Value, isNee
 		for i := 0; i < sliceLen; i++ {
 			d.HandleDumpStruct(tv.Index(i), true)
 			if i < sliceLen-1 {
-				d.buf.WriteString(", ")
+				d.buf.WriteString(",")
 			}
 		}
 		d.buf.WriteByte(']')
@@ -116,10 +116,10 @@ func (d *dumpStruct) loopHandleKV(s reflect.StructField, tv reflect.Value, isNee
 			d.buf.WriteByte('"')
 			d.loopHandleKV(d.nullStructFiled, mapObj.Key(), false)
 			d.buf.WriteByte('"')
-			d.buf.WriteString(": ")
+			d.buf.WriteString(":")
 			d.loopHandleKV(d.nullStructFiled, mapObj.Value(), false)
 			if tmpIndex < mapLen-1 {
-				d.buf.WriteString(", ")
+				d.buf.WriteString(",")
 			}
 			tmpIndex++
 		}
