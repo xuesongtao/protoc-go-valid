@@ -110,7 +110,6 @@ type Man struct {
 	// Output: "Man.Age" input "-1" is size less than 1
 ```
 
-
 #### 最后
 * 本工具易于拓展, 相对于业界功能较多的 `validate` 的验证器在性能方面略胜. 大佬们如果需要调试可以在 `dev` 分支上. 
 * 欢迎大佬们指正, 希望大佬给 **star**
