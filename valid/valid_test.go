@@ -5,12 +5,12 @@ import (
 	"testing"
 
 	"gitee.com/xuesongtao/protoc-go-valid/test"
-	// "github.com/gookit/validate"
+	"github.com/gookit/validate"
 )
 
 type TestOrder struct {
-	AppName              string                  `alipay:"to=2~10" validate:"minLen:2|maxLen:10"` //应用名
-	TotalFeeFloat        float64                 `alipay:"to=2~5" validate:"min:2|max:5"`         //订单总金额，单位为分，详见支付金额
+	AppName              string                  `alipay:"to=2~10" validate:"minLen:2|maxLen:10"` // 应用名
+	TotalFeeFloat        float64                 `alipay:"to=2~5" validate:"min:2|max:5"`         // 订单总金额，单位为分，详见支付金额
 	TestOrderDetailPtr   *TestOrderDetailPtr     `alipay:"required" validate:"required"`          // 商品详细描述
 	TestOrderDetailSlice []*TestOrderDetailSlice `alipay:"required" validate:"required"`          // 商品详细描述
 }
@@ -54,33 +54,33 @@ func TestValidOrder(t *testing.T) {
 	t.Log(ValidateStruct(u, "alipay"))
 }
 
-// func TestValidateOrder(t *testing.T) {
-// 	testOrderDetailPtr := &TestOrderDetailPtr{
-// 		TmpTest3:  &TmpTest3{Name: "测试"},
-// 		GoodsName: "玻尿酸",
-// 	}
-// 	// testOrderDetailPtr = nil
+func TestValidateOrder(t *testing.T) {
+	testOrderDetailPtr := &TestOrderDetailPtr{
+		TmpTest3:  &TmpTest3{Name: "测试"},
+		GoodsName: "玻尿酸",
+	}
+	// testOrderDetailPtr = nil
 
-// 	testOrderDetails := []*TestOrderDetailSlice{
-// 		{TmpTest3: &TmpTest3{Name: "测试1"}, BuyerNames: []string{"test1", "hello2"}},
-// 		{TmpTest3: &TmpTest3{Name: "测试2"}, GoodsName: "隆鼻"},
-// 		{GoodsName: "丰胸"},
-// 		{TmpTest3: &TmpTest3{Name: "测试4"}, GoodsName: "隆鼻"},
-// 	}
-// 	// testOrderDetails = nil
+	testOrderDetails := []*TestOrderDetailSlice{
+		{TmpTest3: &TmpTest3{Name: "测试1"}, BuyerNames: []string{"test1", "hello2"}},
+		{TmpTest3: &TmpTest3{Name: "测试2"}, GoodsName: "隆鼻"},
+		{GoodsName: "丰胸"},
+		{TmpTest3: &TmpTest3{Name: "测试4"}, GoodsName: "隆鼻"},
+	}
+	// testOrderDetails = nil
 
-// 	u := &TestOrder{
-// 		AppName:              "集美测试",
-// 		TotalFeeFloat:        2,
-// 		TestOrderDetailPtr:   testOrderDetailPtr,
-// 		TestOrderDetailSlice: testOrderDetails,
-// 	}
-// 	validObj := validate.Struct(u)
-// 	validObj.Validate()
-// 	for _, err := range validObj.Errors {
-// 		t.Log(err)
-// 	}
-// }
+	u := &TestOrder{
+		AppName:              "集美测试",
+		TotalFeeFloat:        2,
+		TestOrderDetailPtr:   testOrderDetailPtr,
+		TestOrderDetailSlice: testOrderDetails,
+	}
+	validObj := validate.Struct(u)
+	validObj.Validate()
+	for _, err := range validObj.Errors {
+		t.Log(err)
+	}
+}
 
 func TestProtoPb1(t *testing.T) {
 	u := &test.User{
@@ -129,37 +129,49 @@ func BenchmarkValid(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		_ = ValidateStruct(&u, "alipay")
 	}
+
+	// BenchmarkValid-8          162354              7325 ns/op            4635 B/op        108 allocs/op
+	// BenchmarkValid-8          160914              7321 ns/op            4635 B/op        108 allocs/op
+	// BenchmarkValid-8          162373              7303 ns/op            4635 B/op        108 allocs/op
+	// BenchmarkValid-8          160164              7414 ns/op            4635 B/op        108 allocs/op
+	// BenchmarkValid-8          161552              7494 ns/op            4635 B/op        108 allocs/op
 }
 
-// func BenchmarkValidate(b *testing.B) {
-// 	testOrderDetailPtr := &TestOrderDetailPtr{
-// 		TmpTest3:  &TmpTest3{Name: "测试"},
-// 		GoodsName: "玻尿酸",
-// 	}
-// 	// testOrderDetailPtr = nil
+func BenchmarkValidate(b *testing.B) {
+	testOrderDetailPtr := &TestOrderDetailPtr{
+		TmpTest3:  &TmpTest3{Name: "测试"},
+		GoodsName: "玻尿酸",
+	}
+	// testOrderDetailPtr = nil
 
-// 	testOrderDetails := []*TestOrderDetailSlice{
-// 		{TmpTest3: &TmpTest3{Name: "测试1"}, BuyerNames: []string{"test1", "hello2"}},
-// 		{TmpTest3: &TmpTest3{Name: "测试2"}, GoodsName: "隆鼻"},
-// 		{GoodsName: "丰胸"},
-// 		{TmpTest3: &TmpTest3{Name: "测试4"}, GoodsName: "隆鼻"},
-// 	}
-// 	// testOrderDetails = nil
+	testOrderDetails := []*TestOrderDetailSlice{
+		{TmpTest3: &TmpTest3{Name: "测试1"}, BuyerNames: []string{"test1", "hello2"}},
+		{TmpTest3: &TmpTest3{Name: "测试2"}, GoodsName: "隆鼻"},
+		{GoodsName: "丰胸"},
+		{TmpTest3: &TmpTest3{Name: "测试4"}, GoodsName: "隆鼻"},
+	}
+	// testOrderDetails = nil
 
-// 	u := &TestOrder{
-// 		AppName:              "集美测试",
-// 		TotalFeeFloat:        2,
-// 		TestOrderDetailPtr:   testOrderDetailPtr,
-// 		TestOrderDetailSlice: testOrderDetails,
-// 	}
-// 	for i := 0; i < b.N; i++ {
-// 		validObj := validate.Struct(u)
-// 		validObj.Validate()
-// 		_ = validObj.Errors.Error()
-// 	}
-// }
+	u := &TestOrder{
+		AppName:              "集美测试",
+		TotalFeeFloat:        2,
+		TestOrderDetailPtr:   testOrderDetailPtr,
+		TestOrderDetailSlice: testOrderDetails,
+	}
+	for i := 0; i < b.N; i++ {
+		validObj := validate.Struct(u)
+		validObj.Validate()
+		_ = validObj.Errors.Error()
+	}
 
-func BenchmarkIfValid(b *testing.B) {
+	// BenchmarkValidate-8        30902             38716 ns/op           33267 B/op        430 allocs/op
+	// BenchmarkValidate-8        30868             38861 ns/op           33263 B/op        430 allocs/op
+	// BenchmarkValidate-8        29767             39055 ns/op           33262 B/op        430 allocs/op
+	// BenchmarkValidate-8        30717             38774 ns/op           33268 B/op        430 allocs/op
+	// BenchmarkValidate-8        31004             38489 ns/op           33264 B/op        430 allocs/op
+}
+
+func BenchmarkValidIf(b *testing.B) {
 	testOrderDetailPtr := &TestOrderDetailPtr{
 		TmpTest3:  &TmpTest3{Name: "测试"},
 		GoodsName: "玻尿酸",
@@ -241,4 +253,10 @@ func BenchmarkIfValid(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		vFn(u)
 	}
+
+	// BenchmarkValidIf-8       4908489               242.1 ns/op          1232 B/op          5 allocs/op
+	// BenchmarkValidIf-8       4932530               240.9 ns/op          1232 B/op          5 allocs/op
+	// BenchmarkValidIf-8       4938175               252.1 ns/op          1232 B/op          5 allocs/op
+	// BenchmarkValidIf-8       4774190               251.2 ns/op          1232 B/op          5 allocs/op
+	// BenchmarkValidIf-8       4901599               253.2 ns/op          1232 B/op          5 allocs/op
 }
