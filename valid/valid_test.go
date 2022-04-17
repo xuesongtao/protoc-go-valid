@@ -4,8 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"gitee.com/xuesongtao/protoc-go-valid/test"
-	"github.com/gookit/validate"
+	// "github.com/gookit/validate"
 )
 
 type TestOrder struct {
@@ -54,52 +53,33 @@ func TestValidOrder(t *testing.T) {
 	t.Log(ValidateStruct(u, "alipay"))
 }
 
-func TestValidateOrder(t *testing.T) {
-	testOrderDetailPtr := &TestOrderDetailPtr{
-		TmpTest3:  &TmpTest3{Name: "测试"},
-		GoodsName: "玻尿酸",
-	}
-	// testOrderDetailPtr = nil
+// func TestValidateOrder(t *testing.T) {
+// 	testOrderDetailPtr := &TestOrderDetailPtr{
+// 		TmpTest3:  &TmpTest3{Name: "测试"},
+// 		GoodsName: "玻尿酸",
+// 	}
+// 	// testOrderDetailPtr = nil
 
-	testOrderDetails := []*TestOrderDetailSlice{
-		{TmpTest3: &TmpTest3{Name: "测试1"}, BuyerNames: []string{"test1", "hello2"}},
-		{TmpTest3: &TmpTest3{Name: "测试2"}, GoodsName: "隆鼻"},
-		{GoodsName: "丰胸"},
-		{TmpTest3: &TmpTest3{Name: "测试4"}, GoodsName: "隆鼻"},
-	}
-	// testOrderDetails = nil
+// 	testOrderDetails := []*TestOrderDetailSlice{
+// 		{TmpTest3: &TmpTest3{Name: "测试1"}, BuyerNames: []string{"test1", "hello2"}},
+// 		{TmpTest3: &TmpTest3{Name: "测试2"}, GoodsName: "隆鼻"},
+// 		{GoodsName: "丰胸"},
+// 		{TmpTest3: &TmpTest3{Name: "测试4"}, GoodsName: "隆鼻"},
+// 	}
+// 	// testOrderDetails = nil
 
-	u := &TestOrder{
-		AppName:              "集美测试",
-		TotalFeeFloat:        2,
-		TestOrderDetailPtr:   testOrderDetailPtr,
-		TestOrderDetailSlice: testOrderDetails,
-	}
-	validObj := validate.Struct(u)
-	validObj.Validate()
-	for _, err := range validObj.Errors {
-		t.Log(err)
-	}
-}
-
-func TestProtoPb1(t *testing.T) {
-	u := &test.User{
-		M: &test.Man{
-			Name: "xue",
-			Age:  0,
-		},
-		Phone: "13540042615",
-	}
-	t.Log(ValidateStruct(u))
-}
-
-func TestProtoPb2(t *testing.T) {
-	m := &test.Man{
-		Name: "xue",
-		Age:  0,
-	}
-	t.Log(ValidateStruct(m))
-}
+// 	u := &TestOrder{
+// 		AppName:              "集美测试",
+// 		TotalFeeFloat:        2,
+// 		TestOrderDetailPtr:   testOrderDetailPtr,
+// 		TestOrderDetailSlice: testOrderDetails,
+// 	}
+// 	validObj := validate.Struct(u)
+// 	validObj.Validate()
+// 	for _, err := range validObj.Errors {
+// 		t.Log(err)
+// 	}
+// }
 
 func TestGetJoinValidErrStr(t *testing.T) {
 	t.Log(GetJoinValidErrStr("User", "Name", "xue", "len is less than 3"))
@@ -137,39 +117,39 @@ func BenchmarkValid(b *testing.B) {
 	// BenchmarkValid-8          161552              7494 ns/op            4635 B/op        108 allocs/op
 }
 
-func BenchmarkValidate(b *testing.B) {
-	testOrderDetailPtr := &TestOrderDetailPtr{
-		TmpTest3:  &TmpTest3{Name: "测试"},
-		GoodsName: "玻尿酸",
-	}
-	// testOrderDetailPtr = nil
+// func BenchmarkValidate(b *testing.B) {
+// 	testOrderDetailPtr := &TestOrderDetailPtr{
+// 		TmpTest3:  &TmpTest3{Name: "测试"},
+// 		GoodsName: "玻尿酸",
+// 	}
+// 	// testOrderDetailPtr = nil
 
-	testOrderDetails := []*TestOrderDetailSlice{
-		{TmpTest3: &TmpTest3{Name: "测试1"}, BuyerNames: []string{"test1", "hello2"}},
-		{TmpTest3: &TmpTest3{Name: "测试2"}, GoodsName: "隆鼻"},
-		{GoodsName: "丰胸"},
-		{TmpTest3: &TmpTest3{Name: "测试4"}, GoodsName: "隆鼻"},
-	}
-	// testOrderDetails = nil
+// 	testOrderDetails := []*TestOrderDetailSlice{
+// 		{TmpTest3: &TmpTest3{Name: "测试1"}, BuyerNames: []string{"test1", "hello2"}},
+// 		{TmpTest3: &TmpTest3{Name: "测试2"}, GoodsName: "隆鼻"},
+// 		{GoodsName: "丰胸"},
+// 		{TmpTest3: &TmpTest3{Name: "测试4"}, GoodsName: "隆鼻"},
+// 	}
+// 	// testOrderDetails = nil
 
-	u := &TestOrder{
-		AppName:              "集美测试",
-		TotalFeeFloat:        2,
-		TestOrderDetailPtr:   testOrderDetailPtr,
-		TestOrderDetailSlice: testOrderDetails,
-	}
-	for i := 0; i < b.N; i++ {
-		validObj := validate.Struct(u)
-		validObj.Validate()
-		_ = validObj.Errors.Error()
-	}
+// 	u := &TestOrder{
+// 		AppName:              "集美测试",
+// 		TotalFeeFloat:        2,
+// 		TestOrderDetailPtr:   testOrderDetailPtr,
+// 		TestOrderDetailSlice: testOrderDetails,
+// 	}
+// 	for i := 0; i < b.N; i++ {
+// 		validObj := validate.Struct(u)
+// 		validObj.Validate()
+// 		_ = validObj.Errors.Error()
+// 	}
 
-	// BenchmarkValidate-8        30902             38716 ns/op           33267 B/op        430 allocs/op
-	// BenchmarkValidate-8        30868             38861 ns/op           33263 B/op        430 allocs/op
-	// BenchmarkValidate-8        29767             39055 ns/op           33262 B/op        430 allocs/op
-	// BenchmarkValidate-8        30717             38774 ns/op           33268 B/op        430 allocs/op
-	// BenchmarkValidate-8        31004             38489 ns/op           33264 B/op        430 allocs/op
-}
+// 	// BenchmarkValidate-8        30902             38716 ns/op           33267 B/op        430 allocs/op
+// 	// BenchmarkValidate-8        30868             38861 ns/op           33263 B/op        430 allocs/op
+// 	// BenchmarkValidate-8        29767             39055 ns/op           33262 B/op        430 allocs/op
+// 	// BenchmarkValidate-8        30717             38774 ns/op           33268 B/op        430 allocs/op
+// 	// BenchmarkValidate-8        31004             38489 ns/op           33264 B/op        430 allocs/op
+// }
 
 func BenchmarkValidIf(b *testing.B) {
 	testOrderDetailPtr := &TestOrderDetailPtr{
