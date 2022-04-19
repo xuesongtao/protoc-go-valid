@@ -23,8 +23,13 @@ func TestRule2(t *testing.T) {
 	}
 	v := Tmp{Name: "xue", Age: "12a"}
 	validObj := NewVStruct()
-	validObj.SetRule(NewRule().Set("Name,Age", "required").Set("Age", "int"))
+	validObj.SetRule(NewRule().Set("Name,Age", Required, "eq=3").Set("Age", "int"))
 	if err := validObj.Valid(&v); err != nil {
 		t.Log(err)
 	}
+}
+
+func TestRule3(t *testing.T) {
+	r := NewRule().Set("Name,Age", Required, "eq=3", "le=1").Set("Age", "int", "test")
+	t.Log(r)
 }

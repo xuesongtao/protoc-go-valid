@@ -12,14 +12,14 @@ func NewRule() RM {
 // Set 设置验证规则
 // fieldName 多个字段通过逗号隔开
 // rules 多个字段通过逗号隔开
-func (r RM) Set(filedNames string, rules string) RM {
+func (r RM) Set(filedNames string, rules ...string) RM {
 	for _, fieldName := range strings.Split(filedNames, ",") {
 		// 如果存在的话就通过逗号隔开
 		if _, ok := r[fieldName]; ok {
-			r[fieldName] += "," + rules
+			r[fieldName] += "," + strings.Join(rules, ",")
 			continue
 		}
-		r[fieldName] = rules
+		r[fieldName] = strings.Join(rules, ",")
 	}
 	return r
 }
