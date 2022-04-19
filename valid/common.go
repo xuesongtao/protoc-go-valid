@@ -29,6 +29,7 @@ func ParseValidNameKV(validName string) (key, value string) {
 func GetJoinValidErrStr(objName, fieldName, inputVal string, others ...string) (res string) {
 	res = "\"" + objName + "." + fieldName + "\" input \"" + inputVal + "\" "
 	if len(others) == 0 {
+		res += errEndFlag
 		return
 	}
 
