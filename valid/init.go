@@ -86,6 +86,8 @@ var validName2FuncMap = map[string]CommonValidFn{
 	"float":      Float,
 }
 
+// CommonValidFn 通用验证函数, 主要用于回调
+// 注: 再写 errBuf 的时候建议用 GetJoinValidErrStr 包裹下, 这样结果显示易读
 type CommonValidFn func(errBuf *strings.Builder, validName, objName, fieldName string, tv reflect.Value)
 
 // Deprecated 此函数会修改全局变量, 会导致内存释放不了, 此推荐 ValidStructForMyValidFn
