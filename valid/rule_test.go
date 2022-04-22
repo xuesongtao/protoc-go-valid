@@ -14,6 +14,7 @@ func TestRule(t *testing.T) {
 	if err := validObj.Valid(&v); err != nil {
 		t.Log(err)
 	}
+	
 }
 
 func TestRule2(t *testing.T) {
