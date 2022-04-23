@@ -23,12 +23,12 @@ func To(errBuf *strings.Builder, validName, objName, fieldName string, tv reflec
 	isLessThan, isMoreThan, valStr, unitStr := validInputSize(min, max, tv)
 	if isLessThan {
 		// 生成如: "TestOrder.AppName" input "xxx" len less than 2
-		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, unitStr, "less than or equal", strconv.Itoa(min)))
+		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, unitStr, "less than", strconv.Itoa(min)))
 	}
 
 	if isMoreThan {
 		// 生成如: "TestOrder.AppName" input "xxx" len more than 30
-		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, unitStr, "more than or equal", strconv.Itoa(max)))
+		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, unitStr, "more than", strconv.Itoa(max)))
 	}
 }
 
@@ -42,7 +42,7 @@ func Ge(errBuf *strings.Builder, validName, objName, fieldName string, tv reflec
 	isLessThan, _, valStr, unitStr := validInputSize(min, 0, tv)
 	if isLessThan {
 		// 生成如: "TestOrder.AppName" input "xxx" len less than 2
-		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, unitStr, "less than or equal", strconv.Itoa(min)))
+		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, unitStr, "less than", strconv.Itoa(min)))
 	}
 }
 
@@ -56,7 +56,7 @@ func Le(errBuf *strings.Builder, validName, objName, fieldName string, tv reflec
 	_, isMoreThan, valStr, unitStr := validInputSize(0, max, tv)
 	if isMoreThan {
 		// 生成如: "TestOrder.AppName" input "xxx" len more than 30
-		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, unitStr, "more than or equal", strconv.Itoa(max)))
+		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, unitStr, "more than", strconv.Itoa(max)))
 	}
 }
 
@@ -75,12 +75,12 @@ func OTo(errBuf *strings.Builder, validName, objName, fieldName string, tv refle
 	isLessThan, isMoreThan, valStr, unitStr := validInputSize(min, max, tv, false)
 	if isLessThan {
 		// 生成如: "TestOrder.AppName" input "xxx" len less than 2
-		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, unitStr, "less than", strconv.Itoa(min)))
+		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, unitStr, "less than or equal", strconv.Itoa(min)))
 	}
 
 	if isMoreThan {
 		// 生成如: "TestOrder.AppName" input "xxx" len more than 30
-		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, unitStr, "more than", strconv.Itoa(max)))
+		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, unitStr, "more than or equal", strconv.Itoa(max)))
 	}
 }
 
@@ -94,7 +94,7 @@ func Gt(errBuf *strings.Builder, validName, objName, fieldName string, tv reflec
 	isLessThan, _, valStr, unitStr := validInputSize(min, 0, tv, false)
 	if isLessThan {
 		// 生成如: "TestOrder.AppName" input "xxx" len less than 2
-		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, unitStr, "less than", strconv.Itoa(min)))
+		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, unitStr, "less than or equal", strconv.Itoa(min)))
 	}
 }
 
@@ -105,7 +105,7 @@ func Lt(errBuf *strings.Builder, validName, objName, fieldName string, tv reflec
 	_, isMoreThan, valStr, unitStr := validInputSize(0, max, tv, false)
 	if isMoreThan {
 		// 生成如: "TestOrder.AppName" input "xxx" len more than 30
-		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, unitStr, "more than", strconv.Itoa(max)))
+		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, unitStr, "more than or equal", strconv.Itoa(max)))
 	}
 }
 

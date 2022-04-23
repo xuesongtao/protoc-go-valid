@@ -1,12 +1,27 @@
 package valid
 
 import (
+	"fmt"
+	"reflect"
 	"strings"
 	"testing"
 
 	"gitee.com/xuesongtao/protoc-go-valid/test"
 	"github.com/gookit/validate"
 )
+
+const (
+	noEqErr = "src, dest is not eq"
+)
+
+func equal(dest, src interface{}) bool {
+	ok := reflect.DeepEqual(dest, src)
+	if !ok {
+		fmt.Printf("dest: %v\n", dest)
+		fmt.Printf("src: %v\n", src)
+	}
+	return ok
+}
 
 type TestOrder struct {
 	AppName              string                  `alipay:"to=2~10" validate:"minLen:2|maxLen:10"` // 应用名
@@ -51,7 +66,14 @@ func TestValidOrder(t *testing.T) {
 		TestOrderDetailPtr:   testOrderDetailPtr,
 		TestOrderDetailSlice: testOrderDetails,
 	}
-	t.Log(ValidateStruct(u, "alipay"))
+	err := ValidateStruct(u, "alipay")
+	if err == nil {
+		return
+	}
+	sureMsg := `"TestOrder.TestOrderDetailPtr.GoodsName" input "玻尿酸" strLength more than 2; "TestOrder-0.TestOrderDetailSlice.GoodsName" input "" is required; "TestOrder-1.TestOrderDetailSlice.BuyerNames" input "" is required; "TestOrder-2.TestOrderDetailSlice.TmpTest3" input "" is required; "TestOrder-2.TestOrderDetailSlice.BuyerNames" input "" is required; "TestOrder-3.TestOrderDetailSlice.BuyerNames" input "" is required`
+	if !equal(err.Error(), sureMsg) {
+		t.Error(noEqErr)
+	}
 }
 
 func TestValidateOrder(t *testing.T) {
@@ -90,19 +112,23 @@ func TestProtoPb1(t *testing.T) {
 		},
 		Phone: "13540042615",
 	}
-	t.Log(ValidateStruct(u))
-}
-
-func TestProtoPb2(t *testing.T) {
-	m := &test.Man{
-		Name: "xue",
-		Age:  0,
+	err := ValidateStruct(u)
+	if err == nil {
+		return
 	}
-	t.Log(ValidateStruct(m))
+
+	suerMsg := `valid: "he" is not exist, You can call SetValidFn`
+	if !equal(err.Error(), suerMsg) {
+		t.Error(noEqErr)
+	}
 }
 
 func TestGetJoinValidErrStr(t *testing.T) {
-	t.Log(GetJoinValidErrStr("User", "Name", "xue", "len is less than 3"))
+	res := GetJoinValidErrStr("User", "Name", "xue", "len is less than 3")
+	sureRes := `"User.Name" input "xue" len is less than 3;`
+	if !equal(res, sureRes) {
+		t.Error(noEqErr)
+	}
 }
 
 func BenchmarkValid(b *testing.B) {
