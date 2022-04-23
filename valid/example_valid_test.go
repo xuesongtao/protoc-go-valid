@@ -7,6 +7,8 @@ import (
 	"strings"
 )
 
+// go test -run ^Example
+
 func ExampleRequired() {
 	type Tmp struct {
 		Name  string  `valid:"required"`
@@ -17,7 +19,7 @@ func ExampleRequired() {
 	fmt.Println(ValidateStruct(v))
 
 	// Output:
-	// "Tmp.Name" input "" is required; "Tmp.Hobby" input "4" sliceLen more than or equal 3
+	// "Tmp.Name" input "" is required; "Tmp.Hobby" input "4" sliceLen more than 3
 }
 
 func ExampleExist() {
@@ -44,7 +46,7 @@ func ExampleExist() {
 	fmt.Println(ValidateStruct(teather))
 
 	// Output:
-	// "Teather.Man.Name" input "" is required; "Teather-0.Student.Man.Age" input "10" size more than or equal 0
+	// "Teather.Man.Name" input "" is required; "Teather-0.Student.Man.Age" input "10" numSize more than 0
 }
 
 func ExampleTo() {
@@ -56,7 +58,7 @@ func ExampleTo() {
 	v := &Tmp{Name: "测试调", Age: 100, Addr: "tets"}
 	fmt.Println(ValidateStruct(v))
 	// Output:
-	// "Tmp.Age" input "100" size more than or equal 99
+	// "Tmp.Age" input "100" numSize more than 99
 }
 
 func ExampleGe() {
@@ -67,7 +69,7 @@ func ExampleGe() {
 	v := &Tmp{Name: "测试调", Age: -1}
 	fmt.Println(ValidateStruct(v))
 	// Output:
-	// "Tmp.Age" input "-1" size less than or equal 0
+	// "Tmp.Age" input "-1" numSize less than 0
 }
 
 func ExampleLe() {
@@ -78,7 +80,7 @@ func ExampleLe() {
 	v := &Tmp{Name: "测试调", Age: 1}
 	fmt.Println(ValidateStruct(v))
 	// Output:
-	// "Tmp.Name" input "测试调" length more than or equal 2; "Tmp.Age" input "1" size more than or equal 0
+	// "Tmp.Name" input "测试调" strLength more than 2; "Tmp.Age" input "1" numSize more than 0
 }
 
 func ExampleOto() {
@@ -91,7 +93,7 @@ func ExampleOto() {
 	v := &Tmp{Name: "测试", Age: 0, NickName: "h1", Addr: "tets"}
 	fmt.Println(ValidateStruct(v))
 	// Output:
-	// "Tmp.Addr" input "tets" length more than 3
+	// "Tmp.Addr" input "tets" strLength more than or equal 3
 }
 
 func ExampleGt() {
@@ -102,7 +104,7 @@ func ExampleGt() {
 	v := &Tmp{Name: "测试", Age: -1}
 	fmt.Println(ValidateStruct(v))
 	// Output:
-	// "Tmp.Name" input "测试" length less than 2; "Tmp.Age" input "-1" size less than 0
+	// "Tmp.Name" input "测试" strLength less than or equal 2; "Tmp.Age" input "-1" numSize less than or equal 0
 }
 
 func ExampleLt() {
@@ -113,7 +115,7 @@ func ExampleLt() {
 	v := &Tmp{Name: "测试", Age: 99}
 	fmt.Println(ValidateStruct(v))
 	// Output:
-	// "Tmp.Name" input "测试" length more than 2; "Tmp.Age" input "99" size more than 40
+	// "Tmp.Name" input "测试" strLength more than or equal 2; "Tmp.Age" input "99" numSize more than or equal 40
 }
 
 func ExampleEq() {
@@ -131,7 +133,7 @@ func ExampleEq() {
 	}
 	fmt.Println(ValidateStruct(v))
 	// Output:
-	// "Tmp.Phone" input "1354004261" length should equal 11
+	// "Tmp.Phone" input "1354004261" strLength should equal 11
 }
 
 func ExampleNoEq() {
@@ -149,7 +151,7 @@ func ExampleNoEq() {
 	}
 	fmt.Println(ValidateStruct(v))
 	// Output:
-	// "Tmp.Name" input "xue" length should no equal 3; "Tmp.Age" input "20" size should no equal 20; "Tmp.Score" input "80" size should no equal 80
+	// "Tmp.Name" input "xue" strLength should no equal 3; "Tmp.Age" input "20" numSize should no equal 20; "Tmp.Score" input "80" numSize should no equal 80
 }
 
 func ExampleDate() {
@@ -367,5 +369,5 @@ func ExampleRule() {
 	}
 
 	// Output:
-	// "Tmp.Age" input "101" size more than or equal 100
+	// "Tmp.Age" input "101" numSize more than 100
 }
