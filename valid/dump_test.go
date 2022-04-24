@@ -159,7 +159,7 @@ func TestDump5(t *testing.T) {
 	}
 }
 
-func TestDump(t *testing.T) {
+func TestDump6(t *testing.T) {
 	u := &User{
 		Man: Man{
 			Name: "xuesongtao",
@@ -193,7 +193,7 @@ func TestDump(t *testing.T) {
 	}
 }
 
-func TestOrderDump(t *testing.T) {
+func TestDumpOrder(t *testing.T) {
 	testOrderDetailPtr := &TestOrderDetailPtr{
 		TmpTest3:  &TmpTest3{Name: "测试"},
 		GoodsName: "玻尿酸",
