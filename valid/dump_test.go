@@ -1,10 +1,9 @@
 package valid
 
 import (
-	"encoding/json"
 	"fmt"
+	"strings"
 	"testing"
-	"time"
 )
 
 type Man struct {
@@ -36,23 +35,32 @@ func TestDump0(t *testing.T) {
 		Age:  20,
 		addr: "test",
 	}
-	t.Logf("%+v", m)
-	t.Log(GetDumpStructStr(m))
+	res := GetDumpStructStr(m)
+	t.Log(res)
+	sure := GetDumpStructStrForJson(m)
+	if !equal(res, sure) {
+		t.Error(noEqErr)
+	}
 }
 
 func TestDump1(t *testing.T) {
 	type SliceDemo struct {
 		Name  string
 		Hobby []int32
-		Time  time.Time
+		Time  string
 	}
 
 	d := SliceDemo{
 		Name:  "xue",
 		Hobby: []int32{1, 2, 4},
 	}
-	t.Logf("%+v", d)
-	t.Log(GetDumpStructStr(d))
+
+	res := GetDumpStructStr(d)
+	t.Log(res)
+	sure := GetDumpStructStrForJson(d)
+	if !equal(res, sure) {
+		t.Error(noEqErr)
+	}
 }
 
 func TestDump2(t *testing.T) {
@@ -65,8 +73,12 @@ func TestDump2(t *testing.T) {
 		Name:     "xue",
 		Testhers: []*Testher{{Man{Name: "test1", Age: 11}}, {Man{Name: "test2", Age: 11}}},
 	}
-	t.Logf("%+v", d)
-	t.Log(GetDumpStructStr(d))
+	res := GetDumpStructStr(d)
+	t.Log(res)
+	sure := GetDumpStructStrForJson(d)
+	if !equal(res, sure) {
+		t.Error(noEqErr)
+	}
 }
 
 func TestDump3(t *testing.T) {
@@ -84,9 +96,12 @@ func TestDump3(t *testing.T) {
 			},
 		},
 	}
-	t.Logf("%+v", d)
-	t.Log(GetDumpStructStr(d))
-	t.Log(GetDumpStructStrForJson(d))
+	res := GetDumpStructStr(d)
+	t.Log(res)
+	sure := GetDumpStructStrForJson(d)
+	if !equal(res, sure) {
+		t.Error(noEqErr)
+	}
 }
 
 func TestDump4(t *testing.T) {
@@ -105,14 +120,18 @@ func TestDump4(t *testing.T) {
 				addr: "ttt",
 			},
 		},
-		Map: map[int32]string{1: "TEST"},
+		Map: map[int32]string{},
 	}
-	t.Logf("%+v", d)
-	t.Log(GetDumpStructStr(d))
-	t.Log(GetDumpStructStrForJson(d))
+	res := GetDumpStructStr(d)
+	t.Log(res)
+	sure := GetDumpStructStrForJson(d)
+	if !equal(res, sure) {
+		t.Error(noEqErr)
+	}
 }
 
 func TestDump5(t *testing.T) {
+	t.Skip()
 	type Demo struct {
 		Name    string
 		Testher *Testher
@@ -132,12 +151,12 @@ func TestDump5(t *testing.T) {
 		Fn:  func() int { return 1 },
 		Ch:  make(chan int),
 	}
-	t.Logf("%+v", d)
-
-	t.Log(GetDumpStructStr(d))
-
-	b, err := json.Marshal(d)
-	t.Log(err, string(b))
+	res := GetDumpStructStr(d)
+	t.Log(res)
+	sure := GetDumpStructStrForJson(d)
+	if !equal(res, sure) {
+		t.Error(noEqErr)
+	}
 }
 
 func TestDump(t *testing.T) {
@@ -166,9 +185,12 @@ func TestDump(t *testing.T) {
 			},
 		},
 	}
-	t.Logf("%+v", u)
-	t.Log(GetDumpStructStr(u))
-	t.Log(GetDumpStructStrForJson(u))
+	res := GetDumpStructStr(u)
+	t.Log(res)
+	sure := GetDumpStructStrForJson(u)
+	if !equal(res, sure) {
+		t.Error(noEqErr)
+	}
 }
 
 func TestOrderDump(t *testing.T) {
@@ -192,8 +214,12 @@ func TestOrderDump(t *testing.T) {
 		TestOrderDetailPtr:   testOrderDetailPtr,
 		TestOrderDetailSlice: testOrderDetails,
 	}
-	t.Log(GetDumpStructStr(u))
-	t.Log(GetDumpStructStrForJson(u))
+	res := GetDumpStructStr(u)
+	t.Log(res)
+	sure := GetDumpStructStrForJson(u)
+	if !equal(strings.ReplaceAll(res, "[]", "null"), sure) {
+		t.Error(noEqErr)
+	}
 }
 
 func BenchmarkDump0(b *testing.B) {
