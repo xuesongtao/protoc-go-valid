@@ -5,6 +5,11 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+	"time"
+)
+
+var (
+	timeType = reflect.TypeOf(time.Time{})
 )
 
 type dumpStruct struct {
@@ -74,7 +79,7 @@ func (d *dumpStruct) loopHandleKV(s reflect.StructField, tv reflect.Value, isNee
 	}
 
 	// 不处理的内容
-	if s.Name == "Time" {
+	if s.Name == "Time" && s.Type == timeType {
 		d.buf.WriteString("\"time is not handle\"")
 		return
 	}
@@ -131,8 +136,8 @@ func (d *dumpStruct) loopHandleKV(s reflect.StructField, tv reflect.Value, isNee
 
 // =========================== 常用方法进行封装 =======================================
 
-// GetDumpStructStr 获取待 dump 的结构体字符串, 支持json格式化
-// 只会把字段名解析成 key, 值为 value;
+// GetDumpStructStr 获取待 dump 的结构体字符串, 支持 json 格式化
+// 只会把字段名解析成 key, 值为 value
 // GetDumpStructStrForJson 性能较好, 只是在有 json_tag 的时候会用 json_tag 作为 key
 func GetDumpStructStr(v interface{}) string {
 	return NewDumpStruct().HandleDumpStruct(reflect.ValueOf(v)).Get()
