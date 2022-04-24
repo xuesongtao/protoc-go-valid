@@ -43,17 +43,21 @@ func (d *dumpStruct) HandleDumpStruct(v reflect.Value, isSlice ...bool) *dumpStr
 	// 结构体
 	d.buf.WriteByte('{')
 	maxIndex := tv.NumField()
-	for i := 0; i < maxIndex; i++ {
-		structField := ty.Field(i)
+	if maxIndex == 0 {
+		return d
+	}
+
+	structField := ty.Field(0)
+	if isExported(structField.Name) {
+		d.loopHandleKV(structField, tv.Field(0))
+	}
+	for i := 1; i < maxIndex; i++ {
+		structField = ty.Field(i)
 		if !isExported(structField.Name) {
 			continue
 		}
-		d.loopHandleKV(ty.Field(i), tv.Field(i))
-
-		// 去掉最后一个逗号
-		if i < maxIndex-1 && isExported(ty.Field(i+1).Name) {
-			d.buf.WriteString(",")
-		}
+		d.buf.WriteString(",")
+		d.loopHandleKV(structField, tv.Field(i))
 	}
 	d.buf.WriteByte('}')
 	return d
