@@ -68,8 +68,19 @@ func (v *vStruct) getCusRule(structFieldName string) string {
 }
 
 // Valid 验证
-func (v *vStruct) Valid(in interface{}) error {
-	return v.validate("", reflect.ValueOf(in)).getError()
+func (v *vStruct) Valid(src interface{}) error {
+	if src == nil {
+		return errors.New("src is nil")
+	}
+
+	reflectValue := reflect.ValueOf(src)
+	switch reflectValue.Kind() {
+	case reflect.Ptr:
+		if reflectValue.IsNil() {
+			return fmt.Errorf("src %q is nil", reflectValue.Type().String())
+		}
+	}
+	return v.validate("", reflectValue).getError()
 }
 
 // SetValidFn 自定义设置验证函数
@@ -112,7 +123,7 @@ func (v *vStruct) validate(structName string, value reflect.Value, isValidSlice 
 		if len(isValidSlice) > 0 && isValidSlice[0] {
 			return v
 		}
-		v.errBuf.WriteString("in params \"" + structName + ty.Name() + "\" is not struct" + v.endFlag)
+		v.errBuf.WriteString("src params \"" + structName + ty.Name() + "\" is not struct" + v.endFlag)
 		return v
 	}
 
@@ -312,17 +323,17 @@ func (v *vStruct) getError() error {
 // =========================== 常用方法进行封装 =======================================
 
 // ValidateStruct 验证结构体
-func ValidateStruct(in interface{}, targetTag ...string) error {
-	return NewVStruct(targetTag...).Valid(in)
+func ValidateStruct(src interface{}, targetTag ...string) error {
+	return NewVStruct(targetTag...).Valid(src)
 }
 
 // ValidStructForRule 自定义验证规则并验证
 // 注: 通过字段名来匹配规则, 如果嵌套中如果有相同的名的都会走这个规则, 因此建议这种方式推荐使用非嵌套结构体
-func ValidStructForRule(ruleObj RM, in interface{}, targetTag ...string) error {
-	return NewVStruct(targetTag...).SetRule(ruleObj).Valid(in)
+func ValidStructForRule(ruleObj RM, src interface{}, targetTag ...string) error {
+	return NewVStruct(targetTag...).SetRule(ruleObj).Valid(src)
 }
 
 // ValidStructForMyValidFn 自定义单个验证函数
-func ValidStructForMyValidFn(in interface{}, validName string, validFn CommonValidFn, targetTag ...string) error {
-	return NewVStruct(targetTag...).SetValidFn(validName, validFn).Valid(in)
+func ValidStructForMyValidFn(src interface{}, validName string, validFn CommonValidFn, targetTag ...string) error {
+	return NewVStruct(targetTag...).SetValidFn(validName, validFn).Valid(src)
 }
