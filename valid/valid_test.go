@@ -131,6 +131,18 @@ func TestGetJoinValidErrStr(t *testing.T) {
 	}
 }
 
+func TestTmp(t *testing.T) {
+	var a *TestOrderDetailPtr
+	err := ValidateStruct(a, "alipay")
+	t.Log(err)
+
+	err = ValidateStruct(nil, "alipay")
+	t.Log(err)
+
+	err = ValidateStruct(TestOrderDetailPtr{}, "alipay")
+	t.Log(err)
+}
+
 func BenchmarkValid(b *testing.B) {
 	testOrderDetailPtr := &TestOrderDetailPtr{
 		TmpTest3:  &TmpTest3{Name: "测试"},
