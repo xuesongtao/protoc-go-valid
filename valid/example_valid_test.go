@@ -287,6 +287,24 @@ func ExampleFloat() {
 	// "Tmp.IntNum" input "10" is not float
 }
 
+func ExampleValidStructForRule() {
+	type Tmp struct {
+		Name string
+		Age  int
+	}
+	v := Tmp{Name: "xue", Age: 101}
+	ruleObj := NewRule()
+	if v.Name == "xue" {
+		ruleObj.Set("Age", "required,le=100")
+	}
+	if err := ValidStructForRule(ruleObj, &v); err != nil {
+		fmt.Println(err)
+	}
+
+	// Output:
+	// "Tmp.Age" input "101" numSize more than 100
+}
+
 func ExampleSetCustomerValidFn() {
 	type Tmp struct {
 		Name string `valid:"required"`
@@ -310,7 +328,7 @@ func ExampleSetCustomerValidFn() {
 	// "Tmp.Age" is not num
 }
 
-func ExampleSetCustomerValidFn1() {
+func ExampleValidStructForMyValidFn() {
 	type Tmp struct {
 		Name string `valid:"required"`
 		Age  string `valid:"num"`
@@ -329,45 +347,4 @@ func ExampleSetCustomerValidFn1() {
 
 	// Output:
 	// "Tmp.Age" is not num
-}
-
-func ExampleSetCustomerValidFn3() {
-	type Tmp struct {
-		Name string `valid:"required"`
-		Age  string `valid:"num"`
-	}
-
-	isNumFn := func(errBuf *strings.Builder, validName, structName, fieldName string, tv reflect.Value) {
-		ok, _ := regexp.MatchString("^\\d+$", tv.String())
-		if !ok {
-			errBuf.WriteString(fmt.Sprintf("%q is not num", structName+"."+fieldName))
-			return
-		}
-	}
-
-	obj := NewVStruct()
-	obj.SetValidFn("num", isNumFn)
-	v := Tmp{Name: "12", Age: "1ha"}
-	fmt.Println(obj.Valid(v))
-
-	// Output:
-	// "Tmp.Age" is not num
-}
-
-func ExampleRule() {
-	type Tmp struct {
-		Name string
-		Age  int
-	}
-	v := Tmp{Name: "xue", Age: 101}
-	ruleObj := NewRule()
-	if v.Name == "xue" {
-		ruleObj.Set("Age", "required,le=100")
-	}
-	if err := ValidStructForRule(ruleObj, &v); err != nil {
-		fmt.Println(err)
-	}
-
-	// Output:
-	// "Tmp.Age" input "101" numSize more than 100
 }
