@@ -7,7 +7,10 @@ import (
 )
 
 type Man struct {
+	a    string
+	b    string
 	Name string
+	c    string
 	Age  int
 	addr string
 }
@@ -31,7 +34,10 @@ type Testher struct {
 
 func TestDump0(t *testing.T) {
 	m := Man{
+		a:    "1",
+		b:    "2",
 		Name: "XUE",
+		c:    "3",
 		Age:  20,
 		addr: "test",
 	}
