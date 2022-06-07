@@ -156,6 +156,9 @@ func GetDumpStructStr(v interface{}) string {
 
 // GetDumpStructStrForJson 先 json 序列化, 再获取
 func GetDumpStructStrForJson(v interface{}) string {
-	b, _ := json.Marshal(v)
-	return string(b)
+	buf := new(strings.Builder)
+	enc := json.NewEncoder(buf)
+	enc.SetEscapeHTML(false)
+	_ = enc.Encode(v)
+	return strings.TrimSuffix(buf.String(), "\n")
 }
