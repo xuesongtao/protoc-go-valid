@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-// go test -run ^Example
+// go test -timeout 30s -run ^Example gitee.com/xuesongtao/protoc-go-valid/valid -v -count=1
 
 func ExampleRequired() {
 	type Tmp struct {
