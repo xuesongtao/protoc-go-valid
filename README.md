@@ -9,10 +9,10 @@
 
 * 1. 先下载本项目: `go get -u gitee.com/xuesongtao/protoc-go-valid`
 * 2. `protoc-go-valid` 命令操作, 如下:   
-    - 2.1 `protoc-go-valid -init="true"`
-  + 2.1 `protoc-go-valid -d="待注入的目录"`
-  + 2.2 `protoc-go-valid -p="匹配模式"`
-  + 2.3 `protoc-go-valid -f="单个待注入的文件"`
+  + 2.1 `protoc-go-valid -init="true"`
+  + 2.2 `protoc-go-valid -d="待注入的目录"`
+  + 2.3 `protoc-go-valid -p="匹配模式"`
+  + 2.4 `protoc-go-valid -f="单个待注入的文件"`
 
 * 3. 参考 `protoc-go-inject-tag`
 	
