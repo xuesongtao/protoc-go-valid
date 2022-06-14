@@ -28,6 +28,7 @@ type vStruct struct {
 type name2Value struct {
 	structName string
 	fieldName  string
+	cusMsg     string
 	val        reflect.Value
 }
 
@@ -128,13 +129,13 @@ func (v *vStruct) validate(structName string, value reflect.Value, isValidSlice 
 	}
 
 	totalFieldNum := tv.NumField()
-	for filedNum := 0; filedNum < totalFieldNum; filedNum++ {
-		structField := ty.Field(filedNum)
+	for fieldNum := 0; fieldNum < totalFieldNum; fieldNum++ {
+		structField := ty.Field(fieldNum)
 		// 判断下是否可导出
 		if !isExported(structField.Name) {
 			continue
 		}
-		filedValue := tv.Field(filedNum)
+		fieldValue := tv.Field(fieldNum)
 		validNames := structField.Tag.Get(v.targetTag)
 
 		// 如果设置了规则就覆盖 tag 中的验证内容
@@ -153,50 +154,54 @@ func (v *vStruct) validate(structName string, value reflect.Value, isValidSlice 
 				continue
 			}
 
-			validKey, _ := ParseValidNameKV(validName)
+			validKey, _, cusMsg := ParseValidNameKV(validName)
 			fn, err := v.getValidFn(validKey)
 			if err != nil {
 				v.errBuf.WriteString(err.Error() + errEndFlag)
 				continue
 			}
 
-			// fmt.Printf("structName: %s, structFieldName: %s, tv: %v\n", structName+ty.Name(), structField.Name, filedValue)
+			// fmt.Printf("structName: %s, structFieldName: %s, tv: %v\n", structName+ty.Name(), structField.Name, fieldValue)
 			// 开始验证
 			// vStruct 内的验证方法
 			if fn == nil {
 				switch validKey {
 				case Required:
-					v.required(structName+ty.Name(), structField.Name, filedValue)
+					v.required(structName+ty.Name(), structField.Name, cusMsg, fieldValue)
 				case Exist:
-					v.exist(true, structName+ty.Name(), structField.Name, filedValue)
+					v.exist(true, structName+ty.Name(), structField.Name, cusMsg, fieldValue)
 				case Either, BothEq:
-					v.initValid2FieldsMap(validName, structName+ty.Name(), structField.Name, filedValue)
+					v.initValid2FieldsMap(validName, structName+ty.Name(), structField.Name, cusMsg, fieldValue)
 				}
 				continue
 			}
 
 			// vStruct 外拓展的验证方法
-			if filedValue.IsZero() { // 空就直接跳过
+			if fieldValue.IsZero() { // 空就直接跳过
 				continue
 			}
-			fn(v.errBuf, validName, structName+ty.Name(), structField.Name, filedValue)
+			fn(v.errBuf, validName, structName+ty.Name(), structField.Name, fieldValue)
 		}
 	}
 	return v
 }
 
 // required 验证 required
-func (v *vStruct) required(structName, fieldName string, tv reflect.Value) {
+func (v *vStruct) required(structName, fieldName, cusMsg string, tv reflect.Value) {
 	if tv.IsZero() { // 验证必填
+		if cusMsg != "" {
+			v.errBuf.WriteString(GetJoinValidErrStr(structName, fieldName, "", cusMsg))
+			return
+		}
 		// 生成如: "TestOrderDetailSlice.Price" is required
 		v.errBuf.WriteString(GetJoinValidErrStr(structName, fieldName, "", "is", Required))
 	} else { // 有值的话需要判断下嵌套的类型
-		v.exist(false, structName, fieldName, tv)
+		v.exist(false, structName, fieldName, cusMsg, tv)
 	}
 }
 
 // exist 存在验证, 用于验证嵌套结构, 切片
-func (v *vStruct) exist(isValidTvKind bool, structName, fieldName string, tv reflect.Value) {
+func (v *vStruct) exist(isValidTvKind bool, structName, fieldName, cusMsg string, tv reflect.Value) {
 	// 如果空的就没必要验证了
 	if tv.IsZero() {
 		return
@@ -213,13 +218,17 @@ func (v *vStruct) exist(isValidTvKind bool, structName, fieldName string, tv ref
 		}
 	default:
 		if isValidTvKind {
+			if cusMsg != "" {
+				v.errBuf.WriteString(GetJoinValidErrStr(structName, fieldName, tv.String(), cusMsg))
+				return
+			}
 			v.errBuf.WriteString(GetJoinValidErrStr(structName, fieldName, tv.String(), "is nonsupport", Exist))
 		}
 	}
 }
 
 // initValid2FieldsMap 为验证 either/bothexist/botheq 进行准备
-func (v *vStruct) initValid2FieldsMap(validName, structName, fieldName string, tv reflect.Value) {
+func (v *vStruct) initValid2FieldsMap(validName, structName, fieldName, cusMsg string, tv reflect.Value) {
 	if v.valid2FieldsMap == nil {
 		v.valid2FieldsMap = make(map[string][]*name2Value, 5)
 	}
@@ -227,7 +236,7 @@ func (v *vStruct) initValid2FieldsMap(validName, structName, fieldName string, t
 	if _, ok := v.valid2FieldsMap[validName]; !ok {
 		v.valid2FieldsMap[validName] = make([]*name2Value, 0, 2)
 	}
-	v.valid2FieldsMap[validName] = append(v.valid2FieldsMap[validName], &name2Value{structName: structName, fieldName: fieldName, val: tv})
+	v.valid2FieldsMap[validName] = append(v.valid2FieldsMap[validName], &name2Value{structName: structName, fieldName: fieldName, cusMsg: cusMsg, val: tv})
 }
 
 // either 判断两者不能都为空
@@ -296,7 +305,7 @@ func (v *vStruct) againValid() {
 	}
 
 	for validName, fieldInfos := range v.valid2FieldsMap {
-		validKey, _ := ParseValidNameKV(validName)
+		validKey, _, _ := ParseValidNameKV(validName)
 		switch validKey {
 		case Either:
 			v.either(fieldInfos)

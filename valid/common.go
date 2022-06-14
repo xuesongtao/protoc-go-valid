@@ -3,25 +3,50 @@ package valid
 import (
 	"fmt"
 	"reflect"
+	"regexp"
 	"strconv"
 	"strings"
 )
 
-// ParseValidNameKV 解析 validName 中的 key 和 value,
-// 如: "required", key 为 "required", value 为 ""
-// 如: "to=1~2", key 为 "to", value 为 "1~2"
-func ParseValidNameKV(validName string) (key, value string) {
+// ParseValidNameKV 解析 validName 中的 key, value 和 cusMsg,
+// 如: "required|必填", key 为 "required", value 为 "", cusMsg 为 "必填"
+// 如: "to=1~2|大于等于 1 且小于等于 2", key 为 "to", value 为 "1~2", cusMsg 为 "大于等于 1 且小于等于 2"
+func ParseValidNameKV(validName string) (key, value, cusMsg string) {
 	// 因为 validName 中的 k, v 通过 = 连接
 	splitIndex := strings.Index(validName, "=")
 
 	// 如果没有则代表 validName 不为 k=v 类型, 只有一个字段如: required
 	if splitIndex == -1 {
+		// 需要确定下是否包含自定义 msg, 格式为: validName|xxx, 如: required|必填
 		key = validName
+		cusMsgIndex := strings.Index(validName, "|")
+		if cusMsgIndex != -1 && len(validName)-1 > cusMsgIndex+1 {
+			key = validName[:cusMsgIndex]
+			cusMsg = validName[cusMsgIndex+1:]
+			// 根据如果说明有中文就加前缀为: 说明; 否则为 Explain
+			if match, _ := regexp.MatchString("[\u4e00-\u9fa5]", cusMsg); match {
+				cusMsg = "说明: " + cusMsg
+			} else {
+				cusMsg = "Explain: " + cusMsg
+			}
+		}
 		return
 	}
 
 	key = validName[:splitIndex]
 	value = validName[splitIndex+1:]
+	// 需要确定下是否包含自定义 msg, 格式为: validName|xxx, 如: "to=1~2|大于等于 1 且小于等于 2"
+	cusMsgIndex := strings.Index(value, "|")
+	if cusMsgIndex != -1 && len(value)-1 > cusMsgIndex+1 {
+		// 根据如果说明有中文就加前缀为: 说明; 否则为 Explain
+		cusMsg = value[cusMsgIndex+1:]
+		if match, _ := regexp.MatchString("[\u4e00-\u9fa5]", cusMsg); match {
+			cusMsg = "说明: " + cusMsg
+		} else {
+			cusMsg = "Explain: " + cusMsg
+		}
+		value = value[:cusMsgIndex]
+	}
 	return
 }
 

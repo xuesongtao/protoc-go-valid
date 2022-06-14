@@ -36,7 +36,7 @@ func TestDump0(t *testing.T) {
 	m := Man{
 		a:    "1",
 		b:    "2",
-		Name: "XUE",
+		Name: "XUE>",
 		c:    "3",
 		Age:  20,
 		addr: "test",
@@ -231,7 +231,7 @@ func TestDumpOrder(t *testing.T) {
 func BenchmarkDump0(b *testing.B) {
 	u := &User{
 		Man: Man{
-			Name: "xuesongtao",
+			Name: "test",
 			Age:  20,
 		},
 		Hobby: []int32{1},
@@ -262,7 +262,7 @@ func BenchmarkDump0(b *testing.B) {
 func BenchmarkDump1(b *testing.B) {
 	u := &User{
 		Man: Man{
-			Name: "xuesongtao",
+			Name: "test",
 			Age:  20,
 		},
 		Hobby: []int32{1},
@@ -293,7 +293,7 @@ func BenchmarkDump1(b *testing.B) {
 func BenchmarkDump2(b *testing.B) {
 	u := &User{
 		Man: Man{
-			Name: "xuesongtao",
+			Name: "test",
 			Age:  20,
 		},
 		Hobby: []int32{1},

@@ -12,18 +12,21 @@ var (
 	timeType = reflect.TypeOf(time.Time{})
 )
 
+// dumpStruct
 type dumpStruct struct {
 	buf             *strings.Builder
 	nullStructFiled reflect.StructField
 	numBytes        [64]byte
 }
 
+// NewDumpStruct
 func NewDumpStruct() *dumpStruct {
 	return &dumpStruct{
 		buf: &strings.Builder{},
 	}
 }
 
+// HandleDumpStruct 处理待打印的 struct
 func (d *dumpStruct) HandleDumpStruct(v reflect.Value, isSlice ...bool) *dumpStruct {
 	tv := reflect.Indirect(v)
 	if !tv.IsValid() {
@@ -70,11 +73,13 @@ func (d *dumpStruct) HandleDumpStruct(v reflect.Value, isSlice ...bool) *dumpStr
 	return d
 }
 
+// Get 获取打印的结果
 func (d *dumpStruct) Get() string {
 	defer d.buf.Reset()
 	return d.buf.String()
 }
 
+// loopHandleKV 循环处理
 func (d *dumpStruct) loopHandleKV(s reflect.StructField, tv reflect.Value, isNeedFileName ...bool) {
 	// fmt.Printf("s: %+v\n", s)
 	// fmt.Printf("tv: %+v\n", filedValue)
@@ -156,6 +161,9 @@ func GetDumpStructStr(v interface{}) string {
 
 // GetDumpStructStrForJson 先 json 序列化, 再获取
 func GetDumpStructStrForJson(v interface{}) string {
-	b, _ := json.Marshal(v)
-	return string(b)
+	buf := new(strings.Builder)
+	enc := json.NewEncoder(buf)
+	enc.SetEscapeHTML(false)
+	_ = enc.Encode(v)
+	return strings.TrimSuffix(buf.String(), "\n")
 }

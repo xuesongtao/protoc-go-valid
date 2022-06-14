@@ -23,7 +23,7 @@ func equal(dest, src interface{}) bool {
 }
 
 type TestOrder struct {
-	AppName              string                  `alipay:"to=2~10" validate:"minLen:2|maxLen:10"` // 应用名
+	AppName              string                  `alipay:"to=5~10" validate:"minLen:2|maxLen:10"` // 应用名
 	TotalFeeFloat        float64                 `alipay:"to=2~5" validate:"min:2|max:5"`         // 订单总金额，单位为分，详见支付金额
 	TestOrderDetailPtr   *TestOrderDetailPtr     `alipay:"required" validate:"required"`          // 商品详细描述
 	TestOrderDetailSlice []*TestOrderDetailSlice `alipay:"required" validate:"required"`          // 商品详细描述
@@ -60,7 +60,7 @@ func TestValidOrder(t *testing.T) {
 	// testOrderDetails = nil
 
 	u := &TestOrder{
-		AppName:              "集美测试",
+		AppName:              "测试",
 		TotalFeeFloat:        2,
 		TestOrderDetailPtr:   testOrderDetailPtr,
 		TestOrderDetailSlice: testOrderDetails,
@@ -69,30 +69,11 @@ func TestValidOrder(t *testing.T) {
 	if err == nil {
 		return
 	}
-	sureMsg := `"TestOrder.TestOrderDetailPtr.GoodsName" input "玻尿酸" strLength more than 2; "TestOrder-0.TestOrderDetailSlice.GoodsName" input "" is required; "TestOrder-1.TestOrderDetailSlice.BuyerNames" input "" is required; "TestOrder-2.TestOrderDetailSlice.TmpTest3" input "" is required; "TestOrder-2.TestOrderDetailSlice.BuyerNames" input "" is required; "TestOrder-3.TestOrderDetailSlice.BuyerNames" input "" is required`
+	sureMsg := `"TestOrder.AppName" input "测试" strLength less than 5; "TestOrder.TestOrderDetailPtr.GoodsName" input "玻尿酸" strLength more than 2; "TestOrder-0.TestOrderDetailSlice.GoodsName" input "" is required; "TestOrder-1.TestOrderDetailSlice.BuyerNames" input "" is required; "TestOrder-2.TestOrderDetailSlice.TmpTest3" input "" is required; "TestOrder-2.TestOrderDetailSlice.BuyerNames" input "" is required; "TestOrder-3.TestOrderDetailSlice.BuyerNames" input "" is required`
 	if !equal(err.Error(), sureMsg) {
 		t.Error(noEqErr)
 	}
 }
-
-// func TestProtoPb1(t *testing.T) {
-// 	u := &test.User{
-// 		M: &test.Man{
-// 			Name: "xue",
-// 			Age:  0,
-// 		},
-// 		Phone: "13540042615",
-// 	}
-// 	err := ValidateStruct(u)
-// 	if err == nil {
-// 		return
-// 	}
-
-// 	suerMsg := `valid: "he" is not exist, You can call SetValidFn`
-// 	if !equal(err.Error(), suerMsg) {
-// 		t.Error(noEqErr)
-// 	}
-// }
 
 // func TestValidateOrder(t *testing.T) {
 // 	testOrderDetailPtr := &TestOrderDetailPtr{
@@ -122,6 +103,25 @@ func TestValidOrder(t *testing.T) {
 // 	}
 // }
 
+// func TestProtoPb1(t *testing.T) {
+// 	u := &test.User{
+// 		M: &test.Man{
+// 			Name: "",
+// 			Age:  0,
+// 		},
+// 		Phone: "13540042615",
+// 	}
+// 	err := ValidateStruct(u)
+// 	if err == nil {
+// 		return
+// 	}
+
+// 	suerMsg := `"User.Man.Name" input "" 说明: 姓名必填; valid: "he" is not exist, You can call SetValidFn`
+// 	if !equal(err.Error(), suerMsg) {
+// 		t.Error(noEqErr)
+// 	}
+// }
+
 func TestGetJoinValidErrStr(t *testing.T) {
 	t.Skip("GetJoinValidErrStr")
 	res := GetJoinValidErrStr("User", "Name", "xue", "len is less than 3")
@@ -142,7 +142,10 @@ func TestTmp(t *testing.T) {
 	t.Log(err)
 }
 
+// go test -benchmem -run=^$ -bench ^BenchmarkValid gitee.com/xuesongtao/protoc-go-valid/valid -v -count=5 
+
 func BenchmarkValid(b *testing.B) {
+	b.ResetTimer()
 	testOrderDetailPtr := &TestOrderDetailPtr{
 		TmpTest3:  &TmpTest3{Name: "测试"},
 		GoodsName: "玻尿酸",
@@ -209,6 +212,7 @@ func BenchmarkValid(b *testing.B) {
 // }
 
 func BenchmarkValidIf(b *testing.B) {
+	b.ResetTimer()
 	testOrderDetailPtr := &TestOrderDetailPtr{
 		TmpTest3:  &TmpTest3{Name: "测试"},
 		GoodsName: "玻尿酸",
