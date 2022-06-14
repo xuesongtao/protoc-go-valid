@@ -13,9 +13,16 @@ const (
 	sliceLenUnitStr = "sliceLen"
 )
 
+const (
+	Required = "required" // 必填
+	Exist    = "exist"    // 有值才验证
+	Either   = "either"   // 多个必须一个
+	BothEq   = "botheq"   // 两者相等
+)
+
 // 对象
 var (
-	syncValidPool = sync.Pool{New: func() interface{} { return new(vStruct) }}
+	syncValidPool = sync.Pool{New: func() interface{} { return new(VStruct) }}
 )
 
 // 标记
