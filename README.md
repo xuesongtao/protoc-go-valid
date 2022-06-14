@@ -1,8 +1,8 @@
-# proto 中注入 tag, 验证
+# protoc-go-valid [![Open Source Love](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](gitee.com/xuesongtao/protoc-go-valid) 
 
 #### 1. 介绍
 
-* 1. 对 `xxx.pd.go` 文件中的 `struct` 注入自定义的 `tag`
+* 1. 通过对 `xxx.proto` 通过注释的形式加入验证 `tag`(使用方式文档下方有说明), 然后再使用 `inject_tool.sh xxx.proto` 编译, 这样生成的 `xxx.pb.go` 文件中的 `struct` 注入自定义的 `tag`
 * 2. 通过验证器对 `struct` 中的 `tag` 进行验证
 
 #### 2. 注入工具使用
@@ -20,7 +20,7 @@
 #### 3. 工具补充
 
 * 1. `protoc-go-valid -h` 可以通过这个查看帮助
-* 2. 由于此操作是先执行 `protoc` 才再进行注入(需先安装 `protoc`), 项目中的 `inject_tool.sh` 整合了这两步操作, 可以执行 `protoc-go-valid -init="true"` 进行初始化操作, **说明:** 如果为 **windows** 需要使用 `powershell` 来执行
+* 2. 由于此操作是先执行 `protoc` 才再进行注入(需先安装 `protoc`), 项目中的 `inject_tool.sh` 整合了这两步操作, 可以执行 `protoc-go-valid -init="true"` 进行初始化操作, **说明:** 如果为 **windows** 需要使用 `powershell` 来执行, 如果失败的话, 可以直接将 `inject_tool.sh` 放到 GOPATH 下(主要是为了工具能命令行全局调用).
 * 3. 根据自己的项目目录结构调整 `inject_tool.sh` 中 `proto` 和 `pb` 的目录, 相对于应用的目录; 如本项目, 修改如下下:
 
 ```
@@ -67,14 +67,16 @@ protoFileDirName="test" # proto 存放的目录
 
 ###### 4.2.2 设置验证
 
-* 1. 通过设置 `tag` 进行设置验证规则, 默认目标 `tagName` 为 `valid`
-* 2. 通过创建 `RM` 对象进行设置,  `RM` 暂不支持嵌套
+* 1. 通过设置 `tag` 进行设置验证规则, 默认目标为 `valid`
+* 2. 支持通过创建 `RM` 对象进行自定义设置验证规则, 其验证优先级高于 `xxx.pb.go` 里的规则, `RM` 暂不支持嵌套
+
 
 ###### 4.2.3 其他
 
 * 1. 默认按照 `tag` 进行处理, 如果设置 `RM` 对象会以此规则为准
 * 2. 如果验证方法没有实现的, 可以调用 `SetCustomerValidFn` 自定义
 * 3. 使用的可以参考 `example_test.go` 和 `valid_test.go`
+
 
 #### 5 使用示例:
 
