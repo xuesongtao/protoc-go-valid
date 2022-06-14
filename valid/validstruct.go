@@ -108,7 +108,7 @@ func (v *vStruct) validate(structName string, value reflect.Value, isValidSlice 
 		structName = structName + "."
 	}
 
-	tv := removeValuePtr(value)
+	tv := RemoveValuePtr(value)
 	ty := tv.Type()
 
 	// 如果不是结构体就退出
@@ -125,7 +125,7 @@ func (v *vStruct) validate(structName string, value reflect.Value, isValidSlice 
 	for fieldNum := 0; fieldNum < totalFieldNum; fieldNum++ {
 		structField := ty.Field(fieldNum)
 		// 判断下是否可导出
-		if !isExported(structField.Name) {
+		if !IsExported(structField.Name) {
 			continue
 		}
 		fieldValue := tv.Field(fieldNum)

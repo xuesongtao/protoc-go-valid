@@ -79,8 +79,8 @@ func CheckFieldIsStr(objName, fieldName string, tv reflect.Value) (err error) {
 	return
 }
 
-// isExported 是可导出
-func isExported(fieldName string) bool {
+// IsExported 是可导出
+func IsExported(fieldName string) bool {
 	if fieldName == "" {
 		return false
 	}
@@ -221,16 +221,16 @@ func parseTagTo(toVal string, isHasEqual bool) (min int, max int, err error) {
 	return
 }
 
-// removeTypePtr 移除多指针
-func removeTypePtr(t reflect.Type) reflect.Type {
+// RemoveTypePtr 移除多指针
+func RemoveTypePtr(t reflect.Type) reflect.Type {
 	for t.Kind() == reflect.Ptr {
 		t = t.Elem()
 	}
 	return t
 }
 
-// removeValuePtr 移除多指针
-func removeValuePtr(t reflect.Value) reflect.Value {
+// RemoveValuePtr 移除多指针
+func RemoveValuePtr(t reflect.Value) reflect.Value {
 	for t.Kind() == reflect.Ptr {
 		t = t.Elem()
 	}

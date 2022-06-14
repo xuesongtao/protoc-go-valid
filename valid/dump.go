@@ -53,13 +53,13 @@ func (d *dumpStruct) HandleDumpStruct(v reflect.Value, isSlice ...bool) *dumpStr
 	// 需要添加第一个逗号
 	needAddComma := false
 	structField := ty.Field(0)
-	if isExported(structField.Name) {
+	if IsExported(structField.Name) {
 		d.loopHandleKV(structField, tv.Field(0))
 		needAddComma = true
 	}
 	for i := 1; i < maxIndex; i++ {
 		structField = ty.Field(i)
-		if !isExported(structField.Name) {
+		if !IsExported(structField.Name) {
 			continue
 		}
 		// 第一次需要判断下
