@@ -7,13 +7,6 @@ import (
 	"strings"
 )
 
-const (
-	Required = "required" // 必填
-	Exist    = "exist"    // 有值才验证
-	Either   = "either"   // 多个必须一个
-	BothEq   = "botheq"   // 两者相等
-)
-
 // vStruct 验证结构体
 type vStruct struct {
 	targetTag       string // 结构体中的待指定的验证的 tag
