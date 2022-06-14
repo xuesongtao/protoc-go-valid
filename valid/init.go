@@ -22,7 +22,7 @@ const (
 
 // 对象
 var (
-	syncValidPool = sync.Pool{New: func() interface{} { return new(vStruct) }}
+	syncValidPool = sync.Pool{New: func() interface{} { return new(VStruct) }}
 )
 
 // 标记

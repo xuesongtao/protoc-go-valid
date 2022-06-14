@@ -7,8 +7,8 @@ import (
 	"strings"
 )
 
-// vStruct 验证结构体
-type vStruct struct {
+// VStruct 验证结构体
+type VStruct struct {
 	targetTag       string // 结构体中的待指定的验证的 tag
 	endFlag         string // 用于分割 err
 	errBuf          *strings.Builder
@@ -26,8 +26,8 @@ type name2Value struct {
 }
 
 // NewVStruct 验证结构体, 默认目标 tagName 为 "valid"
-func NewVStruct(targetTag ...string) *vStruct {
-	obj := syncValidPool.Get().(*vStruct)
+func NewVStruct(targetTag ...string) *VStruct {
+	obj := syncValidPool.Get().(*VStruct)
 	tagName := defaultTargetTag
 	if len(targetTag) > 0 {
 		tagName = targetTag[0]
@@ -39,7 +39,7 @@ func NewVStruct(targetTag ...string) *vStruct {
 }
 
 // free 释放
-func (v *vStruct) free() {
+func (v *VStruct) free() {
 	v.errBuf.Reset()
 	v.ruleObj = nil
 	v.valid2FieldsMap = nil
@@ -48,13 +48,13 @@ func (v *vStruct) free() {
 }
 
 // SetRule 添加验证规则
-func (v *vStruct) SetRule(ruleObj RM) *vStruct {
+func (v *VStruct) SetRule(ruleObj RM) *VStruct {
 	v.ruleObj = ruleObj
 	return v
 }
 
 // getCusRule 根据字段名获取自定义验证规则
-func (v *vStruct) getCusRule(structFieldName string) string {
+func (v *VStruct) getCusRule(structFieldName string) string {
 	if v.ruleObj == nil {
 		return ""
 	}
@@ -62,7 +62,7 @@ func (v *vStruct) getCusRule(structFieldName string) string {
 }
 
 // Valid 验证
-func (v *vStruct) Valid(src interface{}) error {
+func (v *VStruct) Valid(src interface{}) error {
 	if src == nil {
 		return errors.New("src is nil")
 	}
@@ -78,7 +78,7 @@ func (v *vStruct) Valid(src interface{}) error {
 }
 
 // SetValidFn 自定义设置验证函数
-func (v *vStruct) SetValidFn(validName string, fn CommonValidFn) *vStruct {
+func (v *VStruct) SetValidFn(validName string, fn CommonValidFn) *VStruct {
 	if v.validFn == nil {
 		v.validFn = make(map[string]CommonValidFn)
 	}
@@ -87,7 +87,7 @@ func (v *vStruct) SetValidFn(validName string, fn CommonValidFn) *vStruct {
 }
 
 // getValidFn 获取验证函数
-func (v *vStruct) getValidFn(validName string) (CommonValidFn, error) {
+func (v *VStruct) getValidFn(validName string) (CommonValidFn, error) {
 	// 先从本地找, 如果本地没有就从全局里找
 	fn, ok := v.validFn[validName]
 	if ok {
@@ -102,7 +102,7 @@ func (v *vStruct) getValidFn(validName string) (CommonValidFn, error) {
 }
 
 // validate 验证执行体
-func (v *vStruct) validate(structName string, value reflect.Value, isValidSlice ...bool) *vStruct {
+func (v *VStruct) validate(structName string, value reflect.Value, isValidSlice ...bool) *VStruct {
 	// 辅助 errMsg, 用于嵌套时拼接上一级的结构体名
 	if structName != "" {
 		structName = structName + "."
@@ -156,7 +156,7 @@ func (v *vStruct) validate(structName string, value reflect.Value, isValidSlice 
 
 			// fmt.Printf("structName: %s, structFieldName: %s, tv: %v\n", structName+ty.Name(), structField.Name, fieldValue)
 			// 开始验证
-			// vStruct 内的验证方法
+			// VStruct 内的验证方法
 			if fn == nil {
 				switch validKey {
 				case Required:
@@ -169,7 +169,7 @@ func (v *vStruct) validate(structName string, value reflect.Value, isValidSlice 
 				continue
 			}
 
-			// vStruct 外拓展的验证方法
+			// VStruct 外拓展的验证方法
 			if fieldValue.IsZero() { // 空就直接跳过
 				continue
 			}
@@ -180,7 +180,7 @@ func (v *vStruct) validate(structName string, value reflect.Value, isValidSlice 
 }
 
 // required 验证 required
-func (v *vStruct) required(structName, fieldName, cusMsg string, tv reflect.Value) {
+func (v *VStruct) required(structName, fieldName, cusMsg string, tv reflect.Value) {
 	if tv.IsZero() { // 验证必填
 		if cusMsg != "" {
 			v.errBuf.WriteString(GetJoinValidErrStr(structName, fieldName, "", cusMsg))
@@ -194,7 +194,7 @@ func (v *vStruct) required(structName, fieldName, cusMsg string, tv reflect.Valu
 }
 
 // exist 存在验证, 用于验证嵌套结构, 切片
-func (v *vStruct) exist(isValidTvKind bool, structName, fieldName, cusMsg string, tv reflect.Value) {
+func (v *VStruct) exist(isValidTvKind bool, structName, fieldName, cusMsg string, tv reflect.Value) {
 	// 如果空的就没必要验证了
 	if tv.IsZero() {
 		return
@@ -221,7 +221,7 @@ func (v *vStruct) exist(isValidTvKind bool, structName, fieldName, cusMsg string
 }
 
 // initValid2FieldsMap 为验证 either/bothexist/botheq 进行准备
-func (v *vStruct) initValid2FieldsMap(validName, structName, fieldName, cusMsg string, tv reflect.Value) {
+func (v *VStruct) initValid2FieldsMap(validName, structName, fieldName, cusMsg string, tv reflect.Value) {
 	if v.valid2FieldsMap == nil {
 		v.valid2FieldsMap = make(map[string][]*name2Value, 5)
 	}
@@ -233,7 +233,7 @@ func (v *vStruct) initValid2FieldsMap(validName, structName, fieldName, cusMsg s
 }
 
 // either 判断两者不能都为空
-func (v *vStruct) either(fieldInfos []*name2Value) {
+func (v *VStruct) either(fieldInfos []*name2Value) {
 	l := len(fieldInfos)
 	if l <= 1 { // 如果只有 1 个就没有必要向下执行了
 		v.errBuf.WriteString(eitherValErr.Error() + v.endFlag)
@@ -256,7 +256,7 @@ func (v *vStruct) either(fieldInfos []*name2Value) {
 }
 
 // bothEq 判断两者相等
-func (v *vStruct) bothEq(fieldInfos []*name2Value) {
+func (v *VStruct) bothEq(fieldInfos []*name2Value) {
 	l := len(fieldInfos)
 	if l <= 1 { // 如果只有 1 个就没有必要向下执行了
 		v.errBuf.WriteString(bothEqValErr.Error() + v.endFlag)
@@ -291,7 +291,7 @@ func (v *vStruct) bothEq(fieldInfos []*name2Value) {
 }
 
 // againValid 再一次验证
-func (v *vStruct) againValid() {
+func (v *VStruct) againValid() {
 	// 判断下是否有值, 有就说明有 either 验证
 	if len(v.valid2FieldsMap) == 0 {
 		return
@@ -309,7 +309,7 @@ func (v *vStruct) againValid() {
 }
 
 // getError 获取 err
-func (v *vStruct) getError() error {
+func (v *VStruct) getError() error {
 	defer v.free()
 
 	v.againValid()
