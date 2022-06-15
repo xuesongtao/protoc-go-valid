@@ -22,6 +22,7 @@ message InnerMessage {
 
 ```
 syntax = "proto3";
+package examples;
 
 message InnerMessage {
   // some_integer can only be in range (0, 100).
