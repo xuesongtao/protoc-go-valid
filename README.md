@@ -153,4 +153,4 @@ type Man struct {
 
 #### 最后
 
-* 欢迎大佬们指正, 同时也希望大佬给 **star**
+* 欢迎大佬们指正, 同时也希望大佬给 **star**, [to gitee](https://gitee.com/xuesongtao/protoc-go-valid)
