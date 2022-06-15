@@ -1,4 +1,4 @@
-# protoc-go-valid [![Open Source Love](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](gitee.com/xuesongtao/protoc-go-valid) 
+# protoc-go-valid [![Open Source Love](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](https://gitee.com/xuesongtao/protoc-go-valid) 
 
 #### 项目背景
 
