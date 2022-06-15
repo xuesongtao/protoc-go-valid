@@ -1,5 +1,38 @@
 # protoc-go-valid [![Open Source Love](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](gitee.com/xuesongtao/protoc-go-valid) 
 
+#### 项目背景
+
+* 1. 在 protobuf 方面验证器常用的为 `go-proto-validators` 验证器, 使用个人认为较为繁琐, 代码量比较多 使用如下: 
+
+```
+syntax = "proto3";
+package validator.examples;
+import "github.com/mwitkow/go-proto-validators/validator.proto";
+
+message InnerMessage {
+  // some_integer can only be in range (0, 100).
+  int32 some_integer = 1 [(validator.field) = {int_gt: 0, int_lt: 100}];
+  // some_float can only be in range (0;1).
+  double some_float = 2 [(validator.field) = {float_gte: 0, float_lte: 1}];
+}
+```
+
+* 2. 本验证器, 相同功能使用如下: 
+ 
+
+```
+syntax = "proto3";
+package validator.examples;
+import "github.com/mwitkow/go-proto-validators/validator.proto";
+
+message InnerMessage {
+  // some_integer can only be in range (0, 100).
+  int32 some_integer = 1; // @tag oto=0~100
+  // some_float can only be in range (0;1).
+  double some_float = 2; // @tag to=0~1
+}
+```
+
 #### 1. 介绍
 
 * 1. 通过对 `xxx.proto` 通过注释的形式加入验证 `tag`(使用方式文档下方有说明), 然后再使用 `inject_tool.sh xxx.proto` 编译, 这样生成的 `xxx.pb.go` 文件中的 `struct` 注入自定义的 `tag`
@@ -64,7 +97,9 @@ protoFileDirName="test" # proto 存放的目录
 | datetime | yes         |时间验证, 支持分割符, 默认按照"-". 验证:xxxx/xx/xx xx:xx:xx, 格式: "datetime=/"                                     |
 | int      | yes         |整数型验证(字段类型为字符串)                                                                                      |
 | float    | yes         |浮动数型验证(字段类型为字符串)                                                                                    |
-- 自定义 msg 写法如下: 
+| re       | yes         |正则验证, 格式为: "re='xxx'", 如: "re='[a-z]+'"                                                                 |
+
+* 自定义 msg 写法如下: 
 	1. 如: `required|必填`, key 为 `required`, value 为 ``, cusMsg 为 `必填`; 
 	2. 如: `to=1~2|大于等于 1 且小于等于 2`, key 为 `to`, value 为 `1~2`, cusMsg 为 `大于等于 1 且小于等于 2`
 

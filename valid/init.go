@@ -28,7 +28,7 @@ var (
 // 标记
 var (
 	defaultTargetTag = "valid" // 默认的验证 tag
-	errEndFlag       = "; "    // 错误结束符号
+	ErrEndFlag       = "; "    // 错误结束符号(每个自定义 err 都需要将这个追加在后面, 用于分句)
 )
 
 // 错误
@@ -64,6 +64,11 @@ var (
 		"type Test struct {\n" +
 		"    Name string `valid:\"include=(ab/cd)\"`\n" +
 		"}")
+
+	reErr = errors.New(defaultTargetTag + " \"re\" is not ok, eg: " +
+		"type Test struct {\n" +
+		"    Age string `valid:\"re='\\\\d+'\"`\n" +
+		"}")
 )
 
 // 验证函数
@@ -91,10 +96,12 @@ var validName2FuncMap = map[string]CommonValidFn{
 	"datetime":   Datetime,
 	"int":        Int,
 	"float":      Float,
+	"re":         Re,
 }
 
 // CommonValidFn 通用验证函数, 主要用于回调
-// 注: 再写 errBuf 的时候建议用 GetJoinValidErrStr 包裹下, 这样结果显示易读
+// 注: 在写 errBuf 的时候建议用 GetJoinValidErrStr 包裹下, 这样产生的结果易读.
+//     否则需要再 errBuf.Writestring 最后要加上 ErrEndFlag 分割, 工具是通过 ErrEndFlag 进行分句
 type CommonValidFn func(errBuf *strings.Builder, validName, objName, fieldName string, tv reflect.Value)
 
 // Deprecated 此函数会修改全局变量, 会导致内存释放不了, 此推荐 ValidStructForMyValidFn
