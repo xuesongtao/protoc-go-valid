@@ -50,11 +50,11 @@ func ParseValidNameKV(validName string) (key, value, cusMsg string) {
 	return
 }
 
-// GetJoinValidErrStr 获取拼接验证的错误消息, 内容直接通过空格隔开, 最后会拼接 errEndFlag
+// GetJoinValidErrStr 获取拼接验证的错误消息, 内容直接通过空格隔开, 最后会拼接 ErrEndFlag
 func GetJoinValidErrStr(objName, fieldName, inputVal string, others ...string) (res string) {
 	res = "\"" + objName + "." + fieldName + "\" input \"" + inputVal + "\" "
 	if len(others) == 0 {
-		res += errEndFlag
+		res += ErrEndFlag
 		return
 	}
 
@@ -64,7 +64,7 @@ func GetJoinValidErrStr(objName, fieldName, inputVal string, others ...string) (
 			res += content + " "
 			continue
 		}
-		res += content + errEndFlag
+		res += content + ErrEndFlag
 	}
 	return
 }

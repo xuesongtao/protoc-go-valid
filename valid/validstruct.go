@@ -10,7 +10,6 @@ import (
 // VStruct 验证结构体
 type VStruct struct {
 	targetTag       string // 结构体中的待指定的验证的 tag
-	endFlag         string // 用于分割 err
 	errBuf          *strings.Builder
 	ruleObj         RM                       // 验证规则
 	valid2FieldsMap map[string][]*name2Value // 已存在的, 用于辅助 either, bothexist, botheq tag
@@ -33,7 +32,6 @@ func NewVStruct(targetTag ...string) *VStruct {
 		tagName = targetTag[0]
 	}
 	obj.targetTag = tagName
-	obj.endFlag = errEndFlag
 	obj.errBuf = new(strings.Builder)
 	return obj
 }
@@ -117,7 +115,7 @@ func (v *VStruct) validate(structName string, value reflect.Value, isValidSlice 
 		if len(isValidSlice) > 0 && isValidSlice[0] {
 			return v
 		}
-		v.errBuf.WriteString("src params \"" + structName + ty.Name() + "\" is not struct" + v.endFlag)
+		v.errBuf.WriteString("src params \"" + structName + ty.Name() + "\" is not struct" + ErrEndFlag)
 		return v
 	}
 
@@ -150,7 +148,7 @@ func (v *VStruct) validate(structName string, value reflect.Value, isValidSlice 
 			validKey, _, cusMsg := ParseValidNameKV(validName)
 			fn, err := v.getValidFn(validKey)
 			if err != nil {
-				v.errBuf.WriteString(err.Error() + errEndFlag)
+				v.errBuf.WriteString(err.Error() + ErrEndFlag)
 				continue
 			}
 
@@ -236,7 +234,7 @@ func (v *VStruct) initValid2FieldsMap(validName, structName, fieldName, cusMsg s
 func (v *VStruct) either(fieldInfos []*name2Value) {
 	l := len(fieldInfos)
 	if l <= 1 { // 如果只有 1 个就没有必要向下执行了
-		v.errBuf.WriteString(eitherValErr.Error() + v.endFlag)
+		v.errBuf.WriteString(eitherValErr.Error() + ErrEndFlag)
 		return
 	}
 	isZeroLen := 0
@@ -251,7 +249,7 @@ func (v *VStruct) either(fieldInfos []*name2Value) {
 	// 判断下是否全部为空
 	if l == isZeroLen {
 		fieldInfoStr = strings.TrimSuffix(fieldInfoStr, ", ")
-		v.errBuf.WriteString(fieldInfoStr + " they shouldn't all be empty" + v.endFlag)
+		v.errBuf.WriteString(fieldInfoStr + " they shouldn't all be empty" + ErrEndFlag)
 	}
 }
 
@@ -259,7 +257,7 @@ func (v *VStruct) either(fieldInfos []*name2Value) {
 func (v *VStruct) bothEq(fieldInfos []*name2Value) {
 	l := len(fieldInfos)
 	if l <= 1 { // 如果只有 1 个就没有必要向下执行了
-		v.errBuf.WriteString(bothEqValErr.Error() + v.endFlag)
+		v.errBuf.WriteString(bothEqValErr.Error() + ErrEndFlag)
 		return
 	}
 
@@ -286,7 +284,7 @@ func (v *VStruct) bothEq(fieldInfos []*name2Value) {
 
 	if !eq {
 		fieldInfoStr = strings.TrimSuffix(fieldInfoStr, ", ")
-		v.errBuf.WriteString(fieldInfoStr + " they shouldn't is both equal" + v.endFlag)
+		v.errBuf.WriteString(fieldInfoStr + " they shouldn't is both equal" + ErrEndFlag)
 	}
 }
 
@@ -318,8 +316,8 @@ func (v *VStruct) getError() error {
 		return nil
 	}
 
-	// 这里需要去掉最后一个 endFlag
-	return errors.New(strings.TrimSuffix(v.errBuf.String(), v.endFlag))
+	// 这里需要去掉最后一个 ErrEndFlag
+	return errors.New(strings.TrimSuffix(v.errBuf.String(), ErrEndFlag))
 }
 
 // =========================== 常用方法进行封装 =======================================

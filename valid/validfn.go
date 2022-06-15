@@ -16,7 +16,7 @@ func To(errBuf *strings.Builder, validName, objName, fieldName string, tv reflec
 	_, toVal, cusMsg := ParseValidNameKV(validName)
 	min, max, err := parseTagTo(toVal, true)
 	if err != nil {
-		errBuf.WriteString(err.Error())
+		errBuf.WriteString(err.Error() + ErrEndFlag)
 		return
 	}
 
@@ -84,7 +84,7 @@ func OTo(errBuf *strings.Builder, validName, objName, fieldName string, tv refle
 	_, toVal, cusMsg := ParseValidNameKV(validName)
 	min, max, err := parseTagTo(toVal, false)
 	if err != nil {
-		errBuf.WriteString(err.Error())
+		errBuf.WriteString(err.Error() + ErrEndFlag)
 		return
 	}
 
@@ -234,7 +234,7 @@ func in(errBuf *strings.Builder, validName, objName, fieldName string, tv reflec
 	// 取右括号的下标
 	rightBracketIndex := strings.Index(val, ")")
 	if leftBracketIndex == -1 || rightBracketIndex == -1 {
-		errBuf.WriteString(useErrMsg)
+		errBuf.WriteString(useErrMsg + ErrEndFlag)
 		return
 	}
 
@@ -418,6 +418,55 @@ func Datetime(errBuf *strings.Builder, validName, objName, fieldName string, tv 
 		return
 	}
 	errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, tv.String(), "is not datetime, eg: 1996"+defaultDateSplit+"09"+defaultDateSplit+"28 23:00:00"))
+}
+
+// Re 正则表达式
+// 使用格式如: re='\\d+'|匹配错误
+func Re(errBuf *strings.Builder, validName, objName, fieldName string, tv reflect.Value) {
+	if err := CheckFieldIsStr(objName, fieldName, tv); err != nil {
+		errBuf.WriteString(err.Error())
+		return
+	}
+
+	// 解析正则, 使用格式: re='\\d+'|匹配错误
+	splitIndex := strings.Index(validName, "'")
+	if splitIndex == -1 {
+		errBuf.WriteString(reErr.Error() + ErrEndFlag)
+		return
+	}
+
+	l := len(validName)
+	b := make([]byte, 0, l)
+	i := splitIndex + 1
+	for ; i < l; i++ {
+		v := validName[i]
+		b = append(b, v)
+		// 寻找结束 "'", 同时需要跳过里面有转义的单引号("\'")
+		next := i + 1
+		if next > l-1 {
+			errBuf.WriteString(reErr.Error() + ErrEndFlag)
+			return
+		}
+
+		if v != '\\' && validName[next] == '\'' {
+			break
+		}
+	}
+
+	pattern := string(b)
+	newValidName := validName[:splitIndex] + validName[i+1:] // 重新解析下自定义消息, 这里已经排除正则部分, 处理结果为: re='|xxxx
+	// fmt.Printf("pattern: %s, newValidName: %s\n", pattern, newValidName)
+	_, _, cusMsg := ParseValidNameKV(newValidName)
+	matched, _ := regexp.MatchString(pattern, tv.String())
+	if matched {
+		return
+	}
+
+	if cusMsg != "" {
+		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, tv.String(), cusMsg))
+		return
+	}
+	errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, tv.String(), "regex match is failed, regex: "+pattern))
 }
 
 // Int 验证整数
