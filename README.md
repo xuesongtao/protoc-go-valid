@@ -22,8 +22,6 @@ message InnerMessage {
 
 ```
 syntax = "proto3";
-package validator.examples;
-import "github.com/mwitkow/go-proto-validators/validator.proto";
 
 message InnerMessage {
   // some_integer can only be in range (0, 100).
