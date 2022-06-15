@@ -1,4 +1,4 @@
-# protoc-go-valid [![Open Source Love](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](gitee.com/xuesongtao/protoc-go-valid) 
+# protoc-go-valid [![Open Source Love](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](https://gitee.com/xuesongtao/protoc-go-valid) 
 
 #### 项目背景
 
@@ -22,8 +22,7 @@ message InnerMessage {
 
 ```
 syntax = "proto3";
-package validator.examples;
-import "github.com/mwitkow/go-proto-validators/validator.proto";
+package examples;
 
 message InnerMessage {
   // some_integer can only be in range (0, 100).
@@ -100,8 +99,8 @@ protoFileDirName="test" # proto 存放的目录
 | re       | yes         |正则验证, 格式为: "re='xxx'", 如: "re='[a-z]+'"                                                                 |
 
 * 自定义 msg 写法如下: 
-	1. 如: `required|必填`, key 为 `required`, value 为 ``, cusMsg 为 `必填`; 
-	2. 如: `to=1~2|大于等于 1 且小于等于 2`, key 为 `to`, value 为 `1~2`, cusMsg 为 `大于等于 1 且小于等于 2`
+	+ 1. 如: `required|必填`, key 为 `required`, value 为 ``, cusMsg 为 `必填`; 
+	+ 2. 如: `to=1~2|大于等于 1 且小于等于 2`, key 为 `to`, value 为 `1~2`, cusMsg 为 `大于等于 1 且小于等于 2`
 
 ###### 4.2.2 设置验证
 
@@ -120,8 +119,8 @@ protoFileDirName="test" # proto 存放的目录
 
 ```
 message Man {
-    string name = 1; // 姓名 @tag valid:"required,to=1~3" 
-    int32 age = 2; // 年龄 @tag valid:"to=1~150"
+  string name = 1; // 姓名 @tag valid:"required,to=1~3" 
+  int32 age = 2; // 年龄 @tag valid:"to=1~150"
 }
 ```
 
