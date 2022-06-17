@@ -297,9 +297,17 @@ func ExampleRe() {
 	}
 
 	fmt.Println(ValidateStruct(v))
-	
+
 	// Output:
 	// "Tmp.Name" input "测试" 说明: 姓名必须为英文; "Tmp.Age" input "1" 说明: 年龄必须为 2 位数
+}
+
+func ExampleJoinTag2Val() {
+	val := JoinTag2Val(VIn, "1/2/3", "必须在 1,2,3 之中")
+	fmt.Println(val)
+
+	// Output:
+	// in=(1/2/3)|必须在 1,2,3 之中
 }
 
 func ExampleValidStructForRule() {
@@ -310,7 +318,8 @@ func ExampleValidStructForRule() {
 	v := Tmp{Name: "xue", Age: 101}
 	ruleObj := NewRule()
 	if v.Name == "xue" {
-		ruleObj.Set("Age", "required|必填,le=100|年龄最大为 100")
+		// "required|必填,le=100|年龄最大为 100"
+		ruleObj.Set("Age", JoinTag2Val(Required, "", "必填"), JoinTag2Val(VLe, "100", "年龄最大为 100"))
 	}
 	if err := ValidStructForRule(ruleObj, &v); err != nil {
 		fmt.Println(err)
