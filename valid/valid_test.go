@@ -37,7 +37,7 @@ func TestTmp(t *testing.T) {
 	}
 
 	res := ValidateStruct(v)
-	sureStr := `"Tmp.Name" input "测试" 说明: 姓名必须为英文; "Tmp.Age" input "1" 说明: 年龄必须为 2 位数`
+	sureStr := `"Tmp.Name" input "测试", 说明: 姓名必须为英文; "Tmp.Age" input "1", 说明: 年龄必须为 2 位数`
 	// t.Log(res)
 	if !equal(res.Error(), sureStr) {
 		t.Error(noEqErr)
@@ -45,7 +45,7 @@ func TestTmp(t *testing.T) {
 }
 
 type TestOrder struct {
-	AppName              string                  `alipay:"to=5~10" validate:"minLen:2|maxLen:10"` // 应用名
+	AppName              string                  `alipay:"to=5~10" validate:"minLen:5|maxLen:10"` // 应用名
 	TotalFeeFloat        float64                 `alipay:"to=2~5" validate:"min:2|max:5"`         // 订单总金额，单位为分，详见支付金额
 	TestOrderDetailPtr   *TestOrderDetailPtr     `alipay:"required" validate:"required"`          // 商品详细描述
 	TestOrderDetailSlice []*TestOrderDetailSlice `alipay:"required" validate:"required"`          // 商品详细描述
@@ -91,7 +91,7 @@ func TestValidOrder(t *testing.T) {
 	if err == nil {
 		return
 	}
-	sureMsg := `"TestOrder.AppName" input "测试" strLength less than 5; "TestOrder.TestOrderDetailPtr.GoodsName" input "玻尿酸" strLength more than 2; "TestOrder-0.TestOrderDetailSlice.GoodsName" input "" is required; "TestOrder-1.TestOrderDetailSlice.BuyerNames" input "" is required; "TestOrder-2.TestOrderDetailSlice.TmpTest3" input "" is required; "TestOrder-2.TestOrderDetailSlice.BuyerNames" input "" is required; "TestOrder-3.TestOrderDetailSlice.BuyerNames" input "" is required`
+	sureMsg := `"TestOrder.AppName" input "测试", explain: it is less than 5 str-length; "TestOrder.TestOrderDetailPtr.GoodsName" input "玻尿酸", explain: it is more than 2 str-length; "TestOrder-0.TestOrderDetailSlice.GoodsName" input "", explain: it is required; "TestOrder-1.TestOrderDetailSlice.BuyerNames" input "", explain: it is required; "TestOrder-2.TestOrderDetailSlice.TmpTest3" input "", explain: it is required; "TestOrder-2.TestOrderDetailSlice.BuyerNames" input "", explain: it is required; "TestOrder-3.TestOrderDetailSlice.BuyerNames" input "", explain: it is required`
 	if !equal(err.Error(), sureMsg) {
 		t.Error(noEqErr)
 	}
@@ -138,7 +138,7 @@ func TestProtoPb1(t *testing.T) {
 		return
 	}
 
-	suerMsg := `"User.Man.Name" input "" 说明: 姓名必填; valid: "he" is not exist, You can call SetValidFn`
+	suerMsg := `"User.Man.Name" input "", 说明: 姓名必填; valid: "he" is not exist, You can call SetValidFn`
 	if !equal(err.Error(), suerMsg) {
 		t.Error(noEqErr)
 	}

@@ -7,11 +7,15 @@ import (
 	"sync"
 )
 
-// err msg 单位
 const (
-	strUnitStr      = "strLength"
-	numUnitStr      = "numSize"
-	sliceLenUnitStr = "sliceLen"
+	// err msg 单位
+	strUnitStr      = "str-length"
+	numUnitStr      = "num-size"
+	sliceLenUnitStr = "slice-len"
+
+	// err msg 前缀
+	ExplainEn = "explain:"
+	ExplainZh = "说明:"
 )
 
 // 验证 tag
@@ -130,57 +134,4 @@ type CommonValidFn func(errBuf *strings.Builder, validName, objName, fieldName s
 // SetCustomerValidFn 自定义验证函数
 func SetCustomerValidFn(validName string, fn CommonValidFn) {
 	validName2FuncMap[validName] = fn
-}
-
-// JoinTag2Val 生成 defaultTargetTag 的值
-// tag 为验证点
-// values[0] 会被解析为值
-// values[1] 会被解析为自定义错误信息
-// 如: JoinTag2Val(VRe, "\\d+", "必须为纯数字")
-// => re='\\d+'|必须为纯数字
-func JoinTag2Val(tag string, values ...string) string {
-	l := len(values)
-	if l == 0 {
-		return tag
-	}
-
-	tagVal := tag
-	if values[0] != "" {
-		needAddEqual := values[0][0] != '=' // 判断第一个值得首字符是否为 "="
-
-		// 处理 val 前缀
-		switch tag {
-		case Either, BothEq, VTo, VGe, VLe, VOTo, VGt, VLt, VEq, VNoEq:
-			if needAddEqual {
-				tagVal += "="
-			}
-		case VIn, VInclude:
-			if needAddEqual {
-				tagVal += "="
-			}
-			tagVal += "("
-		case VRe:
-			if needAddEqual {
-				tagVal += "="
-			}
-			tagVal += "'"
-		}
-
-		// 处理 val
-		tagVal += values[0]
-
-		// 处理 val 后缀
-		switch tag {
-		case VIn, VInclude:
-			tagVal += ")"
-		case VRe:
-			tagVal += "'"
-		}
-	}
-
-	// 自定义说明
-	if l >= 2 {
-		tagVal += "|" + values[1]
-	}
-	return tagVal
 }
