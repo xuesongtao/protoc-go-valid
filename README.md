@@ -1,4 +1,5 @@
-# protoc-go-valid [![Open Source Love](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](https://gitee.com/xuesongtao/protoc-go-valid)
+# protoc-go-valid [![Open Source Love](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](https://gitee.com/xuesongtao/protoc-go-valid) 
+[![OSCS Status](https://www.oscs1024.com/platform/badge/xuesongtao/protoc-go-valid.svg?size=small)](https://www.oscs1024.com/project/xuesongtao/protoc-go-valid?ref=badge_small)
 
 #### 项目背景
 
