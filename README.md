@@ -33,9 +33,6 @@ message InnerMessage {
 }
 ```
 
-### OSCS
-[![OSCS Status](https://www.oscs1024.com/platform/badge/xuesongtao/protoc-go-valid.svg?size=large)](https://www.oscs1024.com/project/xuesongtao/protoc-go-valid?ref=badge_large)
-
 #### 1. 介绍
 
 *  1. 通过对 `xxx.proto` 通过注释的形式加入验证 `tag`(使用方式文档下方有说明), 然后再使用 `inject_tool.sh xxx.proto` 编译, 这样生成的 `xxx.pb.go` 文件中的 `struct` 注入自定义的 `tag`
