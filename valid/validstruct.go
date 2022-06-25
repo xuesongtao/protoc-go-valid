@@ -2,7 +2,6 @@ package valid
 
 import (
 	"errors"
-	"fmt"
 	"reflect"
 	"strings"
 )
@@ -69,7 +68,7 @@ func (v *VStruct) Valid(src interface{}) error {
 	switch reflectValue.Kind() {
 	case reflect.Ptr:
 		if reflectValue.IsNil() {
-			return fmt.Errorf("src %q is nil", reflectValue.Type().String())
+			return errors.New("src \"" + reflectValue.Type().String() + "\" is nil")
 		}
 	}
 	return v.validate("", reflectValue).getError()
@@ -126,7 +125,6 @@ func (v *VStruct) validate(structName string, value reflect.Value, isValidSlice 
 		if !IsExported(structField.Name) {
 			continue
 		}
-		fieldValue := tv.Field(fieldNum)
 		validNames := structField.Tag.Get(v.targetTag)
 
 		// 如果设置了规则就覆盖 tag 中的验证内容
@@ -139,6 +137,7 @@ func (v *VStruct) validate(structName string, value reflect.Value, isValidSlice 
 			continue
 		}
 
+		fieldValue := tv.Field(fieldNum)
 		// 根据 tag 中的验证内容进行验证
 		for _, validName := range strings.Split(validNames, ",") {
 			if validName == "" {
@@ -148,7 +147,7 @@ func (v *VStruct) validate(structName string, value reflect.Value, isValidSlice 
 			validKey, _, cusMsg := ParseValidNameKV(validName)
 			fn, err := v.getValidFn(validKey)
 			if err != nil {
-				v.errBuf.WriteString(err.Error() + ErrEndFlag)
+				v.errBuf.WriteString(GetJoinFieldErr(structName+ty.Name(), structField.Name, err))
 				continue
 			}
 
@@ -185,7 +184,7 @@ func (v *VStruct) required(structName, fieldName, cusMsg string, tv reflect.Valu
 			return
 		}
 		// 生成如: "TestOrderDetailSlice.Price" is required
-		v.errBuf.WriteString(GetJoinValidErrStr(structName, fieldName, "", "is", Required))
+		v.errBuf.WriteString(GetJoinValidErrStr(structName, fieldName, "", ExplainEn, "it is", Required))
 	} else { // 有值的话需要判断下嵌套的类型
 		v.exist(false, structName, fieldName, cusMsg, tv)
 	}
@@ -205,7 +204,7 @@ func (v *VStruct) exist(isValidTvKind bool, structName, fieldName, cusMsg string
 		v.validate(structName, tv)
 	case reflect.Slice:
 		for i := 0; i < tv.Len(); i++ {
-			v.validate(fmt.Sprintf("%s-%d", structName, i), tv.Index(i), true)
+			v.validate(structName+"-"+ToStr(i), tv.Index(i), true)
 		}
 	default:
 		if isValidTvKind {
@@ -213,7 +212,7 @@ func (v *VStruct) exist(isValidTvKind bool, structName, fieldName, cusMsg string
 				v.errBuf.WriteString(GetJoinValidErrStr(structName, fieldName, tv.String(), cusMsg))
 				return
 			}
-			v.errBuf.WriteString(GetJoinValidErrStr(structName, fieldName, tv.String(), "is nonsupport", Exist))
+			v.errBuf.WriteString(GetJoinValidErrStr(structName, fieldName, tv.String(), ExplainEn, "it is nonsupport", Exist))
 		}
 	}
 }
@@ -233,8 +232,9 @@ func (v *VStruct) initValid2FieldsMap(validName, structName, fieldName, cusMsg s
 // either 判断两者不能都为空
 func (v *VStruct) either(fieldInfos []*name2Value) {
 	l := len(fieldInfos)
-	if l <= 1 { // 如果只有 1 个就没有必要向下执行了
-		v.errBuf.WriteString(eitherValErr.Error() + ErrEndFlag)
+	if l == 1 { // 如果只有 1 个就没有必要向下执行了
+		info := fieldInfos[0]
+		v.errBuf.WriteString(GetJoinFieldErr(info.structName, info.fieldName, eitherValErr))
 		return
 	}
 	isZeroLen := 0
@@ -249,15 +249,16 @@ func (v *VStruct) either(fieldInfos []*name2Value) {
 	// 判断下是否全部为空
 	if l == isZeroLen {
 		fieldInfoStr = strings.TrimSuffix(fieldInfoStr, ", ")
-		v.errBuf.WriteString(fieldInfoStr + " they shouldn't all be empty" + ErrEndFlag)
+		v.errBuf.WriteString(fieldInfoStr + " " + ExplainEn + " they shouldn't all be empty" + ErrEndFlag)
 	}
 }
 
 // bothEq 判断两者相等
 func (v *VStruct) bothEq(fieldInfos []*name2Value) {
 	l := len(fieldInfos)
-	if l <= 1 { // 如果只有 1 个就没有必要向下执行了
-		v.errBuf.WriteString(bothEqValErr.Error() + ErrEndFlag)
+	if l == 1 { // 如果只有 1 个就没有必要向下执行了
+		info := fieldInfos[0]
+		v.errBuf.WriteString(GetJoinFieldErr(info.structName, info.fieldName, bothEqValErr))
 		return
 	}
 
@@ -284,7 +285,7 @@ func (v *VStruct) bothEq(fieldInfos []*name2Value) {
 
 	if !eq {
 		fieldInfoStr = strings.TrimSuffix(fieldInfoStr, ", ")
-		v.errBuf.WriteString(fieldInfoStr + " they shouldn't is both equal" + ErrEndFlag)
+		v.errBuf.WriteString(fieldInfoStr + " " + ExplainEn + " they should be equal" + ErrEndFlag)
 	}
 }
 

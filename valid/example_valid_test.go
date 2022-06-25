@@ -19,13 +19,13 @@ func ExampleRequired() {
 	fmt.Println(ValidateStruct(v))
 
 	// Output:
-	// "Tmp.Name" input "" 说明: 姓名必填; "Tmp.Hobby" input "4" 说明: 爱好不能超过 3 个
+	// "Tmp.Name" input "", 说明: 姓名必填; "Tmp.Hobby" input "4", 说明: 爱好不能超过 3 个
 }
 
 func ExampleExist() {
 	type Man struct {
 		Name string `valid:"required"`
-		Age  int32  `valid:"le=0"`
+		Age  int32  `valid:"le=100"`
 	}
 
 	type Student struct {
@@ -39,14 +39,14 @@ func ExampleExist() {
 	teather := Teather{
 		M: &Man{
 			Name: "",
-			Age:  0,
+			Age:  90,
 		},
-		Stu: []*Student{{Man{Name: "test1", Age: 10}}},
+		Stu: []*Student{{Man{Name: "test1", Age: 120}}},
 	}
 	fmt.Println(ValidateStruct(teather))
 
 	// Output:
-	// "Teather.Man.Name" input "" is required; "Teather-0.Student.Man.Age" input "10" numSize more than 0
+	// "Teather.Man.Name" input "", explain: it is required; "Teather-0.Student.Man.Age" input "120", explain: it is more than 100 num-size
 }
 
 func ExampleTo() {
@@ -58,7 +58,7 @@ func ExampleTo() {
 	v := &Tmp{Name: "测试调1", Age: 100, Addr: "tets"}
 	fmt.Println(ValidateStruct(v))
 	// Output:
-	// "Tmp.Name" input "测试调1" 说明: 姓名长度为 1-3 个字符; "Tmp.Age" input "100" 说明: 年龄应该在 0-99 之间
+	// "Tmp.Name" input "测试调1", 说明: 姓名长度为 1-3 个字符; "Tmp.Age" input "100", 说明: 年龄应该在 0-99 之间
 }
 
 func ExampleGe() {
@@ -69,7 +69,7 @@ func ExampleGe() {
 	v := &Tmp{Name: "测试调", Age: -1}
 	fmt.Println(ValidateStruct(v))
 	// Output:
-	// "Tmp.Age" input "-1" 说明: 应该大于 0
+	// "Tmp.Age" input "-1", 说明: 应该大于 0
 }
 
 func ExampleLe() {
@@ -80,7 +80,7 @@ func ExampleLe() {
 	v := &Tmp{Name: "测试调", Age: 1}
 	fmt.Println(ValidateStruct(v))
 	// Output:
-	// "Tmp.Name" input "测试调" strLength more than 2; "Tmp.Age" input "1" numSize more than 0
+	// "Tmp.Name" input "测试调", explain: it is more than 2 str-length; "Tmp.Age" input "1", explain: it is more than 0 num-size
 }
 
 func ExampleOto() {
@@ -93,7 +93,7 @@ func ExampleOto() {
 	v := &Tmp{Name: "测试", Age: 0, NickName: "h1", Addr: "tet"}
 	fmt.Println(ValidateStruct(v))
 	// Output:
-	// "Tmp.Addr" input "tet" 说明: 家庭地址长度应该在 大于 1 且小于 3
+	// "Tmp.Addr" input "tet", 说明: 家庭地址长度应该在 大于 1 且小于 3
 }
 
 func ExampleGt() {
@@ -104,7 +104,7 @@ func ExampleGt() {
 	v := &Tmp{Name: "测试", Age: -1}
 	fmt.Println(ValidateStruct(v))
 	// Output:
-	// "Tmp.Name" input "测试" strLength less than or equal 2; "Tmp.Age" input "-1" numSize less than or equal 0
+	// "Tmp.Name" input "测试", explain: it is less than or equal 2 str-length; "Tmp.Age" input "-1", explain: it is less than or equal 0 num-size
 }
 
 func ExampleLt() {
@@ -115,7 +115,7 @@ func ExampleLt() {
 	v := &Tmp{Name: "测试", Age: 99}
 	fmt.Println(ValidateStruct(v))
 	// Output:
-	// "Tmp.Name" input "测试" strLength more than or equal 2; "Tmp.Age" input "99" numSize more than or equal 40
+	// "Tmp.Name" input "测试", explain: it is more than or equal 2 str-length; "Tmp.Age" input "99", explain: it is more than or equal 40 num-size
 }
 
 func ExampleEq() {
@@ -133,7 +133,7 @@ func ExampleEq() {
 	}
 	fmt.Println(ValidateStruct(v))
 	// Output:
-	// "Tmp.Age" input "21" numSize 说明: 年龄应该等于 20; "Tmp.Phone" input "1354004261" strLength should equal 11
+	// "Tmp.Age" input "21", 说明: 年龄应该等于 20; "Tmp.Phone" input "1354004261", explain: it should equal 11 str-length
 }
 
 func ExampleNoEq() {
@@ -151,7 +151,7 @@ func ExampleNoEq() {
 	}
 	fmt.Println(ValidateStruct(v))
 	// Output:
-	// "Tmp.Name" input "xue" strLength should no equal 3; "Tmp.Age" input "20" 说明: 年龄不应该等于 20; "Tmp.Score" input "80" numSize should no equal 80
+	// "Tmp.Name" input "xue", explain: it is not equal 3 str-length; "Tmp.Age" input "20", 说明: 年龄不应该等于 20; "Tmp.Score" input "80", explain: it is not equal 80 num-size
 }
 
 func ExampleDate() {
@@ -164,7 +164,7 @@ func ExampleDate() {
 	v := &Tmp{Year: "2001", Year2Month: "2000/01", Date: "2021/01/22", Datetime: "2021-01-11 23:22"}
 	fmt.Println(ValidateStruct(v))
 	// Output:
-	// "Tmp.Datetime" input "2021-01-11 23:22" 说明: 应该为 xxxx-xx-xx xx:xx:xx 的时间格式
+	// "Tmp.Datetime" input "2021-01-11 23:22", 说明: 应该为 xxxx-xx-xx xx:xx:xx 的时间格式
 }
 
 func ExampleEither() {
@@ -175,7 +175,7 @@ func ExampleEither() {
 	v := &Tmp{}
 	fmt.Println(ValidateStruct(v))
 	// Output:
-	// "Tmp.Either1", "Tmp.Either2" they shouldn't all be empty
+	// "Tmp.Either1", "Tmp.Either2" explain: they shouldn't all be empty
 }
 
 func ExampleBothEq() {
@@ -191,7 +191,7 @@ func ExampleBothEq() {
 	}
 	fmt.Println(ValidateStruct(v))
 	// Output:
-	// "Tmp.BothEq1", "Tmp.BothEq2", "Tmp.BothEq3" they shouldn't is both equal
+	// "Tmp.BothEq1", "Tmp.BothEq2", "Tmp.BothEq3" explain: they should be equal
 }
 
 func ExampleIn() {
@@ -202,28 +202,28 @@ func ExampleIn() {
 	v := &Tmp{SelectNum: 1, SelectStr: "ac"}
 	fmt.Println(ValidateStruct(v))
 	// Output:
-	// "Tmp.SelectStr" input "ac" 说明: 应该在 a/b/c/d 里选择
+	// "Tmp.SelectStr" input "ac", 说明: 应该在 a/b/c/d 里选择
 }
 
 func ExampleInclude() {
 	type Tmp struct {
-		SelectStr string `valid:"include=(hello/test)|应该包含 hello/test"`
+		SelectStr string `valid:"include=(hello/test)"`
 	}
 	v := &Tmp{SelectStr: "hel"}
 	fmt.Println(ValidateStruct(v))
 	// Output:
-	// "Tmp.SelectStr" input "hel" 说明: 应该包含 hello/test
+	// "Tmp.SelectStr" input "hel", explain: it should include (hello/test)
 }
 
 func ExamplePhone() {
 	type Tmp struct {
-		Phone string `valid:"phone|不是正确的手机号码"`
+		Phone string `valid:"phone"`
 	}
 	v := &Tmp{Phone: "1"}
 	fmt.Println(ValidateStruct(v))
 
 	// Output:
-	// "Tmp.Phone" input "1" 说明: 不是正确的手机号码
+	// "Tmp.Phone" input "1", explain: it is not phone
 }
 
 func ExampleEmail() {
@@ -234,7 +234,7 @@ func ExampleEmail() {
 	fmt.Println(ValidateStruct(v))
 
 	// Output:
-	// "Tmp.Email" input "xuesongtao512qq.com" is not email
+	// "Tmp.Email" input "xuesongtao512qq.com", explain: it is not email
 }
 
 func ExampleIdCard() {
@@ -245,7 +245,7 @@ func ExampleIdCard() {
 	fmt.Println(ValidateStruct(v))
 
 	// Output:
-	// "Tmp.IDCard" input "511321" is not idcard
+	// "Tmp.IDCard" input "511321", explain: it is not idcard
 }
 
 func ExampleInt() {
@@ -261,7 +261,27 @@ func ExampleInt() {
 	fmt.Println(ValidateStruct(&v))
 
 	// Output:
-	// "Tmp.IntString" input "11.121" 说明: 请输入整数类
+	// "Tmp.IntString" input "11.121", 说明: 请输入整数类
+}
+
+func ExampleInts() {
+	type Tmp struct {
+		IntStr   string   `valid:"ints"`
+		IntStr1   string   `valid:"ints=-"`
+		IntSlice    []int    `valid:"ints"`
+		IntSliceStr []string `valid:"ints"`
+	}
+
+	v := &Tmp{
+		IntStr:   "1,2,3",
+		IntStr1:   "1,2,3",
+		IntSliceStr: []string{"1", "hello"},
+		IntSlice:    []int{1, 2},
+	}
+	fmt.Println(ValidateStruct(&v))
+
+	// Output:
+	// "Tmp.IntStr1" input "1,2,3", explain: it is not separated by "-" num; "Tmp.IntSliceStr" input "[1, hello]", explain: slice/array element is not all num
 }
 
 func ExampleFloat() {
@@ -280,7 +300,7 @@ func ExampleFloat() {
 	fmt.Println(ValidateStruct(v))
 
 	// Output:
-	// "Tmp.FloatString" input "1" 说明: 请输入浮点数
+	// "Tmp.FloatString" input "1", 说明: 请输入浮点数
 }
 
 func ExampleRe() {
@@ -299,7 +319,7 @@ func ExampleRe() {
 	fmt.Println(ValidateStruct(v))
 
 	// Output:
-	// "Tmp.Name" input "测试" 说明: 姓名必须为英文; "Tmp.Age" input "1" 说明: 年龄必须为 2 位数
+	// "Tmp.Name" input "测试", 说明: 姓名必须为英文; "Tmp.Age" input "1", 说明: 年龄必须为 2 位数
 }
 
 func ExampleJoinTag2Val() {
@@ -326,7 +346,7 @@ func ExampleValidStructForRule() {
 	}
 
 	// Output:
-	// "Tmp.Age" input "101" 说明: 年龄最大为 100
+	// "Tmp.Age" input "101", 说明: 年龄最大为 100
 }
 
 func ExampleSetCustomerValidFn() {

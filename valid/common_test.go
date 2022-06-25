@@ -1,6 +1,7 @@
 package valid
 
 import (
+	"reflect"
 	"regexp"
 	"testing"
 )
@@ -23,4 +24,15 @@ func TestParseValidNameKV(t *testing.T) {
 
 func TestRegexp(t *testing.T) {
 	t.Log(regexp.MatchString("[\u4e00-\u9fa5]+", "abada"))
+}
+
+func TestToString(t *testing.T) {
+	t.Log(ToStr("1"))
+
+	type Tmp struct {
+		Name string
+	}
+	t.Log(ToStr(reflect.ValueOf(&Tmp{
+		Name: "test",
+	})))
 }

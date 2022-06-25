@@ -7,11 +7,15 @@ import (
 	"sync"
 )
 
-// err msg 单位
 const (
-	strUnitStr      = "strLength"
-	numUnitStr      = "numSize"
-	sliceLenUnitStr = "sliceLen"
+	// err msg 单位
+	strUnitStr      = "str-length"
+	numUnitStr      = "num-size"
+	sliceLenUnitStr = "slice-len"
+
+	// err msg 前缀
+	ExplainEn = "explain:"
+	ExplainZh = "说明:"
 )
 
 // 验证 tag
@@ -38,6 +42,7 @@ const (
 	VDate       = "date"       // 日
 	VDatetime   = "datetime"   // 日期+时间点
 	VInt        = "int"        // 整数
+	VInts       = "ints"       // 多个数字验证
 	VFloat      = "float"      // 浮动数
 	VRe         = "re"         // 正则
 )
@@ -66,6 +71,7 @@ var validName2FuncMap = map[string]CommonValidFn{
 	VDate:       Date,
 	VDatetime:   Datetime,
 	VInt:        Int,
+	VInts:       Ints,
 	VFloat:      Float,
 	VRe:         Re,
 }
@@ -119,6 +125,13 @@ var (
 		"type Test struct {\n" +
 		"    Age string `valid:\"re='\\\\d+'\"`\n" +
 		"}")
+
+	intsErr = errors.New(defaultTargetTag + " \"ints\" is not ok, eg: " +
+		"type Test struct {\n" +
+		"    Hobby1 string `valid:\"ints\"`\n" + // 默认按 "," 进行分割对字符串进行判断是否为整数
+		"    Hobby2 string `valid:\"ints=-\"`\n" + // 按 "-" 进行分割对字符串进行判断是否为整数
+		"    Hobby3 []string `valid:\"ints\"`\n" + // 遍历切片中的元素是否为整数
+		"}")
 )
 
 // CommonValidFn 通用验证函数, 主要用于回调
@@ -126,61 +139,8 @@ var (
 //     否则需要再 errBuf.Writestring 最后要加上 ErrEndFlag 分割, 工具是通过 ErrEndFlag 进行分句
 type CommonValidFn func(errBuf *strings.Builder, validName, objName, fieldName string, tv reflect.Value)
 
-// Deprecated 此函数会修改全局变量, 会导致内存释放不了, 此推荐 ValidStructForMyValidFn
 // SetCustomerValidFn 自定义验证函数
+// Deprecated 此函数会修改全局变量, 会导致内存释放不了, 此推荐 *VStruct.SetValidFn
 func SetCustomerValidFn(validName string, fn CommonValidFn) {
 	validName2FuncMap[validName] = fn
-}
-
-// JoinTag2Val 生成 defaultTargetTag 的值
-// tag 为验证点
-// values[0] 会被解析为值
-// values[1] 会被解析为自定义错误信息
-// 如: JoinTag2Val(VRe, "\\d+", "必须为纯数字")
-// => re='\\d+'|必须为纯数字
-func JoinTag2Val(tag string, values ...string) string {
-	l := len(values)
-	if l == 0 {
-		return tag
-	}
-
-	tagVal := tag
-	if values[0] != "" {
-		needAddEqual := values[0][0] != '=' // 判断第一个值得首字符是否为 "="
-
-		// 处理 val 前缀
-		switch tag {
-		case Either, BothEq, VTo, VGe, VLe, VOTo, VGt, VLt, VEq, VNoEq:
-			if needAddEqual {
-				tagVal += "="
-			}
-		case VIn, VInclude:
-			if needAddEqual {
-				tagVal += "="
-			}
-			tagVal += "("
-		case VRe:
-			if needAddEqual {
-				tagVal += "="
-			}
-			tagVal += "'"
-		}
-
-		// 处理 val
-		tagVal += values[0]
-
-		// 处理 val 后缀
-		switch tag {
-		case VIn, VInclude:
-			tagVal += ")"
-		case VRe:
-			tagVal += "'"
-		}
-	}
-
-	// 自定义说明
-	if l >= 2 {
-		tagVal += "|" + values[1]
-	}
-	return tagVal
 }

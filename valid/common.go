@@ -25,9 +25,9 @@ func ParseValidNameKV(validName string) (key, value, cusMsg string) {
 			cusMsg = validName[cusMsgIndex+1:]
 			// 根据如果说明有中文就加前缀为: 说明; 否则为 Explain
 			if match, _ := regexp.MatchString("[\u4e00-\u9fa5]", cusMsg); match {
-				cusMsg = "说明: " + cusMsg
+				cusMsg = ExplainZh + " " + cusMsg
 			} else {
-				cusMsg = "Explain: " + cusMsg
+				cusMsg = ExplainEn + " " + cusMsg
 			}
 		}
 		return
@@ -41,32 +41,43 @@ func ParseValidNameKV(validName string) (key, value, cusMsg string) {
 		// 根据如果说明有中文就加前缀为: 说明; 否则为 Explain
 		cusMsg = value[cusMsgIndex+1:]
 		if match, _ := regexp.MatchString("[\u4e00-\u9fa5]", cusMsg); match {
-			cusMsg = "说明: " + cusMsg
+			cusMsg = ExplainZh + " " + cusMsg
 		} else {
-			cusMsg = "Explain: " + cusMsg
+			cusMsg = ExplainEn + " " + cusMsg
 		}
 		value = value[:cusMsgIndex]
 	}
 	return
 }
 
+// GetJoinFieldErr 拼接字段错误
+func GetJoinFieldErr(objName, fieldName string, err error) string {
+	return "\"" + objName + "." + fieldName + " " + err.Error() + ErrEndFlag
+}
+
 // GetJoinValidErrStr 获取拼接验证的错误消息, 内容直接通过空格隔开, 最后会拼接 ErrEndFlag
-func GetJoinValidErrStr(objName, fieldName, inputVal string, others ...string) (res string) {
-	res = "\"" + objName + "." + fieldName + "\" input \"" + inputVal + "\" "
+func GetJoinValidErrStr(objName, fieldName, inputVal string, others ...string) string {
+	res := new(strings.Builder)
+	res.WriteString("\"" + objName + "." + fieldName + "\" input \"" + inputVal + "\"")
 	if len(others) == 0 {
-		res += ErrEndFlag
-		return
+		res.WriteString(ErrEndFlag)
+		return res.String()
 	}
 
+	res.WriteString(", ")
+	// 判断下是否需要注入: ExplainEn
+	if !strings.Contains(others[0], ExplainEn) && !strings.Contains(others[0], ExplainZh) {
+		res.WriteString(ExplainEn + " ")
+	}
 	lastIndex := len(others) - 1
 	for i, content := range others {
 		if i < lastIndex {
-			res += content + " "
+			res.WriteString(content + " ")
 			continue
 		}
-		res += content + ErrEndFlag
+		res.WriteString(content + ErrEndFlag)
 	}
-	return
+	return res.String()
 }
 
 // CheckFieldIsStr 验证字段类型是否为字符串
@@ -74,7 +85,18 @@ func CheckFieldIsStr(objName, fieldName string, tv reflect.Value) (err error) {
 	switch tv.Kind() {
 	case reflect.String:
 	default:
-		err = fmt.Errorf(GetJoinValidErrStr(objName, fieldName, tv.String()) + "must is string")
+		err = fmt.Errorf(GetJoinValidErrStr(objName, fieldName, tv.String(), ExplainEn, "it must is string"))
+	}
+	return
+}
+
+// ReflectKindIsNum 值是否为数字
+func ReflectKindIsNum(kind reflect.Kind) (is bool) {
+	switch kind {
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		is = true
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		is = true
 	}
 	return
 }
@@ -235,4 +257,46 @@ func RemoveValuePtr(t reflect.Value) reflect.Value {
 		t = t.Elem()
 	}
 	return t
+}
+
+// ToStr 将内容转为 string
+func ToStr(src interface{}) string {
+	if src == nil {
+		return ""
+	}
+
+	switch value := src.(type) {
+	case int:
+		return strconv.Itoa(value)
+	case int8:
+		return strconv.Itoa(int(value))
+	case int16:
+		return strconv.Itoa(int(value))
+	case int32:
+		return strconv.Itoa(int(value))
+	case int64:
+		return strconv.FormatInt(value, 10)
+	case uint:
+		return strconv.FormatUint(uint64(value), 10)
+	case uint8:
+		return strconv.FormatUint(uint64(value), 10)
+	case uint16:
+		return strconv.FormatUint(uint64(value), 10)
+	case uint32:
+		return strconv.FormatUint(uint64(value), 10)
+	case uint64:
+		return strconv.FormatUint(value, 10)
+	case float32:
+		return strconv.FormatFloat(float64(value), 'f', -1, 32)
+	case float64:
+		return strconv.FormatFloat(value, 'f', -1, 64)
+	case bool:
+		return strconv.FormatBool(value)
+	case string:
+		return value
+	case []byte:
+		return string(value)
+	default:
+		return fmt.Sprintf("%v", value)
+	}
 }

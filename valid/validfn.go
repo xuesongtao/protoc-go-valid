@@ -1,7 +1,6 @@
 package valid
 
 import (
-	"fmt"
 	"reflect"
 	"regexp"
 	"strconv"
@@ -16,7 +15,7 @@ func To(errBuf *strings.Builder, validName, objName, fieldName string, tv reflec
 	_, toVal, cusMsg := ParseValidNameKV(validName)
 	min, max, err := parseTagTo(toVal, true)
 	if err != nil {
-		errBuf.WriteString(err.Error() + ErrEndFlag)
+		errBuf.WriteString(GetJoinFieldErr(objName, fieldName, err))
 		return
 	}
 
@@ -26,8 +25,8 @@ func To(errBuf *strings.Builder, validName, objName, fieldName string, tv reflec
 			errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, cusMsg))
 			return
 		}
-		// 生成如: "TestOrder.AppName" input "xxx" len less than 2
-		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, unitStr, "less than", strconv.Itoa(min)))
+		// 生成如: "TestOrder.AppName" input "xxx", Explain: it is less than 2 length
+		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, ExplainEn, "it is less than", ToStr(min), unitStr))
 	}
 
 	if isMoreThan {
@@ -35,8 +34,8 @@ func To(errBuf *strings.Builder, validName, objName, fieldName string, tv reflec
 			errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, cusMsg))
 			return
 		}
-		// 生成如: "TestOrder.AppName" input "xxx" len more than 30
-		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, unitStr, "more than", strconv.Itoa(max)))
+		// 生成如: "TestOrder.AppName" input "xxx", Explain: it is more than 30 length
+		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, ExplainEn, "it is more than", ToStr(max), unitStr))
 	}
 }
 
@@ -53,8 +52,8 @@ func Ge(errBuf *strings.Builder, validName, objName, fieldName string, tv reflec
 			errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, cusMsg))
 			return
 		}
-		// 生成如: "TestOrder.AppName" input "xxx" len less than 2
-		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, unitStr, "less than", strconv.Itoa(min)))
+		// 生成如: "TestOrder.AppName" input "xxx", Explain: it is less than 2 length
+		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, ExplainEn, "it is less than", ToStr(min), unitStr))
 	}
 }
 
@@ -71,8 +70,8 @@ func Le(errBuf *strings.Builder, validName, objName, fieldName string, tv reflec
 			errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, cusMsg))
 			return
 		}
-		// 生成如: "TestOrder.AppName" input "xxx" len more than 30
-		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, unitStr, "more than", strconv.Itoa(max)))
+		// 生成如: "TestOrder.AppName" input "xxx", Explain: it is len more than 30 length
+		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, ExplainEn, "it is more than", ToStr(max), unitStr))
 	}
 }
 
@@ -84,7 +83,7 @@ func OTo(errBuf *strings.Builder, validName, objName, fieldName string, tv refle
 	_, toVal, cusMsg := ParseValidNameKV(validName)
 	min, max, err := parseTagTo(toVal, false)
 	if err != nil {
-		errBuf.WriteString(err.Error() + ErrEndFlag)
+		errBuf.WriteString(GetJoinFieldErr(objName, fieldName, err))
 		return
 	}
 
@@ -94,8 +93,8 @@ func OTo(errBuf *strings.Builder, validName, objName, fieldName string, tv refle
 			errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, cusMsg))
 			return
 		}
-		// 生成如: "TestOrder.AppName" input "xxx" len less than 2
-		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, unitStr, "less than or equal", strconv.Itoa(min)))
+		// 生成如: "TestOrder.AppName" input "xxx", Explain: it is less than 2 length
+		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, ExplainEn, "it is less than or equal", ToStr(min), unitStr))
 	}
 
 	if isMoreThan {
@@ -103,8 +102,8 @@ func OTo(errBuf *strings.Builder, validName, objName, fieldName string, tv refle
 			errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, cusMsg))
 			return
 		}
-		// 生成如: "TestOrder.AppName" input "xxx" len more than 30
-		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, unitStr, "more than or equal", strconv.Itoa(max)))
+		// 生成如: "TestOrder.AppName" input "xxx", Explain: it is more than 30 length
+		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, ExplainEn, "it is more than or equal", ToStr(max), unitStr))
 	}
 }
 
@@ -122,8 +121,8 @@ func Gt(errBuf *strings.Builder, validName, objName, fieldName string, tv reflec
 			errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, cusMsg))
 			return
 		}
-		// 生成如: "TestOrder.AppName" input "xxx" len less than 2
-		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, unitStr, "less than or equal", strconv.Itoa(min)))
+		// 生成如: "TestOrder.AppName" input "xxx", Explain: it is less than or equal 2 length
+		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, ExplainEn, "it is less than or equal", ToStr(min), unitStr))
 	}
 }
 
@@ -137,8 +136,7 @@ func Lt(errBuf *strings.Builder, validName, objName, fieldName string, tv reflec
 			errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, cusMsg))
 			return
 		}
-		// 生成如: "TestOrder.AppName" input "xxx" len more than 30
-		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, unitStr, "more than or equal", strconv.Itoa(max)))
+		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, ExplainEn, "it is more than or equal", ToStr(max), unitStr))
 	}
 }
 
@@ -153,10 +151,10 @@ func Eq(errBuf *strings.Builder, validName, objName, fieldName string, tv reflec
 	}
 
 	if cusMsg != "" {
-		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, fmt.Sprintf("%v", tv.Interface()), uintStr, cusMsg))
+		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, ToStr(tv.Interface()), cusMsg))
 		return
 	}
-	errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, fmt.Sprintf("%v", tv.Interface()), uintStr, "should equal", eqStr))
+	errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, ToStr(tv.Interface()), ExplainEn, "it should equal", eqStr, uintStr))
 }
 
 // NoEq 不等于验证
@@ -170,10 +168,10 @@ func NoEq(errBuf *strings.Builder, validName, objName, fieldName string, tv refl
 	}
 
 	if cusMsg != "" {
-		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, fmt.Sprintf("%v", tv.Interface()), cusMsg))
+		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, ToStr(tv.Interface()), cusMsg))
 		return
 	}
-	errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, fmt.Sprintf("%v", tv.Interface()), uintStr, "should no equal", eqStr))
+	errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, ToStr(tv.Interface()), ExplainEn, "it is not equal", eqStr, uintStr))
 }
 
 // eq 相等
@@ -226,15 +224,15 @@ func in(errBuf *strings.Builder, validName, objName, fieldName string, tv reflec
 	// 取左括号的下标
 	leftBracketIndex := strings.Index(val, "(")
 
-	useErrMsg := inValErr.Error()
+	useErrMsg := inValErr
 	if key == "include" {
-		useErrMsg = includeErr.Error()
+		useErrMsg = includeErr
 	}
 
 	// 取右括号的下标
 	rightBracketIndex := strings.Index(val, ")")
 	if leftBracketIndex == -1 || rightBracketIndex == -1 {
-		errBuf.WriteString(useErrMsg + ErrEndFlag)
+		errBuf.WriteString(GetJoinFieldErr(objName, fieldName, useErrMsg))
 		return
 	}
 
@@ -250,10 +248,10 @@ func in(errBuf *strings.Builder, validName, objName, fieldName string, tv reflec
 	default:
 		// include 必须为字符串才验证, 其他就不处理
 		if key == "include" {
-			errBuf.WriteString(useErrMsg)
+			errBuf.WriteString(GetJoinFieldErr(objName, fieldName, useErrMsg))
 			return
 		}
-		tvVal = fmt.Sprintf("%v", tv.Interface())
+		tvVal = ToStr(tv.Interface())
 	}
 
 	for _, v := range strings.Split(inVals, "/") {
@@ -268,7 +266,7 @@ func in(errBuf *strings.Builder, validName, objName, fieldName string, tv reflec
 			errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, tvVal, cusMsg))
 			return
 		}
-		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, tvVal, "should "+key+" ("+inVals+")"))
+		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, tvVal, ExplainEn, "it should "+key+" ("+inVals+")"))
 	}
 }
 
@@ -288,7 +286,7 @@ func Phone(errBuf *strings.Builder, validName, objName, fieldName string, tv ref
 		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, tv.String(), cusMsg))
 		return
 	}
-	errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, tv.String(), "is not phone"))
+	errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, tv.String(), ExplainEn, "it is not phone"))
 }
 
 // Email 验证邮箱
@@ -307,7 +305,7 @@ func Email(errBuf *strings.Builder, validName, objName, fieldName string, tv ref
 		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, tv.String(), cusMsg))
 		return
 	}
-	errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, tv.String(), "is not email"))
+	errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, tv.String(), ExplainEn, "it is not email"))
 }
 
 // IDCard 验证身份证
@@ -326,7 +324,7 @@ func IDCard(errBuf *strings.Builder, validName, objName, fieldName string, tv re
 		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, tv.String(), cusMsg))
 		return
 	}
-	errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, tv.String(), "is not idcard"))
+	errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, tv.String(), ExplainEn, "it is not idcard"))
 }
 
 // Year 验证年
@@ -345,7 +343,7 @@ func Year(errBuf *strings.Builder, validName, objName, fieldName string, tv refl
 		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, tv.String(), cusMsg))
 		return
 	}
-	errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, tv.String(), "is not year, eg: 1996"))
+	errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, tv.String(), ExplainEn, "it is not year, eg: 1996"))
 }
 
 // Year2Month 验证年月
@@ -369,7 +367,7 @@ func Year2Month(errBuf *strings.Builder, validName, objName, fieldName string, t
 		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, tv.String(), cusMsg))
 		return
 	}
-	errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, tv.String(), "is not year2month, eg: 1996"+defaultDateSplit+"09"))
+	errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, tv.String(), ExplainEn, "it is not year2month, eg: 1996"+defaultDateSplit+"09"))
 }
 
 // Date 验证日期
@@ -393,7 +391,7 @@ func Date(errBuf *strings.Builder, validName, objName, fieldName string, tv refl
 		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, tv.String(), cusMsg))
 		return
 	}
-	errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, tv.String(), "is not date, eg: 1996"+defaultDateSplit+"09"+defaultDateSplit+"28"))
+	errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, tv.String(), ExplainEn, "it is not date, eg: 1996"+defaultDateSplit+"09"+defaultDateSplit+"28"))
 }
 
 // Datetime 验证时间
@@ -417,7 +415,7 @@ func Datetime(errBuf *strings.Builder, validName, objName, fieldName string, tv 
 		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, tv.String(), cusMsg))
 		return
 	}
-	errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, tv.String(), "is not datetime, eg: 1996"+defaultDateSplit+"09"+defaultDateSplit+"28 23:00:00"))
+	errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, tv.String(), ExplainEn, "it is not datetime, eg: 1996"+defaultDateSplit+"09"+defaultDateSplit+"28 23:00:00"))
 }
 
 // Re 正则表达式
@@ -431,7 +429,7 @@ func Re(errBuf *strings.Builder, validName, objName, fieldName string, tv reflec
 	// 解析正则, 使用格式: re='\\d+'|匹配错误
 	splitIndex := strings.Index(validName, "'")
 	if splitIndex == -1 {
-		errBuf.WriteString(reErr.Error() + ErrEndFlag)
+		errBuf.WriteString(GetJoinFieldErr(objName, fieldName, reErr))
 		return
 	}
 
@@ -444,7 +442,7 @@ func Re(errBuf *strings.Builder, validName, objName, fieldName string, tv reflec
 		// 寻找结束 "'", 同时需要跳过里面有转义的单引号("\'")
 		next := i + 1
 		if next > l-1 {
-			errBuf.WriteString(reErr.Error() + ErrEndFlag)
+			errBuf.WriteString(GetJoinFieldErr(objName, fieldName, reErr))
 			return
 		}
 
@@ -466,22 +464,22 @@ func Re(errBuf *strings.Builder, validName, objName, fieldName string, tv reflec
 		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, tv.String(), cusMsg))
 		return
 	}
-	errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, tv.String(), "regex match is failed, regex: "+pattern))
+	errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, tv.String(), ExplainEn, "regex match is failed, pattern: "+pattern))
 }
 
 // Int 验证整数
 func Int(errBuf *strings.Builder, validName, objName, fieldName string, tv reflect.Value) {
 	matched := true
 	valStr := ""
-	switch tv.Kind() {
+	switch kind := tv.Kind(); kind {
 	case reflect.String:
 		valStr = tv.String()
 		matched, _ = regexp.MatchString("^\\d+$", valStr)
-	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
 	default:
-		valStr = fmt.Sprintf("%v", tv.Interface())
-		matched = false
+		if !ReflectKindIsNum(kind) {
+			valStr = ToStr(tv.Interface())
+			matched = false
+		}
 	}
 
 	if matched {
@@ -493,7 +491,66 @@ func Int(errBuf *strings.Builder, validName, objName, fieldName string, tv refle
 		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, cusMsg))
 		return
 	}
-	errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, "is not integer"))
+	errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, ExplainEn, "it is not integer"))
+}
+
+// Ints 验证是否为多个数字
+// 1. 如果输入为 string, 默认按逗号拼接进行处理
+// 2. 如果为 slice/array, 会将每个值进行匹配判断
+func Ints(errBuf *strings.Builder, validName, objName, fieldName string, tv reflect.Value) {
+	is := true
+	valStr := ""
+	errSuffix := ""
+	_, split, cusMsg := ParseValidNameKV(validName)
+	if split == "" {
+		split = ","
+	}
+	re, _ := regexp.Compile(`^\d+$`)
+	switch kind := tv.Kind(); kind {
+	case reflect.String:
+		valStr = tv.String()
+		for _, v := range strings.Split(valStr, split) {
+			is = re.MatchString(v)
+			if !is {
+				break
+			}
+		}
+		errSuffix = "it is not separated by \"" + split + "\"" + " num"
+	case reflect.Array, reflect.Slice:
+		var tmpIs bool
+		l := tv.Len()
+		valStr = "["
+		for i := 0; i < l; i++ {
+			v := ToStr(tv.Index(i).Interface())
+			tmpIs = re.MatchString(v)
+			if !tmpIs {
+				is = tmpIs
+			}
+			if valStr == "[" {
+				valStr += v
+			} else {
+				valStr += ", " + v
+			}
+		}
+		valStr += "]"
+		errSuffix = "slice/array element is not all num"
+	default:
+		if ReflectKindIsNum(kind) {
+			return
+		}
+		errBuf.WriteString(GetJoinFieldErr(objName, fieldName, intsErr))
+		return
+	}
+
+	if is {
+		return
+	}
+
+	if cusMsg != "" {
+		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, cusMsg))
+		return
+	}
+	errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, ExplainEn, errSuffix))
 }
 
 // Float 验证浮动数
@@ -506,7 +563,7 @@ func Float(errBuf *strings.Builder, validName, objName, fieldName string, tv ref
 		matched, _ = regexp.MatchString("^\\d+.\\d+$", valStr)
 	case reflect.Float32, reflect.Float64:
 	default:
-		valStr = fmt.Sprintf("%v", tv.Interface())
+		valStr = ToStr(tv.Interface())
 		matched = false
 	}
 
@@ -519,5 +576,5 @@ func Float(errBuf *strings.Builder, validName, objName, fieldName string, tv ref
 		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, cusMsg))
 		return
 	}
-	errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, "is not float"))
+	errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, ExplainEn, "it is not float"))
 }
