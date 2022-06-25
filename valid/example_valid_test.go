@@ -264,6 +264,26 @@ func ExampleInt() {
 	// "Tmp.IntString" input "11.121", 说明: 请输入整数类
 }
 
+func ExampleInts() {
+	type Tmp struct {
+		IntStr   string   `valid:"ints"`
+		IntStr1   string   `valid:"ints=-"`
+		IntSlice    []int    `valid:"ints"`
+		IntSliceStr []string `valid:"ints"`
+	}
+
+	v := &Tmp{
+		IntStr:   "1,2,3",
+		IntStr1:   "1,2,3",
+		IntSliceStr: []string{"1", "hello"},
+		IntSlice:    []int{1, 2},
+	}
+	fmt.Println(ValidateStruct(&v))
+
+	// Output:
+	// "Tmp.IntStr1" input "1,2,3", explain: it is not separated by "-" num; "Tmp.IntSliceStr" input "[1, hello]", explain: slice/array element is not all num
+}
+
 func ExampleFloat() {
 	type Tmp struct {
 		FloatString string  `valid:"float|请输入浮点数"`

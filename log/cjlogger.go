@@ -13,9 +13,6 @@ const (
 	LevelError
 	LevelPanic
 	LevelFatal
-
-	LevelDev  = LevelDebug | LevelInfo | LevelWarn | LevelError | LevelFatal | LevelPanic
-	LevelProd = LevelInfo | LevelWarn | LevelError | LevelFatal | LevelPanic
 )
 
 var (

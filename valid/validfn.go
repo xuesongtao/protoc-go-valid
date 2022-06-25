@@ -15,7 +15,7 @@ func To(errBuf *strings.Builder, validName, objName, fieldName string, tv reflec
 	_, toVal, cusMsg := ParseValidNameKV(validName)
 	min, max, err := parseTagTo(toVal, true)
 	if err != nil {
-		errBuf.WriteString(err.Error() + ErrEndFlag)
+		errBuf.WriteString(GetJoinFieldErr(objName, fieldName, err))
 		return
 	}
 
@@ -83,7 +83,7 @@ func OTo(errBuf *strings.Builder, validName, objName, fieldName string, tv refle
 	_, toVal, cusMsg := ParseValidNameKV(validName)
 	min, max, err := parseTagTo(toVal, false)
 	if err != nil {
-		errBuf.WriteString(err.Error() + ErrEndFlag)
+		errBuf.WriteString(GetJoinFieldErr(objName, fieldName, err))
 		return
 	}
 
@@ -224,15 +224,15 @@ func in(errBuf *strings.Builder, validName, objName, fieldName string, tv reflec
 	// 取左括号的下标
 	leftBracketIndex := strings.Index(val, "(")
 
-	useErrMsg := inValErr.Error()
+	useErrMsg := inValErr
 	if key == "include" {
-		useErrMsg = includeErr.Error()
+		useErrMsg = includeErr
 	}
 
 	// 取右括号的下标
 	rightBracketIndex := strings.Index(val, ")")
 	if leftBracketIndex == -1 || rightBracketIndex == -1 {
-		errBuf.WriteString(useErrMsg + ErrEndFlag)
+		errBuf.WriteString(GetJoinFieldErr(objName, fieldName, useErrMsg))
 		return
 	}
 
@@ -248,7 +248,7 @@ func in(errBuf *strings.Builder, validName, objName, fieldName string, tv reflec
 	default:
 		// include 必须为字符串才验证, 其他就不处理
 		if key == "include" {
-			errBuf.WriteString(useErrMsg)
+			errBuf.WriteString(GetJoinFieldErr(objName, fieldName, useErrMsg))
 			return
 		}
 		tvVal = ToStr(tv.Interface())
@@ -429,7 +429,7 @@ func Re(errBuf *strings.Builder, validName, objName, fieldName string, tv reflec
 	// 解析正则, 使用格式: re='\\d+'|匹配错误
 	splitIndex := strings.Index(validName, "'")
 	if splitIndex == -1 {
-		errBuf.WriteString(reErr.Error() + ErrEndFlag)
+		errBuf.WriteString(GetJoinFieldErr(objName, fieldName, reErr))
 		return
 	}
 
@@ -442,7 +442,7 @@ func Re(errBuf *strings.Builder, validName, objName, fieldName string, tv reflec
 		// 寻找结束 "'", 同时需要跳过里面有转义的单引号("\'")
 		next := i + 1
 		if next > l-1 {
-			errBuf.WriteString(reErr.Error() + ErrEndFlag)
+			errBuf.WriteString(GetJoinFieldErr(objName, fieldName, reErr))
 			return
 		}
 
@@ -471,15 +471,15 @@ func Re(errBuf *strings.Builder, validName, objName, fieldName string, tv reflec
 func Int(errBuf *strings.Builder, validName, objName, fieldName string, tv reflect.Value) {
 	matched := true
 	valStr := ""
-	switch tv.Kind() {
+	switch kind := tv.Kind(); kind {
 	case reflect.String:
 		valStr = tv.String()
 		matched, _ = regexp.MatchString("^\\d+$", valStr)
-	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
 	default:
-		valStr = ToStr(tv.Interface())
-		matched = false
+		if !ReflectKindIsNum(kind) {
+			valStr = ToStr(tv.Interface())
+			matched = false
+		}
 	}
 
 	if matched {
@@ -492,6 +492,65 @@ func Int(errBuf *strings.Builder, validName, objName, fieldName string, tv refle
 		return
 	}
 	errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, ExplainEn, "it is not integer"))
+}
+
+// Ints 验证是否为多个数字
+// 1. 如果输入为 string, 默认按逗号拼接进行处理
+// 2. 如果为 slice/array, 会将每个值进行匹配判断
+func Ints(errBuf *strings.Builder, validName, objName, fieldName string, tv reflect.Value) {
+	is := true
+	valStr := ""
+	errSuffix := ""
+	_, split, cusMsg := ParseValidNameKV(validName)
+	if split == "" {
+		split = ","
+	}
+	re, _ := regexp.Compile(`^\d+$`)
+	switch kind := tv.Kind(); kind {
+	case reflect.String:
+		valStr = tv.String()
+		for _, v := range strings.Split(valStr, split) {
+			is = re.MatchString(v)
+			if !is {
+				break
+			}
+		}
+		errSuffix = "it is not separated by \"" + split + "\"" + " num"
+	case reflect.Array, reflect.Slice:
+		var tmpIs bool
+		l := tv.Len()
+		valStr = "["
+		for i := 0; i < l; i++ {
+			v := ToStr(tv.Index(i).Interface())
+			tmpIs = re.MatchString(v)
+			if !tmpIs {
+				is = tmpIs
+			}
+			if valStr == "[" {
+				valStr += v
+			} else {
+				valStr += ", " + v
+			}
+		}
+		valStr += "]"
+		errSuffix = "slice/array element is not all num"
+	default:
+		if ReflectKindIsNum(kind) {
+			return
+		}
+		errBuf.WriteString(GetJoinFieldErr(objName, fieldName, intsErr))
+		return
+	}
+
+	if is {
+		return
+	}
+
+	if cusMsg != "" {
+		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, cusMsg))
+		return
+	}
+	errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, ExplainEn, errSuffix))
 }
 
 // Float 验证浮动数

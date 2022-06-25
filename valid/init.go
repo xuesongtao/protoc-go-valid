@@ -42,6 +42,7 @@ const (
 	VDate       = "date"       // 日
 	VDatetime   = "datetime"   // 日期+时间点
 	VInt        = "int"        // 整数
+	VInts       = "ints"       // 多个数字验证
 	VFloat      = "float"      // 浮动数
 	VRe         = "re"         // 正则
 )
@@ -70,6 +71,7 @@ var validName2FuncMap = map[string]CommonValidFn{
 	VDate:       Date,
 	VDatetime:   Datetime,
 	VInt:        Int,
+	VInts:       Ints,
 	VFloat:      Float,
 	VRe:         Re,
 }
@@ -123,6 +125,13 @@ var (
 		"type Test struct {\n" +
 		"    Age string `valid:\"re='\\\\d+'\"`\n" +
 		"}")
+
+	intsErr = errors.New(defaultTargetTag + " \"ints\" is not ok, eg: " +
+		"type Test struct {\n" +
+		"    Hobby1 string `valid:\"ints\"`\n" + // 默认按 "," 进行分割对字符串进行判断是否为整数
+		"    Hobby2 string `valid:\"ints=-\"`\n" + // 按 "-" 进行分割对字符串进行判断是否为整数
+		"    Hobby3 []string `valid:\"ints\"`\n" + // 遍历切片中的元素是否为整数
+		"}")
 )
 
 // CommonValidFn 通用验证函数, 主要用于回调
@@ -130,8 +139,8 @@ var (
 //     否则需要再 errBuf.Writestring 最后要加上 ErrEndFlag 分割, 工具是通过 ErrEndFlag 进行分句
 type CommonValidFn func(errBuf *strings.Builder, validName, objName, fieldName string, tv reflect.Value)
 
-// Deprecated 此函数会修改全局变量, 会导致内存释放不了, 此推荐 ValidStructForMyValidFn
 // SetCustomerValidFn 自定义验证函数
+// Deprecated 此函数会修改全局变量, 会导致内存释放不了, 此推荐 *VStruct.SetValidFn
 func SetCustomerValidFn(validName string, fn CommonValidFn) {
 	validName2FuncMap[validName] = fn
 }

@@ -3,6 +3,7 @@ package valid
 import (
 	"fmt"
 	"reflect"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -25,23 +26,24 @@ func equal(dest, src interface{}) bool {
 
 func TestTmp(t *testing.T) {
 	type Tmp struct {
-		Name string `valid:"required|必填,re='[a-z]+'|姓名必须为英文"`
-		Age  string `valid:"re='\\d{2}'|年龄必须为 2 位数"`
-		Addr string `valid:"required|地址必须,re='[\u4e00-\u9fa5]'|地址必须为中文"`
+		IntString   string   `valid:"ints"`
+		IntSlice    []int    `valid:"ints"`
+		IntSliceStr []string `valid:"ints"`
 	}
 
 	v := &Tmp{
-		Name: "测试",
-		Age:  "1",
-		Addr: "四川成都",
+		IntString:   "1,2,3",
+		IntSlice:    []int{1, 2, 3},
+		IntSliceStr: []string{"1", "23"},
 	}
+	fmt.Println(ValidateStruct(&v))
 
-	res := ValidateStruct(v)
-	sureStr := `"Tmp.Name" input "测试", 说明: 姓名必须为英文; "Tmp.Age" input "1", 说明: 年龄必须为 2 位数`
-	// t.Log(res)
-	if !equal(res.Error(), sureStr) {
-		t.Error(noEqErr)
+	re, err := regexp.Compile(`^\d+$`)
+	if err != nil {
+		t.Fatal(err)
 	}
+	t.Log(re.MatchString("12"))
+
 }
 
 type TestOrder struct {
@@ -138,7 +140,7 @@ func TestProtoPb1(t *testing.T) {
 		return
 	}
 
-	suerMsg := `"User.Man.Name" input "", 说明: 姓名必填; valid: "he" is not exist, You can call SetValidFn`
+	suerMsg := `"User.Man.Name" input "", 说明: 姓名必填; "User.Man.Tmp valid: "he" is not exist, You can call SetValidFn`
 	if !equal(err.Error(), suerMsg) {
 		t.Error(noEqErr)
 	}

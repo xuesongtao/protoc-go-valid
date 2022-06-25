@@ -25,7 +25,7 @@ func ParseValidNameKV(validName string) (key, value, cusMsg string) {
 			cusMsg = validName[cusMsgIndex+1:]
 			// 根据如果说明有中文就加前缀为: 说明; 否则为 Explain
 			if match, _ := regexp.MatchString("[\u4e00-\u9fa5]", cusMsg); match {
-				cusMsg = "说明: " + cusMsg
+				cusMsg = ExplainZh + " " + cusMsg
 			} else {
 				cusMsg = ExplainEn + " " + cusMsg
 			}
@@ -41,13 +41,18 @@ func ParseValidNameKV(validName string) (key, value, cusMsg string) {
 		// 根据如果说明有中文就加前缀为: 说明; 否则为 Explain
 		cusMsg = value[cusMsgIndex+1:]
 		if match, _ := regexp.MatchString("[\u4e00-\u9fa5]", cusMsg); match {
-			cusMsg = "说明: " + cusMsg
+			cusMsg = ExplainZh + " " + cusMsg
 		} else {
 			cusMsg = ExplainEn + " " + cusMsg
 		}
 		value = value[:cusMsgIndex]
 	}
 	return
+}
+
+// GetJoinFieldErr 拼接字段错误
+func GetJoinFieldErr(objName, fieldName string, err error) string {
+	return "\"" + objName + "." + fieldName + " " + err.Error() + ErrEndFlag
 }
 
 // GetJoinValidErrStr 获取拼接验证的错误消息, 内容直接通过空格隔开, 最后会拼接 ErrEndFlag
@@ -61,7 +66,7 @@ func GetJoinValidErrStr(objName, fieldName, inputVal string, others ...string) s
 
 	res.WriteString(", ")
 	// 判断下是否需要注入: ExplainEn
-	if others[0] != ExplainEn && !strings.Contains(others[0], ExplainZh) {
+	if !strings.Contains(others[0], ExplainEn) && !strings.Contains(others[0], ExplainZh) {
 		res.WriteString(ExplainEn + " ")
 	}
 	lastIndex := len(others) - 1
@@ -81,6 +86,17 @@ func CheckFieldIsStr(objName, fieldName string, tv reflect.Value) (err error) {
 	case reflect.String:
 	default:
 		err = fmt.Errorf(GetJoinValidErrStr(objName, fieldName, tv.String(), ExplainEn, "it must is string"))
+	}
+	return
+}
+
+// ReflectKindIsNum 值是否为数字
+func ReflectKindIsNum(kind reflect.Kind) (is bool) {
+	switch kind {
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		is = true
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		is = true
 	}
 	return
 }

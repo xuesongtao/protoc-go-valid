@@ -125,7 +125,6 @@ func (v *VStruct) validate(structName string, value reflect.Value, isValidSlice 
 		if !IsExported(structField.Name) {
 			continue
 		}
-		fieldValue := tv.Field(fieldNum)
 		validNames := structField.Tag.Get(v.targetTag)
 
 		// 如果设置了规则就覆盖 tag 中的验证内容
@@ -138,6 +137,7 @@ func (v *VStruct) validate(structName string, value reflect.Value, isValidSlice 
 			continue
 		}
 
+		fieldValue := tv.Field(fieldNum)
 		// 根据 tag 中的验证内容进行验证
 		for _, validName := range strings.Split(validNames, ",") {
 			if validName == "" {
@@ -147,7 +147,7 @@ func (v *VStruct) validate(structName string, value reflect.Value, isValidSlice 
 			validKey, _, cusMsg := ParseValidNameKV(validName)
 			fn, err := v.getValidFn(validKey)
 			if err != nil {
-				v.errBuf.WriteString(err.Error() + ErrEndFlag)
+				v.errBuf.WriteString(GetJoinFieldErr(structName+ty.Name(), structField.Name, err))
 				continue
 			}
 
@@ -232,8 +232,9 @@ func (v *VStruct) initValid2FieldsMap(validName, structName, fieldName, cusMsg s
 // either 判断两者不能都为空
 func (v *VStruct) either(fieldInfos []*name2Value) {
 	l := len(fieldInfos)
-	if l <= 1 { // 如果只有 1 个就没有必要向下执行了
-		v.errBuf.WriteString(eitherValErr.Error() + ErrEndFlag)
+	if l == 1 { // 如果只有 1 个就没有必要向下执行了
+		info := fieldInfos[0]
+		v.errBuf.WriteString(GetJoinFieldErr(info.structName, info.fieldName, eitherValErr))
 		return
 	}
 	isZeroLen := 0
@@ -255,8 +256,9 @@ func (v *VStruct) either(fieldInfos []*name2Value) {
 // bothEq 判断两者相等
 func (v *VStruct) bothEq(fieldInfos []*name2Value) {
 	l := len(fieldInfos)
-	if l <= 1 { // 如果只有 1 个就没有必要向下执行了
-		v.errBuf.WriteString(bothEqValErr.Error() + ErrEndFlag)
+	if l == 1 { // 如果只有 1 个就没有必要向下执行了
+		info := fieldInfos[0]
+		v.errBuf.WriteString(GetJoinFieldErr(info.structName, info.fieldName, bothEqValErr))
 		return
 	}
 
@@ -283,7 +285,7 @@ func (v *VStruct) bothEq(fieldInfos []*name2Value) {
 
 	if !eq {
 		fieldInfoStr = strings.TrimSuffix(fieldInfoStr, ", ")
-		v.errBuf.WriteString(fieldInfoStr + " " + ExplainEn +" they should be equal" + ErrEndFlag)
+		v.errBuf.WriteString(fieldInfoStr + " " + ExplainEn + " they should be equal" + ErrEndFlag)
 	}
 }
 
