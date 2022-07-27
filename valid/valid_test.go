@@ -3,7 +3,6 @@ package valid
 import (
 	"fmt"
 	"reflect"
-	"regexp"
 	"strings"
 	"testing"
 
@@ -25,24 +24,14 @@ func equal(dest, src interface{}) bool {
 
 func TestTmp(t *testing.T) {
 	type Tmp struct {
-		IntString   string   `valid:"ints"`
-		IntSlice    []int    `valid:"ints"`
-		IntSliceStr []string `valid:"ints"`
+		Ip string `valid:"required,ipv4"`
 	}
 
 	v := &Tmp{
-		IntString:   "1,2,3",
-		IntSlice:    []int{1, 2, 3},
-		IntSliceStr: []string{"1", "23"},
+		// Ip: "61.240.17.210",
+		Ip: "256.12.22.4",
 	}
 	fmt.Println(ValidateStruct(&v))
-
-	re, err := regexp.Compile(`^\d+$`)
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Log(re.MatchString("12"))
-
 }
 
 type TestOrder struct {

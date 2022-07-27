@@ -248,6 +248,22 @@ func ExampleIdCard() {
 	// "Tmp.IDCard" input "511321", explain: it is not idcard
 }
 
+func ExampleIpv4() {
+	type Tmp struct {
+		Ip1 string `valid:"required,ipv4|ip不正确"`
+		Ip2 string `valid:"required,ipv4|ip不正确"`
+	}
+
+	v := &Tmp{
+		Ip1: "255.240.17.210",
+		Ip2: "256.240.17.300",
+	}
+	fmt.Println(ValidateStruct(&v))
+
+	// OutPut:
+	// "Tmp.Ip2" input "256.240.17.300", 说明: ip不正确
+}
+
 func ExampleInt() {
 	type Tmp struct {
 		IntString string `valid:"int|请输入整数类"`
@@ -266,15 +282,15 @@ func ExampleInt() {
 
 func ExampleInts() {
 	type Tmp struct {
-		IntStr   string   `valid:"ints"`
-		IntStr1   string   `valid:"ints=-"`
+		IntStr      string   `valid:"ints"`
+		IntStr1     string   `valid:"ints=-"`
 		IntSlice    []int    `valid:"ints"`
 		IntSliceStr []string `valid:"ints"`
 	}
 
 	v := &Tmp{
-		IntStr:   "1,2,3",
-		IntStr1:   "1,2,3",
+		IntStr:      "1,2,3",
+		IntStr1:     "1,2,3",
 		IntSliceStr: []string{"1", "hello"},
 		IntSlice:    []int{1, 2},
 	}

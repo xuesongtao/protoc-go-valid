@@ -45,6 +45,7 @@ const (
 	VInts       = "ints"       // 多个数字验证
 	VFloat      = "float"      // 浮动数
 	VRe         = "re"         // 正则
+	VIpv4       = "ipv4"       // ipv4
 )
 
 // 验证函数
@@ -74,6 +75,7 @@ var validName2FuncMap = map[string]CommonValidFn{
 	VInts:       Ints,
 	VFloat:      Float,
 	VRe:         Re,
+	VIpv4:       Ipv4,
 }
 
 // 对象
