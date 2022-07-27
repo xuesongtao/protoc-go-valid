@@ -289,6 +289,25 @@ func Phone(errBuf *strings.Builder, validName, objName, fieldName string, tv ref
 	errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, tv.String(), ExplainEn, "it is not phone"))
 }
 
+// Ipv4 ipv4 验证
+func Ipv4(errBuf *strings.Builder, validName, objName, fieldName string, tv reflect.Value) {
+	if err := CheckFieldIsStr(objName, fieldName, tv); err != nil {
+		errBuf.WriteString(err.Error())
+		return
+	}
+	matched, _ := regexp.MatchString(`^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)$`, tv.String())
+	if matched {
+		return
+	}
+
+	_, _, cusMsg := ParseValidNameKV(validName)
+	if cusMsg != "" {
+		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, tv.String(), cusMsg))
+		return
+	}
+	errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, tv.String(), ExplainEn, "it is not ipv4"))
+}
+
 // Email 验证邮箱
 func Email(errBuf *strings.Builder, validName, objName, fieldName string, tv reflect.Value) {
 	if err := CheckFieldIsStr(objName, fieldName, tv); err != nil {
