@@ -70,6 +70,15 @@ func (v *VStruct) Valid(src interface{}) error {
 		if reflectValue.IsNil() {
 			return errors.New("src \"" + reflectValue.Type().String() + "\" is nil")
 		}
+	case reflect.Slice:
+		var structName string
+		for i := 0; i < reflectValue.Len(); i++ {
+			if i == 0 {
+				structName = reflectValue.Index(i).Type().String()
+			}
+			v.validate(structName+"-"+ToStr(i), reflectValue.Index(i), true)
+		}
+		return v.getError()
 	}
 	return v.validate("", reflectValue).getError()
 }

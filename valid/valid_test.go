@@ -25,14 +25,16 @@ func equal(dest, src interface{}) bool {
 
 func TestTmp(t *testing.T) {
 	type Tmp struct {
-		Ip string `valid:"required,ipv4"`
+		Ip string     `valid:"required,ipv4" validate:"required"`
+		T  []TmpTest3 `valid:"required" validate:"required"`
 	}
 
 	v := &Tmp{
 		// Ip: "61.240.17.210",
 		Ip: "256.12.22.4",
 	}
-	fmt.Println(ValidateStruct(&v))
+	datas := append([]*Tmp{}, v, v, v)
+	fmt.Println(ValidateStruct(datas))
 }
 
 type TestOrder struct {
@@ -55,6 +57,44 @@ type TestOrderDetailSlice struct {
 
 type TmpTest3 struct {
 	Name string `alipay:"required" validate:"required"`
+}
+
+func TestValidManyStruct(t *testing.T) {
+	type Tmp struct {
+		Ip string     `valid:"required,ipv4" validate:"required"`
+		T  []TmpTest3 `valid:"required" validate:"required"`
+	}
+
+	v := &Tmp{
+		// Ip: "61.240.17.210",
+		Ip: "256.12.22.4",
+	}
+	datas := append([]*Tmp{}, v, v, v)
+	sureMsg := `"*valid.Tmp-0.Tmp.Ip" input "256.12.22.4", explain: it is not ipv4; "*valid.Tmp-0.Tmp.T" input "", explain: it is required; "*valid.Tmp-1.Tmp.Ip" input "256.12.22.4", explain: it is not ipv4; "*valid.Tmp-1.Tmp.T" input "", explain: it is required; "*valid.Tmp-2.Tmp.Ip" input "256.12.22.4", explain: it is not ipv4; "*valid.Tmp-2.Tmp.T" input "", explain: it is required`
+	err := ValidateStruct(datas)
+	if !equal(err.Error(), sureMsg) {
+		t.Error(noEqErr)
+	}
+}
+
+func TestValidManyStruct2(t *testing.T) {
+	type Tmp struct {
+		Ip string     `valid:"required,ipv4" validate:"required"`
+		T  []TmpTest3 `valid:"required" validate:"required"`
+	}
+
+	v := &Tmp{
+		// Ip: "61.240.17.210",
+		Ip: "256.12.22.4",
+	}
+	datas := append([]*Tmp{}, v, v, v)
+
+	// 不支持
+	validObj := validate.Struct(datas)
+	validObj.Validate()
+	for _, err := range validObj.Errors {
+		t.Log(err)
+	}
 }
 
 func TestValidOrder(t *testing.T) {
