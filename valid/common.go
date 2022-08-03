@@ -51,14 +51,27 @@ func ParseValidNameKV(validName string) (key, value, cusMsg string) {
 }
 
 // GetJoinFieldErr 拼接字段错误
-func GetJoinFieldErr(objName, fieldName string, err error) string {
-	return "\"" + objName + "." + fieldName + " " + err.Error() + ErrEndFlag
+func GetJoinFieldErr(objName, fieldName string, err interface{}) string {
+	res := ""
+	if objName != "" && fieldName != "" {
+		res += "\"" + objName + "." + fieldName + "\" "
+	}
+	switch v := err.(type) {
+	case string:
+		res += v
+	case error:
+		res += v.Error()
+	}
+	return res + ErrEndFlag
 }
 
 // GetJoinValidErrStr 获取拼接验证的错误消息, 内容直接通过空格隔开, 最后会拼接 ErrEndFlag
 func GetJoinValidErrStr(objName, fieldName, inputVal string, others ...string) string {
 	res := new(strings.Builder)
-	res.WriteString("\"" + objName + "." + fieldName + "\" input \"" + inputVal + "\"")
+	if objName != "" && fieldName != "" {
+		res.WriteString("\"" + objName + "." + fieldName + "\" ")
+	}
+	res.WriteString("input \"" + inputVal + "\"")
 	if len(others) == 0 {
 		res.WriteString(ErrEndFlag)
 		return res.String()

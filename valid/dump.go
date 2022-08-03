@@ -5,11 +5,6 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
-	"time"
-)
-
-var (
-	timeType = reflect.TypeOf(time.Time{})
 )
 
 // dumpStruct
@@ -95,7 +90,7 @@ func (d *dumpStruct) loopHandleKV(s reflect.StructField, tv reflect.Value, isNee
 	}
 
 	// 不处理的内容
-	if s.Name == "Time" && s.Type == timeType {
+	if s.Name == "Time" && s.Type == timeReflectType {
 		d.buf.WriteString("\"time is not handle\"")
 		return
 	}
