@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"strings"
 	"sync"
+	"time"
 )
 
 const (
@@ -46,6 +47,7 @@ const (
 	VFloat      = "float"      // 浮动数
 	VRe         = "re"         // 正则
 	VIpv4       = "ipv4"       // ipv4
+	VUnique     = "unique"     // 唯一验证
 )
 
 // 验证函数
@@ -76,11 +78,14 @@ var validName2FuncMap = map[string]CommonValidFn{
 	VFloat:      Float,
 	VRe:         Re,
 	VIpv4:       Ipv4,
+	VUnique:     Unique,
 }
 
 // 对象
 var (
-	syncValidPool = sync.Pool{New: func() interface{} { return new(VStruct) }}
+	syncValidStructPool = sync.Pool{New: func() interface{} { return new(VStruct) }}
+	syncValidVarPool    = sync.Pool{New: func() interface{} { return new(VVar) }}
+	timeReflectType     = reflect.TypeOf(time.Time{})
 )
 
 // 标记
@@ -133,6 +138,13 @@ var (
 		"    Hobby1 string `valid:\"ints\"`\n" + // 默认按 "," 进行分割对字符串进行判断是否为整数
 		"    Hobby2 string `valid:\"ints=-\"`\n" + // 按 "-" 进行分割对字符串进行判断是否为整数
 		"    Hobby3 []string `valid:\"ints\"`\n" + // 遍历切片中的元素是否为整数
+		"}")
+
+	uniqueErr = errors.New(defaultTargetTag + " \"unique\" is not ok, eg: " +
+		"type Test struct {\n" +
+		"    Hobby1 string `valid:\"unique\"`\n" + // 按 "," 进行分割对字符串进行判断是否唯一
+		"    Hobby2 []string `valid:\"ints\"`\n" + // 遍历切片中的元素是否唯一
+		"    Hobby3 []int `valid:\"ints\"`\n" + // 遍历切片中的元素是否唯一
 		"}")
 )
 

@@ -69,11 +69,12 @@ protoFileDirName="test" # proto 存放的目录
 
 ##### 4.1 介绍
 
-* 暂时只支持对 `struct` 的验证, **会一次性根据对 `struct` 设置的规则进行验证(包含嵌套验证), 将最终的所有错误都返回**
+* 支持对 **一个或多个struct**, **会一次性根据对 `struct` 设置的规则进行验证(包含嵌套验证), 将最终的所有错误都返回**
+* 支持对 **单个变量** 的验证, 变量可以为切片/数组/单个[int系列, float系列, bool系列, string系列]进行验证
 
 * 本工具易于拓展, 在功能方面不及业界著名 `validate`, 但在性能方面优于 `validate`, 需要调试可以在 `dev` 分支上, 同时该分支有性能测试数据
 
-##### 4.2 验证 Struct
+##### 4.2 验证
 
 ###### 4.2.1 支持的验证如下:
 
@@ -105,6 +106,7 @@ protoFileDirName="test" # proto 存放的目录
 | ints | yes |验证是否为多个数字. 如果输入为 string, 默认按逗号拼接进行验证; 如果为 slice/array, 会将每个值进行匹配判断 |
 | float | yes |浮动数型验证 |
 | re | yes |正则验证, 格式为: "re='xxx'", 如: "re='[a-z]+'" |
+| unique | yes |唯一验证, 说明: 1.对以逗号隔开的字符串进行唯一验证; 2. 对切片/数组元素[int 系列, float系列, bool系列, string系列]进行唯一验证 |
 
 * 自定义 msg 写法如下:
   + 1. 如: `required|必填`, key 为 `required`, value 为 ``, cusMsg 为 `必填`; 

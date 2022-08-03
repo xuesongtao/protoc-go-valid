@@ -338,6 +338,27 @@ func ExampleRe() {
 	// "Tmp.Name" input "测试", 说明: 姓名必须为英文; "Tmp.Age" input "1", 说明: 年龄必须为 2 位数
 }
 
+func ExampleUnique() {
+	type Tmp struct {
+		Name      string   `valid:"required|必填,re='[a-z]+'|姓名必须为英文"`
+		Hobby     string   `valid:"required|必填,unique|爱好唯一"`
+		ClassName []string `valid:"required|必填,unique|班级名唯一"`
+		LikeNum   []int    `valid:"required|必填,unique|幸运数唯一"`
+	}
+
+	v := &Tmp{
+		Name:      "测试",
+		Hobby:     "打篮球,踢足球,打篮球",
+		ClassName: []string{"美术班", "算术班", "足球班"},
+		LikeNum:   []int{1, 2, 3, 1},
+	}
+
+	fmt.Println(ValidateStruct(v))
+
+	// Output:
+	// "Tmp.Name" input "测试", 说明: 姓名必须为英文; "Tmp.Hobby" input "打篮球,踢足球,打篮球", 说明: 爱好唯一; "Tmp.LikeNum" input "[1,2,3,1]", 说明: 幸运数唯一
+}
+
 func ExampleJoinTag2Val() {
 	val := JoinTag2Val(VIn, "1/2/3", "必须在 1,2,3 之中")
 	fmt.Println(val)

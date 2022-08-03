@@ -3,10 +3,7 @@ package valid
 import (
 	"fmt"
 	"reflect"
-	"strings"
 	"testing"
-
-	// "github.com/gookit/validate"
 )
 
 const (
@@ -23,27 +20,26 @@ func equal(dest, src interface{}) bool {
 }
 
 func TestTmp(t *testing.T) {
-	type Tmp struct {
-		Ip string `valid:"required,ipv4"`
+	t.Skip("tmp")
+	err := Var([]string{"test", "test1", "test"}, Required, VUnique)
+	sureMsg := `input "12", explain: it should in (11/2/3)`
+	if !equal(err.Error(), sureMsg) {
+		t.Error(noEqErr)
 	}
-
-	v := &Tmp{
-		// Ip: "61.240.17.210",
-		Ip: "256.12.22.4",
-	}
-	fmt.Println(ValidateStruct(&v))
 }
 
 type TestOrder struct {
-	AppName              string                  `alipay:"to=5~10" validate:"minLen:5|maxLen:10"` // 应用名
-	TotalFeeFloat        float64                 `alipay:"to=2~5" validate:"min:2|max:5"`         // 订单总金额，单位为分，详见支付金额
-	TestOrderDetailPtr   *TestOrderDetailPtr     `alipay:"required" validate:"required"`          // 商品详细描述
-	TestOrderDetailSlice []*TestOrderDetailSlice `alipay:"required" validate:"required"`          // 商品详细描述
+	AppName string `alipay:"to=5~10" validate:"min=5,max=10"` // 应用名
+	// TotalFeeFloat        float64                 `alipay:"to=2~5" validate:"min:2|max:5"` // 订单总金额，单位为分，详见支付金额
+	TotalFeeFloat        float64                 `alipay:"to=2~5" validate:"min=2,max=5"` // 订单总金额，单位为分，详见支付金额
+	TestOrderDetailPtr   *TestOrderDetailPtr     `alipay:"required" validate:"required"`  // 商品详细描述
+	TestOrderDetailSlice []*TestOrderDetailSlice `alipay:"required" validate:"required"`  // 商品详细描述
 }
 
 type TestOrderDetailPtr struct {
-	TmpTest3  *TmpTest3 `alipay:"required" validate:"required"`
-	GoodsName string    `alipay:"to=1~2" validate:"minLen:1|maxLen:2"`
+	TmpTest3 *TmpTest3 `alipay:"required" validate:"required"`
+	// GoodsName string    `alipay:"to=1~2" validate:"minLen:1|maxLen:2"`
+	GoodsName string `alipay:"to=1~2" validate:"min=1,max=2"`
 }
 
 type TestOrderDetailSlice struct {
@@ -54,6 +50,43 @@ type TestOrderDetailSlice struct {
 
 type TmpTest3 struct {
 	Name string `alipay:"required" validate:"required"`
+}
+
+func TestValidManyStruct(t *testing.T) {
+	type Tmp struct {
+		Ip string     `valid:"required,ipv4" validate:"required"`
+		T  []TmpTest3 `valid:"required" validate:"required"`
+	}
+
+	v := &Tmp{
+		// Ip: "61.240.17.210",
+		Ip: "256.12.22.4",
+	}
+	datas := append([]*Tmp{}, v, v, v)
+	sureMsg := `"*valid.Tmp-0.Tmp.Ip" input "256.12.22.4", explain: it is not ipv4; "*valid.Tmp-0.Tmp.T" input "", explain: it is required; "*valid.Tmp-1.Tmp.Ip" input "256.12.22.4", explain: it is not ipv4; "*valid.Tmp-1.Tmp.T" input "", explain: it is required; "*valid.Tmp-2.Tmp.Ip" input "256.12.22.4", explain: it is not ipv4; "*valid.Tmp-2.Tmp.T" input "", explain: it is required`
+	err := ValidateStruct(datas)
+	if !equal(err.Error(), sureMsg) {
+		t.Error(noEqErr)
+	}
+}
+
+func TestValidateForValid(t *testing.T) {
+	type Users struct {
+		Phone  string `valid:"required"`
+		Passwd string `valid:"required,to=6~20"`
+		Code   string `validate:"required,eq=6"`
+	}
+
+	users := &Users{
+		Phone:  "1326654487",
+		Passwd: "123",
+		Code:   "123456",
+	}
+	err := Struct(users)
+	sureMsg := `"Users.Passwd" input "123", explain: it is less than 6 str-length`
+	if !equal(err.Error(), sureMsg) {
+		t.Error(noEqErr)
+	}
 }
 
 func TestValidOrder(t *testing.T) {
@@ -87,53 +120,6 @@ func TestValidOrder(t *testing.T) {
 	}
 }
 
-// func TestValidateOrder(t *testing.T) {
-// 	testOrderDetailPtr := &TestOrderDetailPtr{
-// 		TmpTest3:  &TmpTest3{Name: "测试"},
-// 		GoodsName: "玻尿酸",
-// 	}
-// 	// testOrderDetailPtr = nil
-
-// 	testOrderDetails := []*TestOrderDetailSlice{
-// 		{TmpTest3: &TmpTest3{Name: "测试1"}, BuyerNames: []string{"test1", "hello2"}},
-// 		{TmpTest3: &TmpTest3{Name: "测试2"}, GoodsName: "隆鼻"},
-// 		{GoodsName: "丰胸"},
-// 		{TmpTest3: &TmpTest3{Name: "测试4"}, GoodsName: "隆鼻"},
-// 	}
-// 	// testOrderDetails = nil
-
-// 	u := &TestOrder{
-// 		AppName:              "集美测试",
-// 		TotalFeeFloat:        2,
-// 		TestOrderDetailPtr:   testOrderDetailPtr,
-// 		TestOrderDetailSlice: testOrderDetails,
-// 	}
-// 	validObj := validate.Struct(u)
-// 	validObj.Validate()
-// 	for _, err := range validObj.Errors {
-// 		t.Log(err)
-// 	}
-// }
-
-// func TestProtoPb1(t *testing.T) {
-// 	u := &test.User{
-// 		M: &test.Man{
-// 			Name: "",
-// 			Age:  0,
-// 		},
-// 		Phone: "13540042615",
-// 	}
-// 	err := ValidateStruct(u)
-// 	if err == nil {
-// 		return
-// 	}
-
-// 	suerMsg := `"User.Man.Name" input "" 说明: 姓名必填; valid: "he" is not exist, You can call SetValidFn`
-// 	if !equal(err.Error(), suerMsg) {
-// 		t.Error(noEqErr)
-// 	}
-// }
-
 func TestGetJoinValidErrStr(t *testing.T) {
 	t.Skip("GetJoinValidErrStr")
 	res := GetJoinValidErrStr("User", "Name", "xue", "len is less than 3")
@@ -142,162 +128,58 @@ func TestGetJoinValidErrStr(t *testing.T) {
 	}
 }
 
-// go test -benchmem -run=^$ -bench ^BenchmarkValid gitee.com/xuesongtao/protoc-go-valid/valid -v -count=5
+func TestVar(t *testing.T) {
+	t.Run("required", func(t *testing.T) {
+		err := Var("hello world", Required)
+		if err != nil {
+			t.Error(err)
+		}
+	})
 
-func BenchmarkValid(b *testing.B) {
-	b.ResetTimer()
-	testOrderDetailPtr := &TestOrderDetailPtr{
-		TmpTest3:  &TmpTest3{Name: "测试"},
-		GoodsName: "玻尿酸",
-	}
-	// testOrderDetailPtr = nil
+	t.Run("no support", func(t *testing.T) {
+		err := Var("hello world", Exist, Either, BothEq)
+		sureMsg := `valid "exist" is no support; valid "either" is no support; valid "botheq" is no support`
+		if !equal(err.Error(), sureMsg) {
+			t.Error(noEqErr)
+		}
+	})
 
-	testOrderDetails := []*TestOrderDetailSlice{
-		{TmpTest3: &TmpTest3{Name: "测试1"}, BuyerNames: []string{"test1", "hello2"}},
-		{TmpTest3: &TmpTest3{Name: "测试2"}, GoodsName: "隆鼻"},
-		{GoodsName: "丰胸"},
-		{TmpTest3: &TmpTest3{Name: "测试4"}, GoodsName: "隆鼻"},
-	}
-	// testOrderDetails = nil
+	t.Run("to", func(t *testing.T) {
+		err := Var(101, Required, GenValidKV(VTo, "1~100", "年龄1~100"))
+		sureMsg := `input "101", 说明: 年龄1~100`
+		if !equal(err.Error(), sureMsg) {
+			t.Error(noEqErr)
+		}
+	})
 
-	u := &TestOrder{
-		AppName:              "集美测试",
-		TotalFeeFloat:        2,
-		TestOrderDetailPtr:   testOrderDetailPtr,
-		TestOrderDetailSlice: testOrderDetails,
-	}
-	for i := 0; i < b.N; i++ {
-		_ = ValidateStruct(&u, "alipay")
-	}
-
-	// BenchmarkValid-8          162354              7325 ns/op            4635 B/op        108 allocs/op
-	// BenchmarkValid-8          160914              7321 ns/op            4635 B/op        108 allocs/op
-	// BenchmarkValid-8          162373              7303 ns/op            4635 B/op        108 allocs/op
-	// BenchmarkValid-8          160164              7414 ns/op            4635 B/op        108 allocs/op
-	// BenchmarkValid-8          161552              7494 ns/op            4635 B/op        108 allocs/op
-}
-
-// func BenchmarkValidate(b *testing.B) {
-// 	testOrderDetailPtr := &TestOrderDetailPtr{
-// 		TmpTest3:  &TmpTest3{Name: "测试"},
-// 		GoodsName: "玻尿酸",
-// 	}
-// 	// testOrderDetailPtr = nil
-
-// 	testOrderDetails := []*TestOrderDetailSlice{
-// 		{TmpTest3: &TmpTest3{Name: "测试1"}, BuyerNames: []string{"test1", "hello2"}},
-// 		{TmpTest3: &TmpTest3{Name: "测试2"}, GoodsName: "隆鼻"},
-// 		{GoodsName: "丰胸"},
-// 		{TmpTest3: &TmpTest3{Name: "测试4"}, GoodsName: "隆鼻"},
-// 	}
-// 	// testOrderDetails = nil
-
-// 	u := &TestOrder{
-// 		AppName:              "集美测试",
-// 		TotalFeeFloat:        2,
-// 		TestOrderDetailPtr:   testOrderDetailPtr,
-// 		TestOrderDetailSlice: testOrderDetails,
-// 	}
-// 	for i := 0; i < b.N; i++ {
-// 		validObj := validate.Struct(u)
-// 		validObj.Validate()
-// 		_ = validObj.Errors.Error()
-// 	}
-
-// 	// BenchmarkValidate-8        30902             38716 ns/op           33267 B/op        430 allocs/op
-// 	// BenchmarkValidate-8        30868             38861 ns/op           33263 B/op        430 allocs/op
-// 	// BenchmarkValidate-8        29767             39055 ns/op           33262 B/op        430 allocs/op
-// 	// BenchmarkValidate-8        30717             38774 ns/op           33268 B/op        430 allocs/op
-// 	// BenchmarkValidate-8        31004             38489 ns/op           33264 B/op        430 allocs/op
-// }
-
-func BenchmarkValidIf(b *testing.B) {
-	b.ResetTimer()
-	testOrderDetailPtr := &TestOrderDetailPtr{
-		TmpTest3:  &TmpTest3{Name: "测试"},
-		GoodsName: "玻尿酸",
-	}
-	// testOrderDetailPtr = nil
-
-	testOrderDetails := []*TestOrderDetailSlice{
-		{TmpTest3: &TmpTest3{Name: "测试1"}, BuyerNames: []string{"test1", "hello2"}},
-		{TmpTest3: &TmpTest3{Name: "测试2"}, GoodsName: "隆鼻"},
-		{GoodsName: "丰胸"},
-		{TmpTest3: &TmpTest3{Name: "测试4"}, GoodsName: "隆鼻"},
-	}
-	// testOrderDetails = nil
-
-	u := &TestOrder{
-		AppName:              "集美测试",
-		TotalFeeFloat:        2,
-		TestOrderDetailPtr:   testOrderDetailPtr,
-		TestOrderDetailSlice: testOrderDetails,
-	}
-
-	vFn := func(info *TestOrder) {
-		// 说明: 写入的内容为随意写
-		errBuf := new(strings.Builder)
-		if len(info.AppName) >= 2 {
-			errBuf.WriteString("info.AppName len is short \n")
+	t.Run("in", func(t *testing.T) {
+		err := Var("12", Required, GenValidKV(VIn, "11/2/3"))
+		sureMsg := `input "12", explain: it should in (11/2/3)`
+		if !equal(err.Error(), sureMsg) {
+			t.Error(noEqErr)
 		}
 
-		if len(info.AppName) <= 10 {
-			errBuf.WriteString("info.AppName len is long \n")
+		err = Var("device", Required, GenValidKV(VInclude, "test/devia"))
+		sureMsg = `input "device", explain: it should include (test/devia)`
+		if !equal(err.Error(), sureMsg) {
+			t.Error(noEqErr)
+		}
+	})
+
+	t.Run("phone", func(t *testing.T) {
+		err := Var("135400426170", Required, VPhone)
+		sureMsg := `input "135400426170", explain: it is not phone`
+		if !equal(err.Error(), sureMsg) {
+			t.Error(noEqErr)
 		}
 
-		if info.TotalFeeFloat >= 2 {
-			errBuf.WriteString("info.TotalFeeFloat should more than 2 \n")
+	})
+
+	t.Run("unique", func(t *testing.T) {
+		err := Var([]string{"test", "test1", "test"}, Required, VUnique)
+		sureMsg := `input "[test,test1,test]", explain: they're not unique`
+		if !equal(err.Error(), sureMsg) {
+			t.Error(noEqErr)
 		}
-
-		if info.TotalFeeFloat <= 5 {
-			errBuf.WriteString("info.TotalFeeFloat should more than 2 \n")
-		}
-
-		if info.TestOrderDetailPtr.TmpTest3 == nil {
-			errBuf.WriteString("info.TestOrderDetailPtr.TmpTest3 is nil \n")
-		} else {
-			if info.TestOrderDetailPtr.TmpTest3.Name == "" {
-				errBuf.WriteString("info.TestOrderDetailPtr.TmpTest3.Name is null \n")
-			}
-		}
-
-		if len(info.TestOrderDetailPtr.GoodsName) >= 2 {
-			errBuf.WriteString("info.TestOrderDetailPtr.GoodsName is null \n")
-		}
-
-		if len(info.TestOrderDetailPtr.GoodsName) <= 5 {
-			errBuf.WriteString("info.TestOrderDetailPtr.GoodsName is null \n")
-		}
-
-		if info.TestOrderDetailSlice == nil {
-			errBuf.WriteString("info.TestOrderDetailSlice is null \n")
-		} else {
-			for _, v := range info.TestOrderDetailSlice {
-				if v.TmpTest3 == nil {
-					errBuf.WriteString("info.TestOrderDetailPtr.GoodsName is null \n")
-				} else {
-					if v.TmpTest3.Name == "" {
-						errBuf.WriteString("info.TestOrderDetailPtr.GoodsName is null \n")
-					}
-				}
-
-				if len(v.BuyerNames) == 0 {
-					errBuf.WriteString("info.TestOrderDetailPtr.GoodsName is null \n")
-				}
-
-				if v.GoodsName == "" {
-					errBuf.WriteString("info.TestOrderDetailPtr.GoodsName is null \n")
-				}
-			}
-		}
-	}
-	for i := 0; i < b.N; i++ {
-		vFn(u)
-	}
-
-	// BenchmarkValidIf-8       4908489               242.1 ns/op          1232 B/op          5 allocs/op
-	// BenchmarkValidIf-8       4932530               240.9 ns/op          1232 B/op          5 allocs/op
-	// BenchmarkValidIf-8       4938175               252.1 ns/op          1232 B/op          5 allocs/op
-	// BenchmarkValidIf-8       4774190               251.2 ns/op          1232 B/op          5 allocs/op
-	// BenchmarkValidIf-8       4901599               253.2 ns/op          1232 B/op          5 allocs/op
+	})
 }

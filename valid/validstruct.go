@@ -25,7 +25,7 @@ type name2Value struct {
 
 // NewVStruct 验证结构体, 默认目标 tagName 为 "valid"
 func NewVStruct(targetTag ...string) *VStruct {
-	obj := syncValidPool.Get().(*VStruct)
+	obj := syncValidStructPool.Get().(*VStruct)
 	tagName := defaultTargetTag
 	if len(targetTag) > 0 {
 		tagName = targetTag[0]
@@ -41,7 +41,7 @@ func (v *VStruct) free() {
 	v.ruleObj = nil
 	v.valid2FieldsMap = nil
 	v.validFn = nil
-	syncValidPool.Put(v)
+	syncValidStructPool.Put(v)
 }
 
 // SetRule 添加验证规则
@@ -59,6 +59,8 @@ func (v *VStruct) getCusRule(structFieldName string) string {
 }
 
 // Valid 验证
+// 1. 支持单结构体验证
+// 2. 支持切片/数组类型结构体验证
 func (v *VStruct) Valid(src interface{}) error {
 	if src == nil {
 		return errors.New("src is nil")
@@ -70,6 +72,15 @@ func (v *VStruct) Valid(src interface{}) error {
 		if reflectValue.IsNil() {
 			return errors.New("src \"" + reflectValue.Type().String() + "\" is nil")
 		}
+	case reflect.Slice, reflect.Array:
+		var structName string
+		for i := 0; i < reflectValue.Len(); i++ {
+			if i == 0 {
+				structName = reflectValue.Index(i).Type().String()
+			}
+			v.validate(structName+"-"+ToStr(i), reflectValue.Index(i), true)
+		}
+		return v.getError()
 	}
 	return v.validate("", reflectValue).getError()
 }
@@ -93,7 +104,7 @@ func (v *VStruct) getValidFn(validName string) (CommonValidFn, error) {
 
 	fn, ok = validName2FuncMap[validName]
 	if !ok {
-		return nil, errors.New("valid: \"" + validName + "\" is not exist, You can call SetValidFn")
+		return nil, errors.New("valid \"" + validName + "\" is not exist, You can call SetValidFn")
 	}
 	return fn, nil
 }
@@ -114,7 +125,7 @@ func (v *VStruct) validate(structName string, value reflect.Value, isValidSlice 
 		if len(isValidSlice) > 0 && isValidSlice[0] {
 			return v
 		}
-		v.errBuf.WriteString("src params \"" + structName + ty.Name() + "\" is not struct" + ErrEndFlag)
+		v.errBuf.WriteString("src param \"" + structName + ty.Name() + "\" is not struct" + ErrEndFlag)
 		return v
 	}
 
@@ -178,16 +189,27 @@ func (v *VStruct) validate(structName string, value reflect.Value, isValidSlice 
 
 // required 验证 required
 func (v *VStruct) required(structName, fieldName, cusMsg string, tv reflect.Value) {
-	if tv.IsZero() { // 验证必填
+	ok := true
+	// 如果集合类型先判断下长度
+	switch tv.Kind() {
+	case reflect.Slice, reflect.Array:
+		if tv.Len() == 0 {
+			ok = false
+		}
+	}
+
+	if !ok || tv.IsZero() { // 验证必填
 		if cusMsg != "" {
 			v.errBuf.WriteString(GetJoinValidErrStr(structName, fieldName, "", cusMsg))
 			return
 		}
 		// 生成如: "TestOrderDetailSlice.Price" is required
 		v.errBuf.WriteString(GetJoinValidErrStr(structName, fieldName, "", ExplainEn, "it is", Required))
-	} else { // 有值的话需要判断下嵌套的类型
-		v.exist(false, structName, fieldName, cusMsg, tv)
+		return
 	}
+
+	// 有值的话再判断下嵌套的类型
+	v.exist(false, structName, fieldName, cusMsg, tv)
 }
 
 // exist 存在验证, 用于验证嵌套结构, 切片
@@ -198,11 +220,11 @@ func (v *VStruct) exist(isValidTvKind bool, structName, fieldName, cusMsg string
 	}
 	switch tv.Kind() {
 	case reflect.Ptr, reflect.Struct:
-		if structName == "Time" {
+		if structName == "Time" && tv.Type() == timeReflectType {
 			return
 		}
 		v.validate(structName, tv)
-	case reflect.Slice:
+	case reflect.Slice, reflect.Array:
 		for i := 0; i < tv.Len(); i++ {
 			v.validate(structName+"-"+ToStr(i), tv.Index(i), true)
 		}
@@ -322,6 +344,11 @@ func (v *VStruct) getError() error {
 }
 
 // =========================== 常用方法进行封装 =======================================
+
+// Struct 验证结构体
+func Struct(src interface{}, targetTag ...string) error {
+	return NewVStruct(targetTag...).Valid(src)
+}
 
 // ValidateStruct 验证结构体
 func ValidateStruct(src interface{}, targetTag ...string) error {

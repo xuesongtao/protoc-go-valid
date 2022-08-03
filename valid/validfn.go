@@ -597,3 +597,54 @@ func Float(errBuf *strings.Builder, validName, objName, fieldName string, tv ref
 	}
 	errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, ExplainEn, "it is not float"))
 }
+
+// Unique 对集合字段进行唯一验证
+// 1. 对以逗号隔开的字符串进行唯一验证
+// 2. 对切片/数组元素[int 系列, float系列, bool系列, string系列]进行唯一验证
+func Unique(errBuf *strings.Builder, validName, objName, fieldName string, tv reflect.Value) {
+	var (
+		ok        bool
+		inVal     string
+		uniqueMap map[string]struct{}
+	)
+	switch tv.Kind() {
+	case reflect.String:
+		inVal = tv.String()
+		inValArr := strings.Split(inVal, ",")
+		uniqueMap = make(map[string]struct{}, len(inValArr))
+		for _, v := range inValArr {
+			uniqueMap[v] = struct{}{}
+		}
+		ok = len(inValArr) == len(uniqueMap)
+	case reflect.Slice, reflect.Array:
+		inVal = "["
+		l := tv.Len()
+		uniqueMap = make(map[string]struct{}, l)
+		for i := 0; i < l; i++ {
+			val := ToStr(tv.Index(i).Interface())
+			uniqueMap[val] = struct{}{}
+
+			if inVal == "[" {
+				inVal += val
+			} else {
+				inVal += "," + val
+			}
+		}
+		inVal += "]"
+		ok = l == len(uniqueMap)
+	default:
+		errBuf.WriteString(GetJoinFieldErr(objName, fieldName, uniqueErr))
+		return
+	}
+
+	if ok {
+		return
+	}
+
+	_, _, cusMsg := ParseValidNameKV(validName)
+	if cusMsg != "" {
+		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, inVal, cusMsg))
+		return
+	}
+	errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, inVal, ExplainEn, "they're not unique"))
+}
