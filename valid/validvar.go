@@ -18,10 +18,17 @@ type VVar struct {
 
 // NewVVar 单值校验
 func NewVVar() *VVar {
-	return &VVar{
-		errBuf:  new(strings.Builder),
-		ruleObj: make(RM),
-	}
+	obj := syncValidVarPool.Get().(*VVar)
+	obj.errBuf.Reset()
+	obj.ruleObj = make(RM)
+	return obj
+}
+
+// free 释放
+func (v *VVar) free() {
+	v.errBuf.Reset()
+	v.ruleObj = nil
+	syncValidVarPool.Put(v)
 }
 
 // Valid 验证
@@ -63,7 +70,7 @@ reValid:
 	switch ty.Kind() {
 	case reflect.String:
 		supportType = true
-	case reflect.Array, reflect.Slice: // 再验证下里面的内容类型
+	case reflect.Slice, reflect.Array: // 再验证下里面的内容类型
 		ty = ty.Elem()
 		goto reValid
 	default:
@@ -121,7 +128,7 @@ reValid:
 			}
 
 		}
-		// VStruct 外拓展的验证方法
+		// 拓展的验证方法
 		if tv.IsZero() { // 空就直接跳过
 			continue
 		}
@@ -132,6 +139,8 @@ reValid:
 
 // getError 获取 err
 func (v *VVar) getError() error {
+	defer v.free()
+
 	if v.errBuf.Len() == 0 {
 		return nil
 	}

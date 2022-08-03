@@ -11,6 +11,7 @@ import (
 // go test -benchmem -run=^$ -bench ^BenchmarkValidateForValid gitee.com/xuesongtao/protoc-go-valid/valid -v -count=5
 
 func BenchmarkValidateForValid(b *testing.B) {
+	b.ResetTimer()
 	type Users struct {
 		Phone  string `valid:"required"`
 		Passwd string `valid:"required,to=6~20"`
@@ -35,6 +36,7 @@ func BenchmarkValidateForValid(b *testing.B) {
 }
 
 func BenchmarkValidateForValidate(b *testing.B) {
+	b.ResetTimer()
 	type Users struct {
 		Phone  string `validate:"required"`
 		Passwd string `validate:"required|minLen:6|maxLen:20"`
@@ -59,6 +61,7 @@ func BenchmarkValidateForValidate(b *testing.B) {
 }
 
 func BenchmarkValidateForValidator(b *testing.B) {
+	b.ResetTimer()
 	type Users struct {
 		Phone  string `validate:"required"`
 		Passwd string `validate:"required,min=6,max=20"`
@@ -83,9 +86,9 @@ func BenchmarkValidateForValidator(b *testing.B) {
 	// BenchmarkValidateForValidator-8          1944094               618.7 ns/op           472 B/op         12 allocs/op
 }
 
-// go test -benchmem -run=^$ -bench ^BenchmarkValid gitee.com/xuesongtao/protoc-go-valid/valid -v -count=5
+// go test -benchmem -run=^$ -bench ^BenchmarkComplexValid gitee.com/xuesongtao/protoc-go-valid/valid -v -count=5
 
-func BenchmarkValid(b *testing.B) {
+func BenchmarkComplexValid(b *testing.B) {
 	b.ResetTimer()
 	testOrderDetailPtr := &TestOrderDetailPtr{
 		TmpTest3:  &TmpTest3{Name: "测试"},
@@ -118,7 +121,7 @@ func BenchmarkValid(b *testing.B) {
 	// BenchmarkValid-8          161552              7494 ns/op            4635 B/op        108 allocs/op
 }
 
-func BenchmarkValidate(b *testing.B) {
+func BenchmarkComplexValidate(b *testing.B) {
 	b.ResetTimer()
 	b.Skip()
 	testOrderDetailPtr := &TestOrderDetailPtr{
@@ -156,7 +159,7 @@ func BenchmarkValidate(b *testing.B) {
 	// BenchmarkValidate-8        31004             38489 ns/op           33264 B/op        430 allocs/op
 }
 
-func BenchmarkValidator(b *testing.B) {
+func BenchmarkComplexValidator(b *testing.B) {
 	b.ResetTimer()
 	testOrderDetailPtr := &TestOrderDetailPtr{
 		TmpTest3:  &TmpTest3{Name: "测试"},
@@ -191,7 +194,7 @@ func BenchmarkValidator(b *testing.B) {
 	// BenchmarkValidate-8        31004             38489 ns/op           33264 B/op        430 allocs/op
 }
 
-func BenchmarkValidIf(b *testing.B) {
+func BenchmarkComplexValidIf(b *testing.B) {
 	b.ResetTimer()
 	testOrderDetailPtr := &TestOrderDetailPtr{
 		TmpTest3:  &TmpTest3{Name: "测试"},

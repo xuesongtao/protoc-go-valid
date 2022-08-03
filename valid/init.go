@@ -83,8 +83,9 @@ var validName2FuncMap = map[string]CommonValidFn{
 
 // 对象
 var (
-	syncValidPool   = sync.Pool{New: func() interface{} { return new(VStruct) }}
-	timeReflectType = reflect.TypeOf(time.Time{})
+	syncValidStructPool = sync.Pool{New: func() interface{} { return new(VStruct) }}
+	syncValidVarPool    = sync.Pool{New: func() interface{} { return new(VVar) }}
+	timeReflectType     = reflect.TypeOf(time.Time{})
 )
 
 // 标记

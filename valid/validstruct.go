@@ -25,7 +25,7 @@ type name2Value struct {
 
 // NewVStruct 验证结构体, 默认目标 tagName 为 "valid"
 func NewVStruct(targetTag ...string) *VStruct {
-	obj := syncValidPool.Get().(*VStruct)
+	obj := syncValidStructPool.Get().(*VStruct)
 	tagName := defaultTargetTag
 	if len(targetTag) > 0 {
 		tagName = targetTag[0]
@@ -41,7 +41,7 @@ func (v *VStruct) free() {
 	v.ruleObj = nil
 	v.valid2FieldsMap = nil
 	v.validFn = nil
-	syncValidPool.Put(v)
+	syncValidStructPool.Put(v)
 }
 
 // SetRule 添加验证规则
@@ -192,7 +192,7 @@ func (v *VStruct) required(structName, fieldName, cusMsg string, tv reflect.Valu
 	ok := true
 	// 如果集合类型先判断下长度
 	switch tv.Kind() {
-	case reflect.Array, reflect.Slice, reflect.Map:
+	case reflect.Slice, reflect.Array:
 		if tv.Len() == 0 {
 			ok = false
 		}
