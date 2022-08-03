@@ -230,7 +230,7 @@ func in(errBuf *strings.Builder, validName, objName, fieldName string, tv reflec
 	}
 
 	// 取右括号的下标
-	rightBracketIndex := strings.Index(val, ")")
+	rightBracketIndex := strings.LastIndex(val, ")")
 	if leftBracketIndex == -1 || rightBracketIndex == -1 {
 		errBuf.WriteString(GetJoinFieldErr(objName, fieldName, useErrMsg))
 		return

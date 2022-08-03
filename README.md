@@ -92,7 +92,7 @@ protoFileDirName="test" # proto 存放的目录
 | eq | yes |等于验证, 格式为: "eq=xxx"(字段类型: 字符串为长度, 数字为大小, 切片为长度) |
 | noeq | yes |不等于验证, 格式为: "noeq=xxx"(字段类型: 字符串为长度, 数字为大小, 切片为长度) |
 | in | yes |指定输入选项, 格式为 "in=(xxx/xxx/xxx)", 如: "in=(1/abc/3)" |
-| include | yes |指定输入包含选项, 格式为 "include=(xxx/xxx/xxx)", 如: "in=(hello/2/3)" |
+| include | yes |指定输入包含选项, 格式为 "include=(xxx/xxx/xxx)", 如: "include=(hello/2/3)" |
 | phone | yes |手机号验证 |
 | email | yes |邮箱验证 |
 | ipv4 | yes| ipv4 验证|
