@@ -1,12 +1,27 @@
 package valid
 
 import (
+	"regexp"
 	"strings"
 	"testing"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gookit/validate"
 )
+
+func BenchmarkReNoComplice(b *testing.B) {
+	a := "123456"
+	for i := 0; i < b.N; i++ {
+		_, _ = regexp.MatchString(`\d+`, a)
+	}
+}
+
+func BenchmarkReComplice(b *testing.B) {
+	a := "123456"
+	for i := 0; i < b.N; i++ {
+		_ = IntRe.MatchString(a)
+	}
+}
 
 // go test -benchmem -run=^$ -bench ^BenchmarkValidateForValid gitee.com/xuesongtao/protoc-go-valid/valid -v -count=5
 
