@@ -114,7 +114,7 @@ reValid:
 						ok = false
 					}
 				}
-				if !ok || !tv.IsZero() {
+				if ok || !tv.IsZero() {
 					continue
 				}
 				if cusMsg != "" {

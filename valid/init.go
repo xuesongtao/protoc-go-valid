@@ -3,6 +3,7 @@ package valid
 import (
 	"errors"
 	"reflect"
+	"regexp"
 	"strings"
 	"sync"
 	"time"
@@ -146,6 +147,24 @@ var (
 		"    Hobby2 []string `valid:\"ints\"`\n" + // 遍历切片中的元素是否唯一
 		"    Hobby3 []int `valid:\"ints\"`\n" + // 遍历切片中的元素是否唯一
 		"}")
+)
+
+// 正则
+var (
+	IncludeZhRe   = regexp.MustCompile("[\u4e00-\u9fa5]")         // 中文
+	PhoneRe       = regexp.MustCompile(`^1[3,4,5,6,7,8,9]\d{9}$`) // 手机号
+	Ipv4Re        = regexp.MustCompile(`^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)$`)
+	EmailRe       = regexp.MustCompile(`^\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$`)
+	IdCardRe      = regexp.MustCompile(`(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)`)
+	YearRe        = regexp.MustCompile(`^\d{4}$`)
+	Year2MonthRe  = regexp.MustCompile(`^\d{4}-\d{2}$`)
+	Year2MonthRe2 = regexp.MustCompile(`^\d{4}/\d{2}$`)
+	DateRe        = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}$`)
+	DateRe2       = regexp.MustCompile(`^\d{4}/\d{2}/\d{2}$`)
+	DatetimeRe    = regexp.MustCompile(`^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$`)
+	DatetimeRe2   = regexp.MustCompile(`^\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}$`)
+	IntRe         = regexp.MustCompile(`^\d+$`)
+	FloatRe       = regexp.MustCompile(`^\d+.\d+$`)
 )
 
 // CommonValidFn 通用验证函数, 主要用于回调

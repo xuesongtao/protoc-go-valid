@@ -3,7 +3,6 @@ package valid
 import (
 	"fmt"
 	"reflect"
-	"regexp"
 	"strconv"
 	"strings"
 )
@@ -24,7 +23,7 @@ func ParseValidNameKV(validName string) (key, value, cusMsg string) {
 			key = validName[:cusMsgIndex]
 			cusMsg = validName[cusMsgIndex+1:]
 			// 根据如果说明有中文就加前缀为: 说明; 否则为 Explain
-			if match, _ := regexp.MatchString("[\u4e00-\u9fa5]", cusMsg); match {
+			if match := IncludeZhRe.MatchString(cusMsg); match {
 				cusMsg = ExplainZh + " " + cusMsg
 			} else {
 				cusMsg = ExplainEn + " " + cusMsg
@@ -40,7 +39,7 @@ func ParseValidNameKV(validName string) (key, value, cusMsg string) {
 	if cusMsgIndex != -1 && len(value)-1 > cusMsgIndex+1 {
 		// 根据如果说明有中文就加前缀为: 说明; 否则为 Explain
 		cusMsg = value[cusMsgIndex+1:]
-		if match, _ := regexp.MatchString("[\u4e00-\u9fa5]", cusMsg); match {
+		if match := IncludeZhRe.MatchString(cusMsg); match {
 			cusMsg = ExplainZh + " " + cusMsg
 		} else {
 			cusMsg = ExplainEn + " " + cusMsg

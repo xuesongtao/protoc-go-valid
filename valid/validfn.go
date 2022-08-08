@@ -230,7 +230,7 @@ func in(errBuf *strings.Builder, validName, objName, fieldName string, tv reflec
 	}
 
 	// 取右括号的下标
-	rightBracketIndex := strings.Index(val, ")")
+	rightBracketIndex := strings.LastIndex(val, ")")
 	if leftBracketIndex == -1 || rightBracketIndex == -1 {
 		errBuf.WriteString(GetJoinFieldErr(objName, fieldName, useErrMsg))
 		return
@@ -276,7 +276,7 @@ func Phone(errBuf *strings.Builder, validName, objName, fieldName string, tv ref
 		errBuf.WriteString(err.Error())
 		return
 	}
-	matched, _ := regexp.MatchString("^1[3,4,5,6,7,8,9]\\d{9}$", tv.String())
+	matched := PhoneRe.MatchString(tv.String())
 	if matched {
 		return
 	}
@@ -295,7 +295,7 @@ func Ipv4(errBuf *strings.Builder, validName, objName, fieldName string, tv refl
 		errBuf.WriteString(err.Error())
 		return
 	}
-	matched, _ := regexp.MatchString(`^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)$`, tv.String())
+	matched := Ipv4Re.MatchString(tv.String())
 	if matched {
 		return
 	}
@@ -314,7 +314,7 @@ func Email(errBuf *strings.Builder, validName, objName, fieldName string, tv ref
 		errBuf.WriteString(err.Error())
 		return
 	}
-	matched, _ := regexp.MatchString("^\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*$", tv.String())
+	matched := EmailRe.MatchString(tv.String())
 	if matched {
 		return
 	}
@@ -333,7 +333,7 @@ func IDCard(errBuf *strings.Builder, validName, objName, fieldName string, tv re
 		errBuf.WriteString(err.Error())
 		return
 	}
-	matched, _ := regexp.MatchString("(^\\d{15}$)|(^\\d{18}$)|(^\\d{17}(\\d|X|x)$)", tv.String())
+	matched := IdCardRe.MatchString(tv.String())
 	if matched {
 		return
 	}
@@ -352,7 +352,7 @@ func Year(errBuf *strings.Builder, validName, objName, fieldName string, tv refl
 		errBuf.WriteString(err.Error())
 		return
 	}
-	matched, _ := regexp.MatchString("^\\d{4}$", tv.String())
+	matched := YearRe.MatchString(tv.String())
 	if matched {
 		return
 	}
@@ -377,7 +377,12 @@ func Year2Month(errBuf *strings.Builder, validName, objName, fieldName string, t
 	if val != "" {
 		defaultDateSplit = val
 	}
-	matched, _ := regexp.MatchString("^\\d{4}"+defaultDateSplit+"\\d{2}$", tv.String())
+	var matched bool
+	if defaultDateSplit == "/" {
+		matched = Year2MonthRe2.MatchString(tv.String())
+	} else {
+		matched = Year2MonthRe.MatchString(tv.String())
+	}
 	if matched {
 		return
 	}
@@ -401,7 +406,12 @@ func Date(errBuf *strings.Builder, validName, objName, fieldName string, tv refl
 	if val != "" {
 		defaultDateSplit = val
 	}
-	matched, _ := regexp.MatchString("^\\d{4}"+defaultDateSplit+"\\d{2}"+defaultDateSplit+"\\d{2}$", tv.String())
+	matched := false
+	if defaultDateSplit == "/" {
+		matched = DateRe2.MatchString(tv.String())
+	} else {
+		matched = DateRe.MatchString(tv.String())
+	}
 	if matched {
 		return
 	}
@@ -425,7 +435,12 @@ func Datetime(errBuf *strings.Builder, validName, objName, fieldName string, tv 
 	if val != "" {
 		defaultDateSplit = val
 	}
-	matched, _ := regexp.MatchString("^\\d{4}"+defaultDateSplit+"\\d{2}"+defaultDateSplit+"\\d{2} \\d{2}:\\d{2}:\\d{2}$", tv.String())
+	matched := false
+	if defaultDateSplit == "/" {
+		matched = DatetimeRe2.MatchString(tv.String())
+	} else {
+		matched = DatetimeRe.MatchString(tv.String())
+	}
 	if matched {
 		return
 	}
@@ -493,7 +508,7 @@ func Int(errBuf *strings.Builder, validName, objName, fieldName string, tv refle
 	switch kind := tv.Kind(); kind {
 	case reflect.String:
 		valStr = tv.String()
-		matched, _ = regexp.MatchString("^\\d+$", valStr)
+		matched = IntRe.MatchString(valStr)
 	default:
 		if !ReflectKindIsNum(kind) {
 			valStr = ToStr(tv.Interface())
@@ -524,12 +539,11 @@ func Ints(errBuf *strings.Builder, validName, objName, fieldName string, tv refl
 	if split == "" {
 		split = ","
 	}
-	re, _ := regexp.Compile(`^\d+$`)
 	switch kind := tv.Kind(); kind {
 	case reflect.String:
 		valStr = tv.String()
 		for _, v := range strings.Split(valStr, split) {
-			is = re.MatchString(v)
+			is = IntRe.MatchString(v)
 			if !is {
 				break
 			}
@@ -541,7 +555,7 @@ func Ints(errBuf *strings.Builder, validName, objName, fieldName string, tv refl
 		valStr = "["
 		for i := 0; i < l; i++ {
 			v := ToStr(tv.Index(i).Interface())
-			tmpIs = re.MatchString(v)
+			tmpIs = IntRe.MatchString(v)
 			if !tmpIs {
 				is = tmpIs
 			}
@@ -579,7 +593,7 @@ func Float(errBuf *strings.Builder, validName, objName, fieldName string, tv ref
 	switch tv.Kind() {
 	case reflect.String:
 		valStr = tv.String()
-		matched, _ = regexp.MatchString("^\\d+.\\d+$", valStr)
+		matched = FloatRe.MatchString(valStr)
 	case reflect.Float32, reflect.Float64:
 	default:
 		valStr = ToStr(tv.Interface())

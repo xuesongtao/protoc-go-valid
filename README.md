@@ -1,12 +1,12 @@
-# [protoc-go-valid](https://gitee.com/xuesongtao/protoc-go-valid) 
+# [protoc-go-valid](https://gitee.com/xuesongtao/protoc-go-valid)
+
 [![OSCS Status](https://www.oscs1024.com/platform/badge/xuesongtao/protoc-go-valid.svg?size=small)](https://www.oscs1024.com/project/xuesongtao/protoc-go-valid?ref=badge_small)
 
 #### 项目背景
 
-*  1. 在 protobuf 方面验证器常用的为 `go-proto-validators` 验证器, 使用方面个人认为较为繁琐，代码量比较多, 使用如下:  
- 
+* 1. 在 protobuf 方面验证器常用的为 `go-proto-validators` 验证器, 使用方面个人认为较为繁琐，代码量比较多, 使用如下:  
 
-```
+```proto
 syntax = "proto3";
 package validator.examples;
 import "github.com/mwitkow/go-proto-validators/validator.proto";
@@ -19,9 +19,9 @@ message InnerMessage {
 }
 ```
 
-*  2. 本验证器, 相同功能使用如下:  
+* 2. 本验证器, 相同功能使用如下:  
 
-```
+```proto
 syntax = "proto3";
 package examples;
 
@@ -35,30 +35,30 @@ message InnerMessage {
 
 #### 1. 介绍
 
-*  1. 通过对 `xxx.proto` 通过注释的形式加入验证 `tag`(使用方式文档下方有说明), 然后再使用 `inject_tool.sh xxx.proto` 编译, 这样生成的 `xxx.pb.go` 文件中的 `struct` 注入自定义的 `tag`
+* 1. 通过对 `xxx.proto` 通过注释的形式加入验证 `tag`(使用方式文档下方有说明), 然后再使用 `inject_tool.sh xxx.proto` 编译, 这样生成的 `xxx.pb.go` 文件中的 `struct` 注入自定义的 `tag`
 
-*  2. 通过验证器对 `struct` 中的 `tag` 进行验证
+* 2. 通过验证器对 `struct` 中的 `tag` 进行验证
 
 #### 2. 注入工具使用
 
-*  1. 先下载本项目: `go get -u gitee.com/xuesongtao/protoc-go-valid`
+* 1. 先下载本项目: `go get -u gitee.com/xuesongtao/protoc-go-valid`
 
-*  2.  `protoc-go-valid` 命令操作, 如下:  
+* 2.  `protoc-go-valid` 命令操作, 如下:  
 
-  + 2.1 `protoc-go-valid -init="true"`
-  + 2.2 `protoc-go-valid -d="待注入的目录"`
-  + 2.3 `protoc-go-valid -p="匹配模式"`
-  + 2.4 `protoc-go-valid -f="单个待注入的文件"`
+* 2.1 `protoc-go-valid -init="true"`
+* 2.2 `protoc-go-valid -d="待注入的目录"`
+* 2.3 `protoc-go-valid -p="匹配模式"`
+* 2.4 `protoc-go-valid -f="单个待注入的文件"`
 
-*  3. 参考 `protoc-go-inject-tag`
+* 3. 参考 `protoc-go-inject-tag`
 
 #### 3. 工具补充
 
-*  1.  `protoc-go-valid -h` 可以通过这个查看帮助
+* 1.  `protoc-go-valid -h` 可以通过这个查看帮助
 
-*  2. 由于此操作是先执行 `protoc` 才再进行注入(需先安装 `protoc`), 项目中的 `inject_tool.sh` 整合了这两步操作, 可以执行 `protoc-go-valid -init="true"` 进行初始化操作, **说明:** 如果为 **windows** 需要使用 `powershell` 来执行, 如果失败的话, 可以直接将 `inject_tool.sh` 放到 GOPATH 下(主要是为了工具能命令行全局调用).
+* 2. 由于此操作是先执行 `protoc` 才再进行注入(需先安装 `protoc`), 项目中的 `inject_tool.sh` 整合了这两步操作, 可以执行 `protoc-go-valid -init="true"` 进行初始化操作, **说明:** 如果为 **windows** 需要使用 `powershell` 来执行, 如果失败的话, 可以直接将 `inject_tool.sh` 放到 GOPATH 下(主要是为了工具能命令行全局调用).
 
-*  3. 根据自己的项目目录结构调整 `inject_tool.sh` 中 `proto` 和 `pb` 的目录, 相对于应用的目录; 如本项目, 修改如下下:  
+* 3. 根据自己的项目目录结构调整 `inject_tool.sh` 中 `proto` 和 `pb` 的目录, 相对于应用的目录; 如本项目, 修改如下下:  
 
 ```
 outPdProjectPath="test" # pb 放入的项目路径
@@ -74,7 +74,7 @@ protoFileDirName="test" # proto 存放的目录
 
 ##### 4.2 验证
 
-###### 4.2.1 支持的验证如下:
+###### 4.2.1 支持的验证如下
 
 | 标识 | 自定义 msg | 说明 |
 | -------- | ---------|---------|
@@ -91,7 +91,7 @@ protoFileDirName="test" # proto 存放的目录
 | eq | yes |等于验证, 格式为: "eq=xxx"(字段类型: 字符串为长度, 数字为大小, 切片为长度) |
 | noeq | yes |不等于验证, 格式为: "noeq=xxx"(字段类型: 字符串为长度, 数字为大小, 切片为长度) |
 | in | yes |指定输入选项, 格式为 "in=(xxx/xxx/xxx)", 如: "in=(1/abc/3)" |
-| include | yes |指定输入包含选项, 格式为 "include=(xxx/xxx/xxx)", 如: "in=(hello/2/3)" |
+| include | yes |指定输入包含选项, 格式为 "include=(xxx/xxx/xxx)", 如: "include=(hello/2/3)" |
 | phone | yes |手机号验证 |
 | email | yes |邮箱验证 |
 | ipv4 | yes| ipv4 验证|
@@ -107,35 +107,35 @@ protoFileDirName="test" # proto 存放的目录
 | unique | yes |唯一验证, 说明: 1.对以逗号隔开的字符串进行唯一验证; 2. 对切片/数组元素[int 系列, float系列, bool系列, string系列]进行唯一验证 |
 
 * 自定义 msg 写法如下:
-  + 1. 如: `required|必填`, key 为 `required`, value 为 ``, cusMsg 为 `必填`; 
-  + 2. 如: `to=1~2|大于等于 1 且小于等于 2`, key 为 `to`, value 为 `1~2`, cusMsg 为 `大于等于 1 且小于等于 2`
+  * 1. 如: `required|必填`, key 为 `required`, value 为 ``, cusMsg 为 `必填`;
+  * 2. 如: `to=1~2|大于等于 1 且小于等于 2`, key 为 `to`, value 为 `1~2`, cusMsg 为 `大于等于 1 且小于等于 2`
 
 ###### 4.2.2 设置验证
 
-*  1. 通过设置 `tag` 进行设置验证规则, 默认目标为 `valid`
-*  2. 支持通过创建 `RM` 对象进行自定义设置验证规则, 其验证优先级高于 `xxx.pb.go` 里的规则,  `RM` 暂不支持嵌套
+* 1. 通过设置 `tag` 进行设置验证规则, 默认目标为 `valid`
+* 2. 支持通过创建 `RM` 对象进行自定义设置验证规则, 其验证优先级高于 `xxx.pb.go` 里的规则,  `RM` 暂不支持嵌套
 
 ###### 4.2.3 其他
 
-*  1. 默认按照 `tag` 进行处理, 如果设置 `RM` 对象会以此规则为准
-*  2. 如果验证方法没有实现的, 可以调用 `SetCustomerValidFn` 自定义
-*  3. 使用的可以参考 `example_test.go` 和 `valid_test.go`
+* 1. 默认按照 `tag` 进行处理, 如果设置 `RM` 对象会以此规则为准
+* 2. 如果验证方法没有实现的, 可以调用 `SetCustomerValidFn` 自定义
+* 3. 使用的可以参考 `example_test.go` 和 `valid_test.go`
 
-#### 5 使用示例:
+#### 5 使用示例
 
-*  `proto` 内容如下:  
+* `proto` 内容如下:  
 
-```
+```go
 message Man {
     string name = 1; // 姓名 @tag valid:"required,to=1~3"
     int32 age = 2; // 年龄 @tag valid:"to=1~150"
 }
 ```
 
-*  **注:** 编写 `xxx.proto` 时, 需要加将 `@tag xxx` 放到注释的最后面
+* **注:** 编写 `xxx.proto` 时, 需要加将 `@tag xxx` 放到注释的最后面
 * 执行命令: `inject_tool.sh xxx.proto` 生成 `pd` 内容如下:  
 
-```
+```go
 type Man struct {
     state protoimpl.MessageState
     sizeCache protoimpl.SizeCache
@@ -148,7 +148,7 @@ type Man struct {
 
 * 代码里的使用  
 
-```
+```go
 m := &test.Man{
     Name: "xue",
     Age: -1,
