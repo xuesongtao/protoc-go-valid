@@ -31,7 +31,10 @@ func NewVStruct(targetTag ...string) *VStruct {
 		tagName = targetTag[0]
 	}
 	obj.targetTag = tagName
-	obj.errBuf = new(strings.Builder)
+	if obj.errBuf == nil { // 储存使用的时候 new 下, 后续都是从缓存中处理
+		obj.errBuf = new(strings.Builder)
+	}
+	obj.errBuf.Grow(1 << 7)
 	return obj
 }
 

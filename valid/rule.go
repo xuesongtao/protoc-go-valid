@@ -6,7 +6,7 @@ import "strings"
 type RM map[string]string
 
 func NewRule() RM {
-	return make(map[string]string)
+	return make(map[string]string, 4)
 }
 
 // Set 设置验证规则
