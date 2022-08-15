@@ -286,7 +286,7 @@ func TestGetJoinValidErrStr(t *testing.T) {
 	}
 }
 
-func TestVar(t *testing.T) {
+func TestValidVar(t *testing.T) {
 	t.Run("required", func(t *testing.T) {
 		err := Var("hello world", Required)
 		if err != nil {
@@ -336,6 +336,53 @@ func TestVar(t *testing.T) {
 	t.Run("unique", func(t *testing.T) {
 		err := Var([]string{"test", "test1", "test"}, Required, VUnique)
 		sureMsg := `input "[test,test1,test]", explain: they're not unique`
+		if !equal(err.Error(), sureMsg) {
+			t.Error(noEqErr)
+		}
+	})
+}
+
+func TestValidUrl(t *testing.T) {
+	t.Run("required", func(t *testing.T) {
+		url := "http://test.com?name=test&age=10"
+		ruleObj := NewRule()
+		ruleObj.Set("name", Required, GenValidKV(VTo, "5~10|姓名需在5-10之间"))
+		err := Url(url, ruleObj)
+		sureMsg := `"name" input "test", 说明: 姓名需在5-10之间`
+		if !equal(err.Error(), sureMsg) {
+			t.Error(noEqErr)
+		}
+	})
+
+	t.Run("no support", func(t *testing.T) {
+		ruleObj := NewRule()
+		ruleObj.Set("name", Exist)
+		err := Url("http%3A%2F%2Ftest.com%3Fname%3Dtest%26age%3D10", ruleObj)
+		sureMsg := `valid "exist" is no support`
+		if !equal(err.Error(), sureMsg) {
+			t.Error(noEqErr)
+		}
+	})
+
+	t.Run("botheq", func(t *testing.T) {
+		url := "http://test.com?name=test&age=10&nickname=test1"
+		ruleObj := NewRule()
+		ruleObj.Set("name", Required, GenValidKV(VTo, "5~10|姓名需在5-10之间"), GenValidKV(BothEq, "botheq=0"))
+		ruleObj.Set("nickname", Required, GenValidKV(BothEq, "botheq=0"))
+		err := Url(url, ruleObj)
+		sureMsg := `"name" input "test", 说明: 姓名需在5-10之间; "name", "nickname" explain: they should be equal`
+		if !equal(err.Error(), sureMsg) {
+			t.Error(noEqErr)
+		}
+	})
+
+	t.Run("in", func(t *testing.T) {
+		// http://test.com?type=(1/2/3)
+		url := "http%3A%2F%2Ftest.com%3Ftype%3D(1%2F2%2F3)"
+		ruleObj := NewRule()
+		ruleObj.Set("type", Required, GenValidKV(VIn, "1/2/3"))
+		err := Url(url, ruleObj)
+		sureMsg := `"type" input "(1/2/3)", explain: it should in (1/2/3)`
 		if !equal(err.Error(), sureMsg) {
 			t.Error(noEqErr)
 		}
