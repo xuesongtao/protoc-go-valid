@@ -15,14 +15,6 @@ type VStruct struct {
 	validFn         map[string]CommonValidFn // 存放自定义的验证函数, 可以做到调用完就被清理
 }
 
-// name2Value
-type name2Value struct {
-	structName string
-	fieldName  string
-	cusMsg     string
-	val        reflect.Value
-}
-
 // NewVStruct 验证结构体, 默认目标 tagName 为 "valid"
 func NewVStruct(targetTag ...string) *VStruct {
 	obj := syncValidStructPool.Get().(*VStruct)
@@ -31,7 +23,10 @@ func NewVStruct(targetTag ...string) *VStruct {
 		tagName = targetTag[0]
 	}
 	obj.targetTag = tagName
-	obj.errBuf = new(strings.Builder)
+	if obj.errBuf == nil { // 储存使用的时候 new 下, 后续都是从缓存中处理
+		obj.errBuf = new(strings.Builder)
+	}
+	obj.errBuf.Grow(1 << 7)
 	return obj
 }
 
@@ -248,7 +243,7 @@ func (v *VStruct) initValid2FieldsMap(validName, structName, fieldName, cusMsg s
 	if _, ok := v.valid2FieldsMap[validName]; !ok {
 		v.valid2FieldsMap[validName] = make([]*name2Value, 0, 2)
 	}
-	v.valid2FieldsMap[validName] = append(v.valid2FieldsMap[validName], &name2Value{structName: structName, fieldName: fieldName, cusMsg: cusMsg, val: tv})
+	v.valid2FieldsMap[validName] = append(v.valid2FieldsMap[validName], &name2Value{structName: structName, fieldName: fieldName, cusMsg: cusMsg, reflectVal: tv})
 }
 
 // either 判断两者不能都为空
@@ -263,7 +258,7 @@ func (v *VStruct) either(fieldInfos []*name2Value) {
 	fieldInfoStr := "" // 拼接空的 structName, fliedName
 	for _, fieldInfo := range fieldInfos {
 		fieldInfoStr += "\"" + fieldInfo.structName + "." + fieldInfo.fieldName + "\", "
-		if fieldInfo.val.IsZero() {
+		if fieldInfo.reflectVal.IsZero() {
 			isZeroLen++
 		}
 	}
@@ -296,11 +291,11 @@ func (v *VStruct) bothEq(fieldInfos []*name2Value) {
 		}
 
 		if i == 0 {
-			tmp = fieldInfo.val.Interface()
+			tmp = fieldInfo.reflectVal.Interface()
 			continue
 		}
 
-		if !reflect.DeepEqual(tmp, fieldInfo.val.Interface()) {
+		if !reflect.DeepEqual(tmp, fieldInfo.reflectVal.Interface()) {
 			eq = false
 		}
 	}
@@ -341,27 +336,4 @@ func (v *VStruct) getError() error {
 
 	// 这里需要去掉最后一个 ErrEndFlag
 	return errors.New(strings.TrimSuffix(v.errBuf.String(), ErrEndFlag))
-}
-
-// =========================== 常用方法进行封装 =======================================
-
-// Struct 验证结构体
-func Struct(src interface{}, targetTag ...string) error {
-	return NewVStruct(targetTag...).Valid(src)
-}
-
-// ValidateStruct 验证结构体
-func ValidateStruct(src interface{}, targetTag ...string) error {
-	return NewVStruct(targetTag...).Valid(src)
-}
-
-// ValidStructForRule 自定义验证规则并验证
-// 注: 通过字段名来匹配规则, 如果嵌套中如果有相同的名的都会走这个规则, 因此建议这种方式推荐使用非嵌套结构体
-func ValidStructForRule(ruleObj RM, src interface{}, targetTag ...string) error {
-	return NewVStruct(targetTag...).SetRule(ruleObj).Valid(src)
-}
-
-// ValidStructForMyValidFn 自定义单个验证函数
-func ValidStructForMyValidFn(src interface{}, validName string, validFn CommonValidFn, targetTag ...string) error {
-	return NewVStruct(targetTag...).SetValidFn(validName, validFn).Valid(src)
 }

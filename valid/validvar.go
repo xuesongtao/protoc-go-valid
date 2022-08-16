@@ -14,12 +14,16 @@ const (
 type VVar struct {
 	errBuf  *strings.Builder
 	ruleObj RM
+	validFn map[string]CommonValidFn // 存放自定义的验证函数, 可以做到调用完就被清理
 }
 
 // NewVVar 单值校验
 func NewVVar() *VVar {
 	obj := syncValidVarPool.Get().(*VVar)
-	obj.errBuf = new(strings.Builder)
+	if obj.errBuf == nil {
+		obj.errBuf = new(strings.Builder)
+	}
+	obj.errBuf.Grow(1 << 4)
 	obj.ruleObj = make(RM)
 	return obj
 }
@@ -28,6 +32,7 @@ func NewVVar() *VVar {
 func (v *VVar) free() {
 	v.errBuf.Reset()
 	v.ruleObj = nil
+	v.validFn = nil
 	syncValidVarPool.Put(v)
 }
 
@@ -57,6 +62,30 @@ func (v *VVar) Valid(src interface{}) error {
 func (v *VVar) SetRules(rules ...string) *VVar {
 	v.ruleObj.Set(validVarFieldName, rules...)
 	return v
+}
+
+// SetValidFn 自定义设置验证函数
+func (v *VVar) SetValidFn(validName string, fn CommonValidFn) *VVar {
+	if v.validFn == nil {
+		v.validFn = make(map[string]CommonValidFn)
+	}
+	v.validFn[validName] = fn
+	return v
+}
+
+// getValidFn 获取验证函数
+func (v *VVar) getValidFn(validName string) (CommonValidFn, error) {
+	// 先从本地找, 如果本地没有就从全局里找
+	fn, ok := v.validFn[validName]
+	if ok {
+		return fn, nil
+	}
+
+	fn, ok = validName2FuncMap[validName]
+	if !ok {
+		return nil, errors.New("valid \"" + validName + "\" is not exist, You can call SetValidFn")
+	}
+	return fn, nil
 }
 
 // validate 验证执行体
@@ -96,9 +125,9 @@ reValid:
 		}
 
 		validKey, _, cusMsg := ParseValidNameKV(validName)
-		fn, ok := validName2FuncMap[validKey]
-		if !ok {
-			v.errBuf.WriteString(GetJoinFieldErr("", "", "valid \""+validKey+"\" is not exist"))
+		fn, err := v.getValidFn(validKey)
+		if err != nil {
+			v.errBuf.WriteString(GetJoinFieldErr("", "", err))
 			continue
 		}
 
@@ -124,9 +153,8 @@ reValid:
 				v.errBuf.WriteString(GetJoinValidErrStr("", "", "", ExplainEn, "it is", Required))
 			default:
 				v.errBuf.WriteString(GetJoinFieldErr("", "", "valid \""+validName+"\" is no support"))
-				continue
 			}
-
+			continue
 		}
 		// 拓展的验证方法
 		if tv.IsZero() { // 空就直接跳过
@@ -147,11 +175,4 @@ func (v *VVar) getError() error {
 
 	// 这里需要去掉最后一个 ErrEndFlag
 	return errors.New(strings.TrimSuffix(v.errBuf.String(), ErrEndFlag))
-}
-
-// =========================== 常用方法进行封装 =======================================
-
-// Var 验证变量
-func Var(src interface{}, rules ...string) error {
-	return NewVVar().SetRules(rules...).Valid(src)
 }
