@@ -1,12 +1,9 @@
 package valid
 
-var (
-	_ Valider = &VStruct{}
-	_ Valider = &VVar{}
-	_ Valider = &VUrl{}
-)
 
-// ==================================== 验证 struct =========================================
+// *******************************************************************************
+// *                              验证 struct                                     *
+// *******************************************************************************
 
 // ValidateStruct 验证结构体
 func ValidateStruct(src interface{}, targetTag ...string) error {
@@ -29,7 +26,10 @@ func Struct(src interface{}, targetTag ...string) error {
 	return NewVStruct(targetTag...).Valid(src)
 }
 
-// ==================================== 验证单个变量 =========================================
+
+// *******************************************************************************
+// *                             验证 单个变量                                     *
+// *******************************************************************************
 
 // Var 验证变量
 func Var(src interface{}, rules ...string) error {
@@ -38,9 +38,22 @@ func Var(src interface{}, rules ...string) error {
 	return NewVVar().SetRule(ruleObj).Valid(src)
 }
 
-// ==================================== 验证 query url =========================================
+// VarForFn 验证变量, 同时设置自定义函数
+func VarForFn(src interface{}, validFn CommonValidFn) error {
+	return NewVVar().SetValidFn(validVarFieldName, validFn).Valid(src)
+}
+
+
+// *******************************************************************************
+// *                             验证 query url                                   *
+// *******************************************************************************
 
 // Url 验证变量
 func Url(src interface{}, ruleObj RM) error {
 	return NewVUrl().SetRule(ruleObj).Valid(src)
+}
+
+// UrlForFn 验证 url, 同时设置自定义函数
+func UrlForFn(src interface{}, validName string, validFn CommonValidFn) error {
+	return NewVUrl().SetValidFn(validName, validFn).Valid(src)
 }

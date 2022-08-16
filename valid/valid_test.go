@@ -387,4 +387,16 @@ func TestValidUrl(t *testing.T) {
 			t.Error(noEqErr)
 		}
 	})
+
+	t.Run("phone", func(t *testing.T) {
+		// http://test.com?phone=13540042619
+		url := "http%3A%2F%2Ftest.com%3Fphone%3D135400426199"
+		ruleObj := NewRule()
+		ruleObj.Set("phone", Required, GenValidKV(VPhone, "", "不是手机号"))
+		err := Url(url, ruleObj)
+		sureMsg := `"phone" input "135400426199", 说明: 不是手机号`
+		if !equal(err.Error(), sureMsg) {
+			t.Error(noEqErr)
+		}
+	})
 }
