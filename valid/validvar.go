@@ -24,7 +24,7 @@ func NewVVar() *VVar {
 		obj.errBuf = new(strings.Builder)
 	}
 	obj.errBuf.Grow(1 << 4)
-	obj.ruleObj = make(RM)
+	obj.ruleObj = NewRule()
 	return obj
 }
 
