@@ -1,9 +1,20 @@
 package valid
 
 
+
 // *******************************************************************************
 // *                              验证 struct                                     *
 // *******************************************************************************
+
+// Struct 验证结构体
+func Struct(src interface{}, targetTag ...string) error {
+	return NewVStruct(targetTag...).Valid(src)
+}
+
+// StructForFn 验证结构体, 同时设置自定义参数
+func StructForFn(src interface{}, ruleObj RM, targetTag ...string) error {
+	return NewVStruct(targetTag...).SetRule(ruleObj).Valid(src)
+}
 
 // ValidateStruct 验证结构体
 func ValidateStruct(src interface{}, targetTag ...string) error {
@@ -21,10 +32,7 @@ func ValidStructForMyValidFn(src interface{}, validName string, validFn CommonVa
 	return NewVStruct(targetTag...).SetValidFn(validName, validFn).Valid(src)
 }
 
-// Struct 验证结构体
-func Struct(src interface{}, targetTag ...string) error {
-	return NewVStruct(targetTag...).Valid(src)
-}
+
 
 
 // *******************************************************************************
@@ -40,6 +48,7 @@ func Var(src interface{}, rules ...string) error {
 func VarForFn(src interface{}, validFn CommonValidFn) error {
 	return NewVVar().SetValidFn(validVarFieldName, validFn).Valid(src)
 }
+
 
 
 // *******************************************************************************
