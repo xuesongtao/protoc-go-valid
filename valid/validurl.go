@@ -19,12 +19,12 @@ type VUrl struct {
 func NewVUrl() *VUrl {
 	obj := new(VUrl)
 	obj.errBuf = new(strings.Builder)
-	obj.errBuf.Grow(1 << 6)
+	obj.errBuf.Grow(1 << 4)
 	return obj
 }
 
 // SetRule 添加验证规则
-func (v *VUrl) SetRule(ruleObj RM) Valider {
+func (v *VUrl) SetRule(ruleObj RM) *VUrl {
 	v.ruleObj = ruleObj
 	return v
 }
@@ -42,13 +42,13 @@ func (v *VUrl) Valid(src interface{}) error {
 	case *string:
 		srcStr = v
 	default:
-		return errors.New("src must is string")
+		return errors.New("src must is string/*string")
 	}
 	return v.validate(srcStr).getError()
 }
 
 // SetValidFn 自定义设置验证函数
-func (v *VUrl) SetValidFn(validName string, fn CommonValidFn) Valider {
+func (v *VUrl) SetValidFn(validName string, fn CommonValidFn) *VUrl {
 	if v.validFn == nil {
 		v.validFn = make(map[string]CommonValidFn)
 	}

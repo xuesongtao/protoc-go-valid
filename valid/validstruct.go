@@ -40,7 +40,7 @@ func (v *VStruct) free() {
 }
 
 // SetRule 添加验证规则
-func (v *VStruct) SetRule(ruleObj RM) Valider {
+func (v *VStruct) SetRule(ruleObj RM) *VStruct {
 	v.ruleObj = ruleObj
 	return v
 }
@@ -81,7 +81,7 @@ func (v *VStruct) Valid(src interface{}) error {
 }
 
 // SetValidFn 自定义设置验证函数
-func (v *VStruct) SetValidFn(validName string, fn CommonValidFn) Valider {
+func (v *VStruct) SetValidFn(validName string, fn CommonValidFn) *VStruct {
 	if v.validFn == nil {
 		v.validFn = make(map[string]CommonValidFn)
 	}

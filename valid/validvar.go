@@ -23,7 +23,7 @@ func NewVVar() *VVar {
 	if obj.errBuf == nil {
 		obj.errBuf = new(strings.Builder)
 	}
-	obj.errBuf.Grow(1 << 6)
+	obj.errBuf.Grow(1 << 4)
 	obj.ruleObj = make(RM)
 	return obj
 }
@@ -32,6 +32,7 @@ func NewVVar() *VVar {
 func (v *VVar) free() {
 	v.errBuf.Reset()
 	v.ruleObj = nil
+	v.validFn = nil
 	syncValidVarPool.Put(v)
 }
 
@@ -58,20 +59,13 @@ func (v *VVar) Valid(src interface{}) error {
 }
 
 // SetRules 设置规则
-// Deprecated 由于需要实现 Valider, 此方法多余, 请使用 SetRule
 func (v *VVar) SetRules(rules ...string) *VVar {
 	v.ruleObj.Set(validVarFieldName, rules...)
 	return v
 }
 
-// SetRule 设置规则
-func (v *VVar) SetRule(ruleObj RM) Valider {
-	v.ruleObj = ruleObj
-	return v
-}
-
 // SetValidFn 自定义设置验证函数
-func (v *VVar) SetValidFn(validName string, fn CommonValidFn) Valider {
+func (v *VVar) SetValidFn(validName string, fn CommonValidFn) *VVar {
 	if v.validFn == nil {
 		v.validFn = make(map[string]CommonValidFn)
 	}

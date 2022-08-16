@@ -33,9 +33,7 @@ func Struct(src interface{}, targetTag ...string) error {
 
 // Var 验证变量
 func Var(src interface{}, rules ...string) error {
-	ruleObj := NewRule()
-	ruleObj.Set(validVarFieldName, rules...)
-	return NewVVar().SetRule(ruleObj).Valid(src)
+	return NewVVar().SetRules(rules...).Valid(src)
 }
 
 // VarForFn 验证变量, 同时设置自定义函数
