@@ -1,14 +1,16 @@
 package valid
 
-
-
 // *******************************************************************************
 // *                              验证 struct                                     *
 // *******************************************************************************
 
 // Struct 验证结构体
-func Struct(src interface{}, targetTag ...string) error {
-	return NewVStruct(targetTag...).Valid(src)
+func Struct(src interface{}, ruleObj ...RM) error {
+	obj := NewVStruct()
+	if len(ruleObj) > 0 {
+		obj.SetRule(ruleObj[0])
+	}
+	return obj.Valid(src)
 }
 
 // StructForFn 验证结构体, 同时设置自定义参数
@@ -32,9 +34,6 @@ func ValidStructForMyValidFn(src interface{}, validName string, validFn CommonVa
 	return NewVStruct(targetTag...).SetValidFn(validName, validFn).Valid(src)
 }
 
-
-
-
 // *******************************************************************************
 // *                             验证 单个变量                                     *
 // *******************************************************************************
@@ -48,8 +47,6 @@ func Var(src interface{}, rules ...string) error {
 func VarForFn(src interface{}, validFn CommonValidFn) error {
 	return NewVVar().SetValidFn(validVarFieldName, validFn).Valid(src)
 }
-
-
 
 // *******************************************************************************
 // *                             验证 query url                                   *
