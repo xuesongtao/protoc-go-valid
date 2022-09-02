@@ -9,6 +9,12 @@ import (
 	"github.com/gookit/validate"
 )
 
+func BenchmarkStringSplitValid(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		_ = ValidNamesSplit("required,phone,test", ',')
+	}
+}
+
 func BenchmarkReNoComplice(b *testing.B) {
 	a := "123456"
 	for i := 0; i < b.N; i++ {

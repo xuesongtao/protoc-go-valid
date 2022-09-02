@@ -337,18 +337,20 @@ func ExampleRe() {
 		Name string `valid:"required|必填,re='[a-z]+'|姓名必须为英文"`
 		Age  string `valid:"re='\\d{2}'|年龄必须为 2 位数"`
 		Addr string `valid:"required|地址必须,re='[\u4e00-\u9fa5]'|地址必须为中文"`
+		Pwd string `valid:"required,re='^[A-Za-z0-9]{8,16}$'|密码必须为8-16为字母和数字组合"`
 	}
 
 	v := &Tmp{
 		Name: "测试",
 		Age:  "1",
 		Addr: "四川成都",
+		Pwd: "1234567",
 	}
 
 	fmt.Println(Struct(v))
 
 	// Output:
-	// "Tmp.Name" input "测试", 说明: 姓名必须为英文; "Tmp.Age" input "1", 说明: 年龄必须为 2 位数
+	// "Tmp.Name" input "测试", 说明: 姓名必须为英文; "Tmp.Age" input "1", 说明: 年龄必须为 2 位数; "Tmp.Pwd" input "1234567", 说明: 密码必须为8-16为字母和数字组合
 }
 
 func ExampleUnique() {

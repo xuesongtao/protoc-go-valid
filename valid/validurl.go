@@ -106,7 +106,7 @@ func (v *VUrl) validate(value *string) *VUrl {
 			continue
 		}
 		// 根据验证内容进行验证
-		for _, validName := range strings.Split(validNames, ",") {
+		for _, validName := range ValidNamesSplit(validNames) {
 			if validName == "" {
 				continue
 			}

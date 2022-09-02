@@ -36,3 +36,7 @@ func TestToString(t *testing.T) {
 		Name: "test",
 	})))
 }
+
+func TestValidNamesSplit(t *testing.T) {
+	t.Log(ValidNamesSplit("required|必填,phone|'手机号码必填,同时正确',re='\\d+{1,2}'"))
+}

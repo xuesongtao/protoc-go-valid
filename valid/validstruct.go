@@ -145,7 +145,7 @@ func (v *VStruct) validate(structName string, value reflect.Value, isValidSlice 
 
 		fieldValue := tv.Field(fieldNum)
 		// 根据 tag 中的验证内容进行验证
-		for _, validName := range strings.Split(validNames, ",") {
+		for _, validName := range ValidNamesSplit(validNames) {
 			if validName == "" {
 				continue
 			}

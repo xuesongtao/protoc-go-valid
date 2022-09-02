@@ -110,6 +110,7 @@ protoFileDirName="test" # proto 存放的目录
 * 自定义 msg 写法如下, 可以通过调用 `GenValidKV` 来动态生成:
   * 1. 如: `required|必填`, key 为 `required`, value 为 ``, cusMsg 为 `必填`;
   * 2. 如: `to=1~2|大于等于 1 且小于等于 2`, key 为 `to`, value 为 `1~2`, cusMsg 为 `大于等于 1 且小于等于 2`
+  * 3. 如果自定义信息里有**,**, 此信息必须用 `''` 包裹, 如: `phone|'需要为手机号,同时为国内的'`
 
 ###### 4.2.2 设置验证
 
