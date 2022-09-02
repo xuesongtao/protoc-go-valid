@@ -5,6 +5,8 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+
+	"gitee.com/xuesongtao/protoc-go-valid/valid/internal"
 )
 
 // name2Value
@@ -322,4 +324,55 @@ func ToStr(src interface{}) string {
 	default:
 		return fmt.Sprintf("%v", value)
 	}
+}
+
+// ValidNamesSplit 验证点进行分割
+func ValidNamesSplit(s string, sep ...byte) []string {
+	if s == "" {
+		return nil
+	}
+
+	defaultSep := byte(',')
+	if len(sep) > 0 {
+		defaultSep = sep[0]
+	}
+
+	stack := internal.NewStackByte(2)
+	defer stack.Reset()
+
+	l := len(s)
+	tmp := make([]byte, 0, 5)
+	res := make([]string, 0, 3)
+	isParseSingleQuotes := false // 标记是否正在处理单引号里的内容
+	for i := 0; i < l; i++ {
+		v := s[i]
+		if !isParseSingleQuotes && v != defaultSep {
+			tmp = append(tmp, v)
+		} else if isParseSingleQuotes { // 如果是单引号就不处理
+			tmp = append(tmp, v)
+		}
+
+		// 判断是否为 单引号
+		if !isParseSingleQuotes && v == '\'' {
+			stack.Append(v)
+			isParseSingleQuotes = true
+			continue
+		}
+
+		if isParseSingleQuotes && stack.IsEqualLastVal(v) {
+			stack.Pop()
+			isParseSingleQuotes = false
+			continue
+		}
+
+		if v == defaultSep && stack.IsEmpty() {
+			res = append(res, string(tmp))
+			tmp = tmp[:0]
+		}
+	}
+
+	if len(tmp) > 0 {
+		res = append(res, string(tmp))
+	}
+	return res
 }
