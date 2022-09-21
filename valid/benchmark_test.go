@@ -87,11 +87,11 @@ func BenchmarkComplexValid(b *testing.B) {
 		_ = ValidateStruct(&u, "alipay")
 	}
 
-	// BenchmarkValid-8          162354              7325 ns/op            4635 B/op        108 allocs/op
-	// BenchmarkValid-8          160914              7321 ns/op            4635 B/op        108 allocs/op
-	// BenchmarkValid-8          162373              7303 ns/op            4635 B/op        108 allocs/op
-	// BenchmarkValid-8          160164              7414 ns/op            4635 B/op        108 allocs/op
-	// BenchmarkValid-8          161552              7494 ns/op            4635 B/op        108 allocs/op
+	// BenchmarkComplexValid-8           189698              6276 ns/op            4404 B/op         78 allocs/op
+	// BenchmarkComplexValid-8           187850              6382 ns/op            4404 B/op         78 allocs/op
+	// BenchmarkComplexValid-8           185665              6312 ns/op            4404 B/op         78 allocs/op
+	// BenchmarkComplexValid-8           188355              6312 ns/op            4404 B/op         78 allocs/op
+	// BenchmarkComplexValid-8           187948              6263 ns/op            4404 B/op         78 allocs/op
 }
 
 func BenchmarkComplexValidIf(b *testing.B) {
