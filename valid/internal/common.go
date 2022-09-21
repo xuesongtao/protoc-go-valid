@@ -2,7 +2,7 @@ package internal
 
 import "unsafe"
 
-// Byte2Str 
-func Byte2Str(bytes []byte) string {
+// Bytes2Str 
+func Bytes2Str(bytes []byte) string {
 	return *(*string)(unsafe.Pointer(&bytes))
 }

@@ -85,6 +85,7 @@ var validName2FuncMap = map[string]CommonValidFn{
 // 对象
 var (
 	syncValidStructPool = sync.Pool{New: func() interface{} { return new(VStruct) }}
+	cacheStructType     = new(sync.Map)
 	syncValidVarPool    = sync.Pool{New: func() interface{} { return new(VVar) }}
 	timeReflectType     = reflect.TypeOf(time.Time{})
 )
@@ -173,7 +174,7 @@ var (
 type CommonValidFn func(errBuf *strings.Builder, validName, objName, fieldName string, tv reflect.Value)
 
 // SetCustomerValidFn 自定义验证函数
-// Deprecated 此函数会修改全局变量, 会导致内存释放不了, 此推荐 *VStruct.SetValidFn
+// 此函数会修改全局变量, 会导致内存释放不了, 此推荐 *VStruct.SetValidFn
 func SetCustomerValidFn(validName string, fn CommonValidFn) {
 	validName2FuncMap[validName] = fn
 }

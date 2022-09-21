@@ -15,6 +15,19 @@ type VStruct struct {
 	validFn         map[string]CommonValidFn // 存放自定义的验证函数, 可以做到调用完就被清理
 }
 
+// structType
+type structType struct {
+	name       string            // 名字
+	fieldInfos []structFieldInfo // 偏移量对应的字段信息内容
+}
+
+// structFieldInfo
+type structFieldInfo struct {
+	export     bool   // 是否可导出
+	name       string // 字段名
+	validNames string // 验证规则
+}
+
 // NewVStruct 验证结构体, 默认目标 tagName 为 "valid"
 func NewVStruct(targetTag ...string) *VStruct {
 	obj := syncValidStructPool.Get().(*VStruct)
@@ -26,7 +39,7 @@ func NewVStruct(targetTag ...string) *VStruct {
 	if obj.errBuf == nil { // 储存使用的时候 new 下, 后续都是从缓存中处理
 		obj.errBuf = new(strings.Builder)
 	}
-	obj.errBuf.Grow(1 << 7)
+	// obj.errBuf.Grow(1 << 7)
 	return obj
 }
 
@@ -112,40 +125,33 @@ func (v *VStruct) validate(structName string, value reflect.Value, isValidSlice 
 	}
 
 	tv := RemoveValuePtr(value)
-	ty := tv.Type()
-
 	// 如果不是结构体就退出
-	if ty.Kind() != reflect.Struct {
+	if tv.Kind() != reflect.Struct {
 		// 这里主要防止验证的切片为非结构体切片, 如 []int{1, 2, 3}, 这里会出现1, 为非指针所有需要退出
 		if len(isValidSlice) > 0 && isValidSlice[0] {
 			return v
 		}
-		v.errBuf.WriteString("src param \"" + structName + ty.Name() + "\" is not struct" + ErrEndFlag)
+		v.errBuf.WriteString("src param \"" + structName + tv.Type().Name() + "\" is not struct" + ErrEndFlag)
 		return v
 	}
 
+	cacheStructType := v.getCacheStructType(tv.Type())
 	totalFieldNum := tv.NumField()
 	for fieldNum := 0; fieldNum < totalFieldNum; fieldNum++ {
-		structField := ty.Field(fieldNum)
+		fieldInfo := cacheStructType.fieldInfos[fieldNum]
 		// 判断下是否可导出
-		if !IsExported(structField.Name) {
+		if !fieldInfo.export {
 			continue
-		}
-		validNames := structField.Tag.Get(v.targetTag)
-
-		// 如果设置了规则就覆盖 tag 中的验证内容
-		if rule := v.getCusRule(structField.Name); rule != "" {
-			validNames = rule
 		}
 
 		// 没有 validNames 直接跳过
-		if validNames == "" {
+		if fieldInfo.validNames == "" {
 			continue
 		}
 
 		fieldValue := tv.Field(fieldNum)
 		// 根据 tag 中的验证内容进行验证
-		for _, validName := range ValidNamesSplit(validNames) {
+		for _, validName := range ValidNamesSplit(fieldInfo.validNames) {
 			if validName == "" {
 				continue
 			}
@@ -153,21 +159,21 @@ func (v *VStruct) validate(structName string, value reflect.Value, isValidSlice 
 			validKey, _, cusMsg := ParseValidNameKV(validName)
 			fn, err := v.getValidFn(validKey)
 			if err != nil {
-				v.errBuf.WriteString(GetJoinFieldErr(structName+ty.Name(), structField.Name, err))
+				v.errBuf.WriteString(GetJoinFieldErr(structName+cacheStructType.name, fieldInfo.name, err))
 				continue
 			}
 
-			// fmt.Printf("structName: %s, structFieldName: %s, tv: %v\n", structName+ty.Name(), structField.Name, fieldValue)
+			// fmt.Printf("structName: %s, structFieldName: %s, tv: %v\n", cacheStructType.name, fieldInfo.name, fieldValue)
 			// 开始验证
 			// VStruct 内的验证方法
 			if fn == nil {
 				switch validKey {
 				case Required:
-					v.required(structName+ty.Name(), structField.Name, cusMsg, fieldValue)
+					v.required(structName+cacheStructType.name, fieldInfo.name, cusMsg, fieldValue)
 				case Exist:
-					v.exist(true, structName+ty.Name(), structField.Name, cusMsg, fieldValue)
+					v.exist(true, structName+cacheStructType.name, fieldInfo.name, cusMsg, fieldValue)
 				case Either, BothEq:
-					v.initValid2FieldsMap(validName, structName+ty.Name(), structField.Name, cusMsg, fieldValue)
+					v.initValid2FieldsMap(validName, structName+cacheStructType.name, fieldInfo.name, cusMsg, fieldValue)
 				}
 				continue
 			}
@@ -176,10 +182,37 @@ func (v *VStruct) validate(structName string, value reflect.Value, isValidSlice 
 			if fieldValue.IsZero() { // 空就直接跳过
 				continue
 			}
-			fn(v.errBuf, validName, structName+ty.Name(), structField.Name, fieldValue)
+			fn(v.errBuf, validName, structName+cacheStructType.name, fieldInfo.name, fieldValue)
 		}
 	}
 	return v
+}
+
+// getCacheStructType 获取缓存中的 reflect.Type
+func (v *VStruct) getCacheStructType(ty reflect.Type) structType {
+	if obj, ok := cacheStructType.Load(ty); ok {
+		return obj.(structType)
+	}
+
+	l := ty.NumField()
+	obj := structType{name: ty.Name()}
+	obj.fieldInfos = make([]structFieldInfo, l)
+	for fieldNum := 0; fieldNum < l; fieldNum++ {
+		fieldInfo := ty.Field(fieldNum)
+		info := structFieldInfo{
+			export:     IsExported(fieldInfo.Name),
+			name:       fieldInfo.Name,
+			validNames: fieldInfo.Tag.Get(v.targetTag),
+		}
+
+		// 如果设置了规则就覆盖 tag 中的验证内容
+		if rule := v.getCusRule(info.name); rule != "" {
+			info.validNames = rule
+		}
+		obj.fieldInfos[fieldNum] = info
+	}
+	cacheStructType.Store(ty, obj)
+	return obj
 }
 
 // required 验证 required

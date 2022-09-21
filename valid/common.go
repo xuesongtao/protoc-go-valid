@@ -337,6 +337,12 @@ func ValidNamesSplit(s string, sep ...byte) []string {
 		defaultSep = sep[0]
 	}
 
+	// 判断是否包含单单引号, 包含单引号需要排除里面的逗号
+	// fast path
+	if strings.IndexByte(s, '\'') == -1 {
+		return strings.Split(s, string(defaultSep))
+	}
+
 	stack := internal.NewStackByte(2)
 	defer stack.Reset()
 
@@ -346,9 +352,10 @@ func ValidNamesSplit(s string, sep ...byte) []string {
 	isParseSingleQuotes := false // 标记是否正在处理单引号里的内容
 	for i := 0; i < l; i++ {
 		v := s[i]
+		// 非单引号
 		if !isParseSingleQuotes && v != defaultSep {
 			tmp = append(tmp, v)
-		} else if isParseSingleQuotes { // 如果是单引号就不处理
+		} else if isParseSingleQuotes { // 单引号中的所有内容都添加
 			tmp = append(tmp, v)
 		}
 
@@ -359,6 +366,7 @@ func ValidNamesSplit(s string, sep ...byte) []string {
 			continue
 		}
 
+		// 判断单引号结束
 		if isParseSingleQuotes && stack.IsEqualLastVal(v) {
 			stack.Pop()
 			isParseSingleQuotes = false

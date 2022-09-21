@@ -19,7 +19,7 @@ type VUrl struct {
 func NewVUrl() *VUrl {
 	obj := new(VUrl)
 	obj.errBuf = new(strings.Builder)
-	obj.errBuf.Grow(1 << 4)
+	// obj.errBuf.Grow(1 << 4)
 	return obj
 }
 

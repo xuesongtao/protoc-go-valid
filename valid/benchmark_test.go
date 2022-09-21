@@ -8,7 +8,13 @@ import (
 
 func BenchmarkStringSplitValid(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		_ = ValidNamesSplit("required,phone,test", ',')
+		_ = ValidNamesSplit("required,phone,test")
+	}
+}
+
+func BenchmarkStringSplit(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		_ = strings.Split("required,phone,test", ",")
 	}
 }
 
@@ -46,11 +52,11 @@ func BenchmarkValidateForValid(b *testing.B) {
 		_ = ValidateStruct(users)
 	}
 
-	// BenchmarkValidateForValid-8              1235048               959.1 ns/op           456 B/op         12 allocs/op
-	// BenchmarkValidateForValid-8              1258246               950.5 ns/op           456 B/op         12 allocs/op
-	// BenchmarkValidateForValid-8              1258429               952.3 ns/op           456 B/op         12 allocs/op
-	// BenchmarkValidateForValid-8              1259571               952.8 ns/op           456 B/op         12 allocs/op
-	// BenchmarkValidateForValid-8              1258640               951.5 ns/op           456 B/op         12 allocs/op
+	// BenchmarkValidateForValid-8              1544240               771.6 ns/op           416 B/op          9 allocs/op
+	// BenchmarkValidateForValid-8              1560686               767.9 ns/op           416 B/op          9 allocs/op
+	// BenchmarkValidateForValid-8              1560042               772.7 ns/op           416 B/op          9 allocs/op
+	// BenchmarkValidateForValid-8              1547824               773.5 ns/op           416 B/op          9 allocs/op
+	// BenchmarkValidateForValid-8              1556835               770.4 ns/op           416 B/op          9 allocs/op
 }
 
 // go test -benchmem -run=^$ -bench ^BenchmarkComplexValid gitee.com/xuesongtao/protoc-go-valid/valid -v -count=5
