@@ -23,7 +23,7 @@ func NewVVar() *VVar {
 	if obj.errBuf == nil {
 		obj.errBuf = new(strings.Builder)
 	}
-	obj.errBuf.Grow(1 << 4)
+	// obj.errBuf.Grow(1 << 4)
 	obj.ruleObj = NewRule()
 	return obj
 }
