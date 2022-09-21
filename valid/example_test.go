@@ -107,7 +107,7 @@ func ExampleGt() {
 	}
 	v := &Tmp{Name: "测试", Age: -1}
 	fmt.Println(Struct(v))
-	
+
 	// Output:
 	// "Tmp.Name" input "测试", explain: it is less than or equal 2 str-length; "Tmp.Age" input "-1", explain: it is less than or equal 0 num-size
 }
@@ -337,14 +337,14 @@ func ExampleRe() {
 		Name string `valid:"required|必填,re='[a-z]+'|姓名必须为英文"`
 		Age  string `valid:"re='\\d{2}'|年龄必须为 2 位数"`
 		Addr string `valid:"required|地址必须,re='[\u4e00-\u9fa5]'|地址必须为中文"`
-		Pwd string `valid:"required,re='^[A-Za-z0-9]{8,16}$'|密码必须为8-16为字母和数字组合"`
+		Pwd  string `valid:"required,re='^[A-Za-z0-9]{8,16}$'|密码必须为8-16为字母和数字组合"`
 	}
 
 	v := &Tmp{
 		Name: "测试",
 		Age:  "1",
 		Addr: "四川成都",
-		Pwd: "1234567",
+		Pwd:  "1234567",
 	}
 
 	fmt.Println(Struct(v))
@@ -443,4 +443,25 @@ func ExampleValidStructForMyValidFn() {
 
 	// Output:
 	// "Tmp.Age" is not num
+}
+
+func ExampleForVar() {
+	err := Var(101, Required, GenValidKV(VTo, "1~100", "年龄1~100"))
+	fmt.Println(err)
+
+	// OutPut:
+	// input "101", 说明: 年龄1~100
+}
+
+func ExampleForUrl() {
+	url := "http://test.com?name=test&age=10&nickname=test1"
+	ruleObj := NewRule()
+	ruleObj.Set("name", Required, GenValidKV(VTo, "5~10|姓名需在5-10之间"), GenValidKV(BothEq, "botheq=0"))
+	ruleObj.Set("nickname", Required, GenValidKV(BothEq, "botheq=0"))
+	err := Url(url, ruleObj)
+	fmt.Println(err)
+
+	// OutPut
+	// "name" input "test", 说明: 姓名需在5-10之间; "name", "nickname" explain: they should be equal
+
 }
