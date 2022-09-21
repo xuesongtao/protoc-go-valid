@@ -461,7 +461,6 @@ func ExampleForUrl() {
 	err := Url(url, ruleObj)
 	fmt.Println(err)
 
-	// OutPut
+	// OutPut:
 	// "name" input "test", 说明: 姓名需在5-10之间; "name", "nickname" explain: they should be equal
-
 }
