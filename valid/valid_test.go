@@ -20,6 +20,26 @@ func equal(dest, src interface{}) bool {
 }
 
 func TestTmp(t *testing.T) {
+	type Tmp struct {
+		Name string
+		Age  int
+	}
+	data := &Tmp{
+		Name: "1",
+		Age:  2,
+	}
+	ruleObj := NewRule()
+	ruleObj.Set("Name,Age", Required)
+	err := StructForFn(&data, ruleObj)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	data = &Tmp{}
+	err = Struct(&data)
+	if err != nil {
+		t.Fatal(err)
+	}
 	t.Log(IncludeZhRe.MatchString("测试1hell"))
 }
 
