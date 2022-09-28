@@ -144,6 +144,11 @@ func (v *VStruct) validate(structName string, value reflect.Value, isValidSlice 
 			continue
 		}
 
+		// 如果设置了规则就覆盖 tag 中的验证内容
+		if rule := v.getCusRule(fieldInfo.name); rule != "" {
+			fieldInfo.validNames = rule
+		}
+
 		// 没有 validNames 直接跳过
 		if fieldInfo.validNames == "" {
 			continue
@@ -203,11 +208,6 @@ func (v *VStruct) getCacheStructType(ty reflect.Type) structType {
 			export:     IsExported(fieldInfo.Name),
 			name:       fieldInfo.Name,
 			validNames: fieldInfo.Tag.Get(v.targetTag),
-		}
-
-		// 如果设置了规则就覆盖 tag 中的验证内容
-		if rule := v.getCusRule(info.name); rule != "" {
-			info.validNames = rule
 		}
 		obj.fieldInfos[fieldNum] = info
 	}

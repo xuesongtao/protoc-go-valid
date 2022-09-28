@@ -1,17 +1,7 @@
 package internal
 
 import (
-	"sync"
-
 	"gitee.com/xuesongtao/protoc-go-valid/log"
-)
-
-var (
-	cache = sync.Pool{
-		New: func() interface{} {
-			return &stackByte{}
-		},
-	}
 )
 
 type stackByte struct {
@@ -19,13 +9,9 @@ type stackByte struct {
 }
 
 func NewStackByte(size int) *stackByte {
-	obj := cache.Get().(*stackByte)
-	if obj.data == nil {
-		obj.data = make([]byte, 0, size)
-	} else {
-		obj.data = obj.data[:0]
+	return &stackByte{
+		data: make([]byte, 0, size),
 	}
-	return obj
 }
 
 func (s *stackByte) Append(b byte) {
@@ -62,10 +48,7 @@ func (s *stackByte) IsEqualLastVal(b byte) bool {
 }
 
 func (s *stackByte) Reset() {
-	if cap(s.data) > 1<<8 {
-		return
-	}
-	cache.Put(s)
+	s.data = nil
 }
 
 func (s *stackByte) Dump() {
