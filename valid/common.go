@@ -11,7 +11,7 @@ import (
 
 // name2Value
 type name2Value struct {
-	structName string
+	objName    string
 	fieldName  string
 	cusMsg     string
 	val        string

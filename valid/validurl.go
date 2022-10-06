@@ -170,7 +170,7 @@ func (v *VUrl) either(fieldInfos []*name2Value) {
 	l := len(fieldInfos)
 	if l == 1 { // 如果只有 1 个就没有必要向下执行了
 		info := fieldInfos[0]
-		v.errBuf.WriteString(GetJoinFieldErr(info.structName, info.fieldName, eitherValErr))
+		v.errBuf.WriteString(GetJoinFieldErr(info.objName, info.fieldName, eitherValErr))
 		return
 	}
 	isZeroLen := 0
@@ -194,7 +194,7 @@ func (v *VUrl) bothEq(fieldInfos []*name2Value) {
 	l := len(fieldInfos)
 	if l == 1 { // 如果只有 1 个就没有必要向下执行了
 		info := fieldInfos[0]
-		v.errBuf.WriteString(GetJoinFieldErr(info.structName, info.fieldName, bothEqValErr))
+		v.errBuf.WriteString(GetJoinFieldErr(info.objName, info.fieldName, bothEqValErr))
 		return
 	}
 

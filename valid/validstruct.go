@@ -276,7 +276,7 @@ func (v *VStruct) initValid2FieldsMap(validName, structName, fieldName, cusMsg s
 	if _, ok := v.valid2FieldsMap[validName]; !ok {
 		v.valid2FieldsMap[validName] = make([]*name2Value, 0, 2)
 	}
-	v.valid2FieldsMap[validName] = append(v.valid2FieldsMap[validName], &name2Value{structName: structName, fieldName: fieldName, cusMsg: cusMsg, reflectVal: tv})
+	v.valid2FieldsMap[validName] = append(v.valid2FieldsMap[validName], &name2Value{objName: structName, fieldName: fieldName, cusMsg: cusMsg, reflectVal: tv})
 }
 
 // either 判断两者不能都为空
@@ -284,13 +284,13 @@ func (v *VStruct) either(fieldInfos []*name2Value) {
 	l := len(fieldInfos)
 	if l == 1 { // 如果只有 1 个就没有必要向下执行了
 		info := fieldInfos[0]
-		v.errBuf.WriteString(GetJoinFieldErr(info.structName, info.fieldName, eitherValErr))
+		v.errBuf.WriteString(GetJoinFieldErr(info.objName, info.fieldName, eitherValErr))
 		return
 	}
 	isZeroLen := 0
 	fieldInfoStr := "" // 拼接空的 structName, fliedName
 	for _, fieldInfo := range fieldInfos {
-		fieldInfoStr += "\"" + fieldInfo.structName + "." + fieldInfo.fieldName + "\", "
+		fieldInfoStr += "\"" + fieldInfo.objName + "." + fieldInfo.fieldName + "\", "
 		if fieldInfo.reflectVal.IsZero() {
 			isZeroLen++
 		}
@@ -308,7 +308,7 @@ func (v *VStruct) bothEq(fieldInfos []*name2Value) {
 	l := len(fieldInfos)
 	if l == 1 { // 如果只有 1 个就没有必要向下执行了
 		info := fieldInfos[0]
-		v.errBuf.WriteString(GetJoinFieldErr(info.structName, info.fieldName, bothEqValErr))
+		v.errBuf.WriteString(GetJoinFieldErr(info.objName, info.fieldName, bothEqValErr))
 		return
 	}
 
@@ -318,7 +318,7 @@ func (v *VStruct) bothEq(fieldInfos []*name2Value) {
 		eq           = true
 	)
 	for i, fieldInfo := range fieldInfos {
-		fieldInfoStr += "\"" + fieldInfo.structName + "." + fieldInfo.fieldName + "\", "
+		fieldInfoStr += "\"" + fieldInfo.objName + "." + fieldInfo.fieldName + "\", "
 		if !eq { // 避免多次比较
 			continue
 		}
