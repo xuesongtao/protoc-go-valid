@@ -85,10 +85,12 @@ var validName2FuncMap = map[string]CommonValidFn{
 // 对象
 var (
 	syncValidStructPool = sync.Pool{New: func() interface{} { return new(VStruct) }}
-	cacheStructType     = new(sync.Map)
-	// cacheStructType  = internal.NewLRU(2 << 8)
-	syncValidVarPool = sync.Pool{New: func() interface{} { return new(VVar) }}
-	timeReflectType  = reflect.TypeOf(time.Time{})
+	// 考虑到性能, 用 sync.Map 缓存(缺点: 内存释放不到)
+	// 如果需要释放内存可以通过调用 SetStructTypeCache, 如: SetStructTypeCache(NewLRU(2 << 8))
+	cacheStructType  CacheEr = new(sync.Map)
+	syncValidVarPool         = sync.Pool{New: func() interface{} { return new(VVar) }}
+	timeReflectType          = reflect.TypeOf(time.Time{})
+	once             sync.Once
 )
 
 // 标记
@@ -184,4 +186,11 @@ type CommonValidFn func(errBuf *strings.Builder, validName, objName, fieldName s
 // 此函数会修改全局变量, 会导致内存释放不了, 此推荐 *VStruct.SetValidFn
 func SetCustomerValidFn(validName string, fn CommonValidFn) {
 	validName2FuncMap[validName] = fn
+}
+
+// SetStructTypeCache 设置 structType 缓存类型
+func SetStructTypeCache(cacheEr CacheEr) {
+	once.Do(func() {
+		cacheStructType = cacheEr
+	})
 }
