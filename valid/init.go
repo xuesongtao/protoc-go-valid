@@ -85,9 +85,12 @@ var validName2FuncMap = map[string]CommonValidFn{
 // 对象
 var (
 	syncValidStructPool = sync.Pool{New: func() interface{} { return new(VStruct) }}
-	cacheStructType     = new(sync.Map)
-	syncValidVarPool    = sync.Pool{New: func() interface{} { return new(VVar) }}
-	timeReflectType     = reflect.TypeOf(time.Time{})
+	// 考虑到性能, 用 sync.Map 缓存(缺点: 内存释放不到)
+	// 如果需要释放内存可以通过调用 SetStructTypeCache, 如: SetStructTypeCache(NewLRU(2 << 8))
+	cacheStructType  CacheEr = new(sync.Map)
+	syncValidVarPool         = sync.Pool{New: func() interface{} { return new(VVar) }}
+	timeReflectType          = reflect.TypeOf(time.Time{})
+	once             sync.Once
 )
 
 // 标记
@@ -168,6 +171,12 @@ var (
 	FloatRe       = regexp.MustCompile(`^\d+.\d+$`)
 )
 
+// CacheEr 缓存接口
+type CacheEr interface {
+	Load(key interface{}) (interface{}, bool)
+	Store(key, value interface{})
+}
+
 // CommonValidFn 通用验证函数, 主要用于回调
 // 注: 在写 errBuf 的时候建议用 GetJoinValidErrStr 包裹下, 这样产生的结果易读.
 //     否则需要再 errBuf.Writestring 最后要加上 ErrEndFlag 分割, 工具是通过 ErrEndFlag 进行分句
@@ -177,4 +186,11 @@ type CommonValidFn func(errBuf *strings.Builder, validName, objName, fieldName s
 // 此函数会修改全局变量, 会导致内存释放不了, 此推荐 *VStruct.SetValidFn
 func SetCustomerValidFn(validName string, fn CommonValidFn) {
 	validName2FuncMap[validName] = fn
+}
+
+// SetStructTypeCache 设置 structType 缓存类型
+func SetStructTypeCache(cacheEr CacheEr) {
+	once.Do(func() {
+		cacheStructType = cacheEr
+	})
 }
