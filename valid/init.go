@@ -7,6 +7,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"gitee.com/xuesongtao/protoc-go-valid/valid/internal"
 )
 
 const (
@@ -85,9 +87,10 @@ var validName2FuncMap = map[string]CommonValidFn{
 // 对象
 var (
 	syncValidStructPool = sync.Pool{New: func() interface{} { return new(VStruct) }}
-	cacheStructType     = new(sync.Map)
-	syncValidVarPool    = sync.Pool{New: func() interface{} { return new(VVar) }}
-	timeReflectType     = reflect.TypeOf(time.Time{})
+	// cacheStructType  = new(sync.Map)
+	cacheStructType  = internal.NewLRU(2 << 8)
+	syncValidVarPool = sync.Pool{New: func() interface{} { return new(VVar) }}
+	timeReflectType  = reflect.TypeOf(time.Time{})
 )
 
 // 标记
@@ -167,6 +170,12 @@ var (
 	IntRe         = regexp.MustCompile(`^\d+$`)
 	FloatRe       = regexp.MustCompile(`^\d+.\d+$`)
 )
+
+// CacheEr 缓存接口
+type CacheEr interface {
+	Load(key interface{}) (interface{}, bool)
+	Store(key, value interface{})
+}
 
 // CommonValidFn 通用验证函数, 主要用于回调
 // 注: 在写 errBuf 的时候建议用 GetJoinValidErrStr 包裹下, 这样产生的结果易读.

@@ -1,7 +1,10 @@
 package internal
 
 import (
+	"fmt"
+	"sync"
 	"testing"
+	"time"
 )
 
 func TestStack(t *testing.T) {
@@ -42,6 +45,39 @@ func TestStack(t *testing.T) {
 
 func TestByte2Str(t *testing.T) {
 	t.Log(Bytes2Str([]byte("hello 你好 a")))
+}
+
+func TestLRU(t *testing.T) {
+	var wg sync.WaitGroup
+	size := 3
+	lruSize := size - 1
+	obj := NewLRU(lruSize)
+	for i := 0; i < size; i++ {
+		wg.Add(1)
+		go func(num int) {
+			defer wg.Done()
+			time.Sleep(time.Second * time.Duration(num))
+			obj.Store(num, "hello"+fmt.Sprint(num))
+		}(i)
+	}
+	wg.Wait()
+	t.Log(obj.Dump())
+	if obj.Len() > lruSize {
+		t.Error("size is not ok")
+		return
+	}
+
+	if _, ok := obj.Load(0); ok {
+		t.Error("0 is not ok")
+		return
+	}
+
+	for i := size - lruSize; i < size; i++ {
+		if v, _ := obj.Load(i); v.(string) != fmt.Sprintf("hello%d", i) {
+			t.Errorf("%d is not ok", i)
+			return
+		}
+	}
 }
 
 func BenchmarkByte2Str1(b *testing.B) {
