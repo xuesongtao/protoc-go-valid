@@ -7,8 +7,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-
-	"gitee.com/xuesongtao/protoc-go-valid/valid/internal"
 )
 
 const (
@@ -87,8 +85,8 @@ var validName2FuncMap = map[string]CommonValidFn{
 // 对象
 var (
 	syncValidStructPool = sync.Pool{New: func() interface{} { return new(VStruct) }}
-	// cacheStructType  = new(sync.Map)
-	cacheStructType  = internal.NewLRU(2 << 8)
+	cacheStructType     = new(sync.Map)
+	// cacheStructType  = internal.NewLRU(2 << 8)
 	syncValidVarPool = sync.Pool{New: func() interface{} { return new(VVar) }}
 	timeReflectType  = reflect.TypeOf(time.Time{})
 )
