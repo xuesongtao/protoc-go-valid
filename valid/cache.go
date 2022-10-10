@@ -13,6 +13,7 @@ type LRUCache struct {
 	cacheMap map[interface{}]*cacheData
 }
 
+// cacheData
 type cacheData struct {
 	timestamp int64
 	data      interface{}
