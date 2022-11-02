@@ -24,7 +24,17 @@ func equal(dest, src interface{}) bool {
 }
 
 func TestTmp(t *testing.T) {
-	t.Log(IncludeZhRe.MatchString("测试1hell"))
+	type Tmp struct {
+		IntString string `valid:"int|intString必须为整数"`
+		IntNum    string    `valid:"int"`
+	}
+
+	v := &Tmp{
+		IntString: "11.121",
+		IntNum:    "a",
+	}
+	err := Struct(&v)
+	fmt.Println(GetOnlyExplainErr(err.Error()))
 }
 
 type TestOrder struct {
@@ -62,7 +72,7 @@ func TestValidManyStruct(t *testing.T) {
 		T:  []TmpTest3{{Name: ""}},
 	}
 	datas := append([]*Tmp{}, v, v)
-	sureMsg := `"*valid.Tmp-0.Tmp.Ip" input "256.12.22.4", explain: it is not ipv4; "*valid.Tmp-0.Tmp-0.TmpTest3.Name" input "", explain: it is required; "*valid.Tmp-1.Tmp.Ip" input "256.12.22.4", explain: it is not ipv4; "*valid.Tmp-1.Tmp-0.TmpTest3.Name" input "", explain: it is required`
+	sureMsg := `"*valid.Tmp[0].Ip" input "256.12.22.4", explain: it is not ipv4; "*valid.Tmp[0].T[0].Name" input "", explain: it is required; "*valid.Tmp[1].Ip" input "256.12.22.4", explain: it is not ipv4; "*valid.Tmp[1].T[0].Name" input "", explain: it is required`
 	err := ValidateStruct(datas)
 	if !equal(err.Error(), sureMsg) {
 		t.Error(noEqErr)
@@ -193,7 +203,7 @@ func TestValidOrder(t *testing.T) {
 	if err == nil {
 		return
 	}
-	sureMsg := `"TestOrder.AppName" input "测试", explain: it is less than 5 str-length; "TestOrder.TestOrderDetailPtr.GoodsName" input "玻尿酸", explain: it is more than 2 str-length; "TestOrder-0.TestOrderDetailSlice.GoodsName" input "", explain: it is required; "TestOrder-1.TestOrderDetailSlice.BuyerNames" input "", explain: it is required; "TestOrder-2.TestOrderDetailSlice.TmpTest3" input "", explain: it is required; "TestOrder-2.TestOrderDetailSlice.BuyerNames" input "", explain: it is required; "TestOrder-3.TestOrderDetailSlice.BuyerNames" input "", explain: it is required`
+	sureMsg := `"TestOrder.AppName" input "测试", explain: it is less than 5 str-length; "TestOrder.TestOrderDetailPtr.GoodsName" input "玻尿酸", explain: it is more than 2 str-length; "TestOrder.TestOrderDetailSlice[0].GoodsName" input "", explain: it is required; "TestOrder.TestOrderDetailSlice[1].BuyerNames" input "", explain: it is required; "TestOrder.TestOrderDetailSlice[2].TmpTest3" input "", explain: it is required; "TestOrder.TestOrderDetailSlice[2].BuyerNames" input "", explain: it is required; "TestOrder.TestOrderDetailSlice[3].BuyerNames" input "", explain: it is required`
 	if !equal(err.Error(), sureMsg) {
 		t.Error(noEqErr)
 	}
@@ -272,7 +282,7 @@ func TestProtoPb1(t *testing.T) {
 		return
 	}
 
-	suerMsg := `"User.Man.Name" input "", 说明: 姓名必填; "User.Man.Tmp" valid "he" is not exist, You can call SetValidFn`
+	suerMsg := `"User.M.Name" input "", 说明: 姓名必填; "User.M.Tmp" valid "he" is not exist, You can call SetValidFn`
 	if !equal(err.Error(), suerMsg) {
 		t.Error(noEqErr)
 	}

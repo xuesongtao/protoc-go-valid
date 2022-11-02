@@ -17,3 +17,4 @@
 protoc-go-valid*
 version.txt
 .vscode
+.idea

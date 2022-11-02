@@ -194,3 +194,36 @@ func SetStructTypeCache(cacheEr CacheEr) {
 		cacheStructType = cacheEr
 	})
 }
+
+// GetOnlyExplainErr 获取所有的说明错误(不包含错误的字段信息)
+// 使用场景: 在自定义错误信息时, 返回给非开发人员看的结果
+func GetOnlyExplainErr(errMsg string) string {
+	if errMsg == "" {
+		return ""
+	}
+	buf := new(strings.Builder)
+	zhLen := len(ExplainZh)
+	enLen := len(ExplainEn)
+	endLen := len(ErrEndFlag)
+	splitLen := zhLen
+	nullLen := 1 // err msg [说明: xxx] 里包含一个空需要处理
+	for {
+		s := strings.Index(errMsg, ExplainZh)
+		e := strings.Index(errMsg, ErrEndFlag) // 未发现的话, 为最后一句错误
+		if s == -1 || (e != -1 && s > e) {     // 说明为英文
+			s = strings.Index(errMsg, ExplainEn)
+			splitLen = enLen
+		}
+		if s == -1 { // 异常
+			break
+		}
+		if e == -1 {
+			buf.WriteString(errMsg[s+splitLen+nullLen:])
+			break
+		}
+		buf.WriteString(errMsg[s+splitLen+nullLen : e])
+		buf.WriteString(ErrEndFlag)
+		errMsg = errMsg[e+endLen:]
+	}
+	return buf.String()
+}
