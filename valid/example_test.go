@@ -465,19 +465,21 @@ func ExampleForUrl() {
 	// "name" input "test", 说明: 姓名需在5-10之间; "name", "nickname" explain: they should be equal
 }
 
-func ExampleGetAllExplainErr() {
+func ExampleGetOnlyExplainErr() {
 	type Tmp struct {
-		IntString string `valid:"int|请输入整数类"`
-		IntNum    int    `valid:"int"`
+		Name string `valid:"to=2~4|姓名长度应该在2-4个长度"`
+		IntString string `valid:"int|IntString请输入整数类"`
+		IntNum    string    `valid:"int|IntNum请输入整数"`
 	}
 
 	v := &Tmp{
+		Name: "xuesongtao",
 		IntString: "11.121",
-		IntNum:    1,
+		IntNum:    "1a",
 	}
 	err := Struct(&v)
 	fmt.Println(GetOnlyExplainErr(err.Error()))
 
 	// OutPut:
-	// 请输入整数类
+	// 姓名长度应该在2-4个长度; IntString请输入整数类; IntNum请输入整数
 }
