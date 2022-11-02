@@ -46,7 +46,7 @@ func ExampleExist() {
 	fmt.Println(Struct(teather))
 
 	// Output:
-	// "Teather.Man.Name" input "", explain: it is required; "Teather-0.Student.Man.Age" input "120", explain: it is more than 100 num-size
+	// "Teather.M.Name" input "", explain: it is required; "Teather.Stu[0].M.Age" input "120", explain: it is more than 100 num-size
 }
 
 func ExampleTo() {
@@ -463,4 +463,21 @@ func ExampleForUrl() {
 
 	// OutPut:
 	// "name" input "test", 说明: 姓名需在5-10之间; "name", "nickname" explain: they should be equal
+}
+
+func ExampleGetAllExplainErr() {
+	type Tmp struct {
+		IntString string `valid:"int|请输入整数类"`
+		IntNum    int    `valid:"int"`
+	}
+
+	v := &Tmp{
+		IntString: "11.121",
+		IntNum:    1,
+	}
+	err := Struct(&v)
+	fmt.Println(GetOnlyExplainErr(err.Error()))
+
+	// OutPut:
+	// 请输入整数类
 }

@@ -83,14 +83,15 @@ func (v *VStruct) Valid(src interface{}) error {
 	case reflect.Slice, reflect.Array:
 		var structName string
 		for i := 0; i < reflectValue.Len(); i++ {
+			val := reflectValue.Index(i)
 			if i == 0 {
-				structName = reflectValue.Index(i).Type().String()
+				structName = val.Type().String()
 			}
-			v.validate(structName+"-"+ToStr(i), reflectValue.Index(i), true)
+			v.validate(structName+"["+ToStr(i)+"]", val, true)
 		}
 		return v.getError()
 	}
-	return v.validate("", reflectValue).getError()
+	return v.validate("", reflectValue, false).getError()
 }
 
 // SetValidFn 自定义设置验证函数
@@ -119,11 +120,6 @@ func (v *VStruct) getValidFn(validName string) (CommonValidFn, error) {
 
 // validate 验证执行体
 func (v *VStruct) validate(structName string, value reflect.Value, isValidSlice ...bool) *VStruct {
-	// 辅助 errMsg, 用于嵌套时拼接上一级的结构体名
-	if structName != "" {
-		structName = structName + "."
-	}
-
 	tv := RemoveValuePtr(value)
 	// 如果不是结构体就退出
 	if tv.Kind() != reflect.Struct {
@@ -131,12 +127,15 @@ func (v *VStruct) validate(structName string, value reflect.Value, isValidSlice 
 		if len(isValidSlice) > 0 && isValidSlice[0] {
 			return v
 		}
-		v.errBuf.WriteString("src param \"" + structName + tv.Type().Name() + "\" is not struct" + ErrEndFlag)
+		v.errBuf.WriteString("src param \"" + structName + "." + tv.Type().Name() + "\" is not struct" + ErrEndFlag)
 		return v
 	}
 
 	cacheStructType := v.getCacheStructType(tv.Type())
-	totalFieldNum := tv.NumField()
+	totalFieldNum := len(cacheStructType.fieldInfos)
+	if structName == "" {
+		structName = cacheStructType.name
+	}
 	for fieldNum := 0; fieldNum < totalFieldNum; fieldNum++ {
 		fieldInfo := cacheStructType.fieldInfos[fieldNum]
 		// 判断下是否可导出
@@ -164,7 +163,7 @@ func (v *VStruct) validate(structName string, value reflect.Value, isValidSlice 
 			validKey, _, cusMsg := ParseValidNameKV(validName)
 			fn, err := v.getValidFn(validKey)
 			if err != nil {
-				v.errBuf.WriteString(GetJoinFieldErr(structName+cacheStructType.name, fieldInfo.name, err))
+				v.errBuf.WriteString(GetJoinFieldErr(structName, fieldInfo.name, err))
 				continue
 			}
 
@@ -174,11 +173,11 @@ func (v *VStruct) validate(structName string, value reflect.Value, isValidSlice 
 			if fn == nil {
 				switch validKey {
 				case Required:
-					v.required(structName+cacheStructType.name, fieldInfo.name, cusMsg, fieldValue)
+					v.required(structName, fieldInfo.name, cusMsg, fieldValue)
 				case Exist:
-					v.exist(true, structName+cacheStructType.name, fieldInfo.name, cusMsg, fieldValue)
+					v.exist(true, structName, fieldInfo.name, cusMsg, fieldValue)
 				case Either, BothEq:
-					v.initValid2FieldsMap(validName, structName+cacheStructType.name, fieldInfo.name, cusMsg, fieldValue)
+					v.initValid2FieldsMap(validName, structName, fieldInfo.name, cusMsg, fieldValue)
 				}
 				continue
 			}
@@ -187,7 +186,7 @@ func (v *VStruct) validate(structName string, value reflect.Value, isValidSlice 
 			if fieldValue.IsZero() { // 空就直接跳过
 				continue
 			}
-			fn(v.errBuf, validName, structName+cacheStructType.name, fieldInfo.name, fieldValue)
+			fn(v.errBuf, validName, structName, fieldInfo.name, fieldValue)
 		}
 	}
 	return v
@@ -251,10 +250,10 @@ func (v *VStruct) exist(isValidTvKind bool, structName, fieldName, cusMsg string
 		if structName == "Time" && tv.Type() == timeReflectType {
 			return
 		}
-		v.validate(structName, tv)
+		v.validate(structName+"."+fieldName, tv, false)
 	case reflect.Slice, reflect.Array:
 		for i := 0; i < tv.Len(); i++ {
-			v.validate(structName+"-"+ToStr(i), tv.Index(i), true)
+			v.validate(structName+"."+fieldName+"["+ToStr(i)+"]", tv.Index(i), true)
 		}
 	default:
 		if isValidTvKind {
