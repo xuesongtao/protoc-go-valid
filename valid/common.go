@@ -166,7 +166,7 @@ func validInputSize(min, max int, tv reflect.Value, isHasEqual ...bool) (isLessT
 		}
 	case reflect.Float32, reflect.Float64:
 		val := tv.Float()
-		valStr = fmt.Sprintf("%v", val)
+		valStr = ToStr(val)
 		if hasEqual {
 			if val < float64(min) {
 				isLessThan = true
@@ -185,7 +185,7 @@ func validInputSize(min, max int, tv reflect.Value, isHasEqual ...bool) (isLessT
 		}
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		val := tv.Int()
-		valStr = fmt.Sprintf("%d", val)
+		valStr = ToStr(val)
 		if hasEqual {
 			if val < int64(min) {
 				isLessThan = true
@@ -204,7 +204,7 @@ func validInputSize(min, max int, tv reflect.Value, isHasEqual ...bool) (isLessT
 		}
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
 		val := tv.Uint()
-		valStr = fmt.Sprintf("%d", val)
+		valStr = ToStr(val)
 		if hasEqual {
 			if val < uint64(min) {
 				isLessThan = true
@@ -223,7 +223,7 @@ func validInputSize(min, max int, tv reflect.Value, isHasEqual ...bool) (isLessT
 	case reflect.Slice:
 		unitStr = sliceLenUnitStr
 		l := tv.Len()
-		valStr = fmt.Sprintf("%d", l)
+		valStr = ToStr(l)
 		if hasEqual {
 			if l < min {
 				isLessThan = true

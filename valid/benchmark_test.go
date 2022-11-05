@@ -56,10 +56,10 @@ func BenchmarkValidateForValid(b *testing.B) {
 	}
 
 	// BenchmarkValidateForValid-8              1544240               771.6 ns/op           416 B/op          9 allocs/op
-	// BenchmarkValidateForValid-8              1560686               767.9 ns/op           416 B/op          9 allocs/op
-	// BenchmarkValidateForValid-8              1560042               772.7 ns/op           416 B/op          9 allocs/op
-	// BenchmarkValidateForValid-8              1547824               773.5 ns/op           416 B/op          9 allocs/op
-	// BenchmarkValidateForValid-8              1556835               770.4 ns/op           416 B/op          9 allocs/op
+	// BenchmarkValidateForValid-8              1617544               739.9 ns/op           416 B/op          9 allocs/op
+	// BenchmarkValidateForValid-8              1618682               740.3 ns/op           416 B/op          9 allocs/op
+	// BenchmarkValidateForValid-8              1621915               739.2 ns/op           416 B/op          9 allocs/op
+	// BenchmarkValidateForValid-8              1612825               739.7 ns/op           416 B/op          9 allocs/op
 }
 
 func BenchmarkValidateForValidate(b *testing.B) {
