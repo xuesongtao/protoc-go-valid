@@ -20,6 +20,19 @@ const (
 	ExplainZh = "说明:"
 )
 
+const (
+	// 时间格式
+	YearFmt int8 = 1 << iota
+	MonthFmt
+	DayFmt
+	HourFmt
+	MinFmt
+	SecFmt
+
+	DateFmt     = YearFmt | MonthFmt | DayFmt
+	DateTimeFmt = DateFmt | HourFmt | MinFmt | SecFmt
+)
+
 // 验证 tag
 const (
 	Required    = "required"   // 必填
@@ -47,7 +60,9 @@ const (
 	VInts       = "ints"       // 多个数字验证
 	VFloat      = "float"      // 浮动数
 	VRe         = "re"         // 正则
+	VIp         = "ip"         // ip
 	VIpv4       = "ipv4"       // ipv4
+	VIpv6       = "ipv6"       // ipv6
 	VUnique     = "unique"     // 唯一验证
 )
 
@@ -78,7 +93,9 @@ var validName2FuncMap = map[string]CommonValidFn{
 	VInts:       Ints,
 	VFloat:      Float,
 	VRe:         Re,
+	VIp:         Ip,
 	VIpv4:       Ipv4,
+	VIpv6:       Ipv6,
 	VUnique:     Unique,
 }
 
@@ -226,4 +243,41 @@ func GetOnlyExplainErr(errMsg string) string {
 		errMsg = errMsg[e+endLen:]
 	}
 	return buf.String()
+}
+
+// GetTimeFmt 获取时间格式化
+func GetTimeFmt(fmtType int8, split ...string) (res string) {
+	defaultSplit := "-"
+	if len(split) > 0 {
+		defaultSplit = split[0]
+	}
+
+	// 年月日
+	if fmtType&YearFmt > 0 {
+		res += "2006" + defaultSplit
+	}
+	if fmtType&MonthFmt > 0 {
+		res += "01" + defaultSplit
+	}
+	if fmtType&DayFmt > 0 {
+		res += "02" + defaultSplit
+	}
+
+	// 时分秒
+	if res != "" {
+		res = strings.TrimSuffix(res, defaultSplit)
+		res += " " // 添加个空格进行分割
+	}
+	defaultSplit = ":"
+	if fmtType&HourFmt > 0 {
+		res += "15" + defaultSplit
+	}
+	if fmtType&MinFmt > 0 {
+		res += "04" + defaultSplit
+	}
+	if fmtType&SecFmt > 0 {
+		res += "05" + defaultSplit
+	}
+	res = strings.TrimSuffix(res, defaultSplit)
+	return
 }

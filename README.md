@@ -95,7 +95,9 @@ protoFileDirName="test" # proto 存放的目录
 | include | yes |指定输入包含选项, 格式为 "include=(xxx/xxx/xxx)", 如: "include=(hello/2/3)" |
 | phone | yes |手机号验证 |
 | email | yes |邮箱验证 |
+| ip | yes| ip 验证|
 | ipv4 | yes| ipv4 验证|
+| ipv6 | yes| ipv6 验证|
 | idcard | yes |身份证号码验证 |
 | year | yes |年验证 |
 | year2month| yes |年月验证, 支持分割符, 默认按照"-". 验证:xxxx/xx, 格式: "year2month=/" |

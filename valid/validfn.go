@@ -1,10 +1,12 @@
 package valid
 
 import (
+	"net"
 	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // To 验证输入的大小区间, 注: 左右都为闭区间
@@ -289,23 +291,58 @@ func Phone(errBuf *strings.Builder, validName, objName, fieldName string, tv ref
 	errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, tv.String(), ExplainEn, "it is not phone"))
 }
 
+// Ip ip 验证
+func Ip(errBuf *strings.Builder, validName, objName, fieldName string, tv reflect.Value) {
+	if err := CheckFieldIsStr(objName, fieldName, tv); err != nil {
+		errBuf.WriteString(err.Error())
+		return
+	}
+	ip := net.ParseIP(tv.String())
+	if ip != nil {
+		return
+	}
+	_, _, cusMsg := ParseValidNameKV(validName)
+	if cusMsg != "" {
+		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, tv.String(), cusMsg))
+		return
+	}
+	errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, tv.String(), ExplainEn, "it is not ip"))
+}
+
 // Ipv4 ipv4 验证
 func Ipv4(errBuf *strings.Builder, validName, objName, fieldName string, tv reflect.Value) {
 	if err := CheckFieldIsStr(objName, fieldName, tv); err != nil {
 		errBuf.WriteString(err.Error())
 		return
 	}
-	matched := Ipv4Re.MatchString(tv.String())
-	if matched {
+	ip := net.ParseIP(tv.String())
+	if ip != nil && ip.To4() != nil {
 		return
 	}
-
 	_, _, cusMsg := ParseValidNameKV(validName)
 	if cusMsg != "" {
 		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, tv.String(), cusMsg))
 		return
 	}
 	errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, tv.String(), ExplainEn, "it is not ipv4"))
+}
+
+// Ipv6 ipv6 验证
+func Ipv6(errBuf *strings.Builder, validName, objName, fieldName string, tv reflect.Value) {
+	if err := CheckFieldIsStr(objName, fieldName, tv); err != nil {
+		errBuf.WriteString(err.Error())
+		return
+	}
+	ip := net.ParseIP(tv.String())
+	if ip != nil && ip.To4() == nil {
+		return
+	}
+	_, _, cusMsg := ParseValidNameKV(validName)
+	if cusMsg != "" {
+		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, tv.String(), cusMsg))
+		return
+	}
+	errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, tv.String(), ExplainEn, "it is not ipv6"))
 }
 
 // Email 验证邮箱
@@ -352,8 +389,8 @@ func Year(errBuf *strings.Builder, validName, objName, fieldName string, tv refl
 		errBuf.WriteString(err.Error())
 		return
 	}
-	matched := YearRe.MatchString(tv.String())
-	if matched {
+	_, err := time.Parse(GetTimeFmt(YearFmt), tv.String())
+	if err == nil {
 		return
 	}
 
@@ -377,13 +414,8 @@ func Year2Month(errBuf *strings.Builder, validName, objName, fieldName string, t
 	if val != "" {
 		defaultDateSplit = val
 	}
-	var matched bool
-	if defaultDateSplit == "/" {
-		matched = Year2MonthRe2.MatchString(tv.String())
-	} else {
-		matched = Year2MonthRe.MatchString(tv.String())
-	}
-	if matched {
+	_, err := time.Parse(GetTimeFmt(YearFmt|MonthFmt, defaultDateSplit), tv.String())
+	if err == nil {
 		return
 	}
 
@@ -406,13 +438,8 @@ func Date(errBuf *strings.Builder, validName, objName, fieldName string, tv refl
 	if val != "" {
 		defaultDateSplit = val
 	}
-	matched := false
-	if defaultDateSplit == "/" {
-		matched = DateRe2.MatchString(tv.String())
-	} else {
-		matched = DateRe.MatchString(tv.String())
-	}
-	if matched {
+	_, err := time.Parse(GetTimeFmt(DateFmt, defaultDateSplit), tv.String())
+	if err == nil {
 		return
 	}
 
@@ -435,13 +462,8 @@ func Datetime(errBuf *strings.Builder, validName, objName, fieldName string, tv 
 	if val != "" {
 		defaultDateSplit = val
 	}
-	matched := false
-	if defaultDateSplit == "/" {
-		matched = DatetimeRe2.MatchString(tv.String())
-	} else {
-		matched = DatetimeRe.MatchString(tv.String())
-	}
-	if matched {
+	_, err := time.Parse(GetTimeFmt(DateTimeFmt, defaultDateSplit), tv.String())
+	if err == nil {
 		return
 	}
 
