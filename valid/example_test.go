@@ -261,20 +261,22 @@ func ExampleIdCard() {
 	// "Tmp.IDCard" input "511321", explain: it is not idcard
 }
 
-func ExampleIpv4() {
+func ExampleIp() {
 	type Tmp struct {
-		Ip1 string `valid:"required,ipv4|ip不正确"`
-		Ip2 string `valid:"required,ipv4|ip不正确"`
+		Ip   string `valid:"required,ip|ip不正确"`
+		Ipv4 string `valid:"required,ipv4|ipv4不正确"`
+		Ipv6 string `valid:"required,ipv6|ipv6不正确"`
 	}
 
 	v := &Tmp{
-		Ip1: "255.240.17.210",
-		Ip2: "256.240.17.300",
+		Ip:   "192.168.1.0",
+		Ipv4: "192.168.0.113",
+		Ipv6: "2001:3CA1:10F:1A:121B:0:0:",
 	}
 	fmt.Println(Struct(&v))
 
 	// OutPut:
-	// "Tmp.Ip2" input "256.240.17.300", 说明: ip不正确
+	// "Tmp.Ipv6" input "2001:3CA1:10F:1A:121B:0:0:", 说明: ipv6不正确
 }
 
 func ExampleInt() {
@@ -467,13 +469,13 @@ func ExampleForUrl() {
 
 func ExampleGetOnlyExplainErr() {
 	type Tmp struct {
-		Name string `valid:"to=2~4|姓名长度应该在2-4个长度"`
+		Name      string `valid:"to=2~4|姓名长度应该在2-4个长度"`
 		IntString string `valid:"int|IntString请输入整数类"`
-		IntNum    string    `valid:"int|IntNum请输入整数"`
+		IntNum    string `valid:"int|IntNum请输入整数"`
 	}
 
 	v := &Tmp{
-		Name: "xuesongtao",
+		Name:      "xuesongtao",
 		IntString: "11.121",
 		IntNum:    "1a",
 	}
