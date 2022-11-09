@@ -20,17 +20,6 @@ func equal(dest, src interface{}) bool {
 }
 
 func TestTmp(t *testing.T) {
-	type Tmp struct {
-		IntString string `valid:"int|intString必须为整数"`
-		IntNum    string `valid:"int"`
-	}
-
-	v := &Tmp{
-		IntString: "11.121",
-		IntNum:    "a",
-	}
-	err := Struct(&v)
-	fmt.Println(GetOnlyExplainErr(err.Error()))
 }
 
 type TestOrder struct {

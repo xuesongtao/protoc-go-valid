@@ -102,7 +102,7 @@ protoFileDirName="test" # proto 存放的目录
 | year | yes |年验证 |
 | year2month| yes |年月验证, 支持分割符, 默认按照"-". 验证:xxxx/xx, 格式: "year2month=/" |
 | date | yes |日期验证, 支持分割符, 默认按照"-". 验证:xxxx/xx/xx, 格式: "date=/" |
-| datetime | yes |时间验证, 支持分割符, 默认按照"-". 验证:xxxx/xx/xx xx\:xx\:xx, 格式: "datetime=/" |
+| datetime | yes |时间验证, 支持分割符, 默认按照"-". 验证:xxxx/xx/xx xx\:xx\:xx, 格式: "datetime=/"(说明:支持自定义"日期","日期和时间","时间"分割符, 如: "datetime='/, ,/'", 建议参考 ExampleDatetime) |
 | int | yes |整数型验证 |
 | ints | yes |验证是否为多个数字. 如果输入为 string, 默认按逗号拼接进行验证; 如果为 slice/array, 会将每个值进行匹配判断 |
 | float | yes |浮动数型验证 |

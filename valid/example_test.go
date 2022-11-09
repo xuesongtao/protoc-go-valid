@@ -176,6 +176,25 @@ func ExampleDate() {
 	// "Tmp.Datetime" input "2021-01-11 23:22", 说明: 应该为 xxxx-xx-xx xx:xx:xx 的时间格式
 }
 
+func ExampleDatetime()  {
+	type Tmp struct {
+		Datetime1   string `valid:"required,datetime|应该为 xxxx-xx-xx xx:xx:xx 的时间格式"`
+		Datetime2   string `valid:"required,datetime='/'|应该为 xxxx/xx/xx xx:xx:xx 的时间格式"`
+		Datetime3   string `valid:"required,datetime='/, ,/'|应该为 xxxx/xx/xx xx/xx/xx 的时间格式"`
+		Datetime4   string `valid:"required,datetime=', ,'|应该为 xxxxxxxx xxxxxx 的时间格式"`
+	}
+	v := &Tmp{
+		Datetime1: "2022/11-09 10:05:00",
+		Datetime2: "2022/11/09 10:05:00",
+		Datetime3: "2022/11/09 10/05/00",
+		Datetime4: "20221109 100500",
+	}
+	fmt.Println(Struct(v))
+
+	// Output:
+	// "Tmp.Datetime1" input "2022/11-09 10:05:00", 说明: 应该为 xxxx-xx-xx xx:xx:xx 的时间格式
+}
+
 func ExampleEither() {
 	type Tmp struct {
 		Either1 int32 `valid:"either=1"`

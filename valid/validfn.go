@@ -1,6 +1,7 @@
 package valid
 
 import (
+	"fmt"
 	"net"
 	"reflect"
 	"regexp"
@@ -457,12 +458,14 @@ func Datetime(errBuf *strings.Builder, validName, objName, fieldName string, tv 
 		errBuf.WriteString(err.Error())
 		return
 	}
-	defaultDateSplit := "-" // 默认时间拼接符号
 	_, val, cusMsg := ParseValidNameKV(validName)
+	defaultSplit := []string{"-", " ", ":"}
 	if val != "" {
-		defaultDateSplit = val
+		for i, split := range strings.Split(strings.Trim(val, "'"), ",") {
+			defaultSplit[i] = split
+		}
 	}
-	_, err := time.Parse(GetTimeFmt(DateTimeFmt, defaultDateSplit), tv.String())
+	_, err := time.Parse(GetTimeFmt(DateTimeFmt, defaultSplit...), tv.String())
 	if err == nil {
 		return
 	}
@@ -471,7 +474,10 @@ func Datetime(errBuf *strings.Builder, validName, objName, fieldName string, tv 
 		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, tv.String(), cusMsg))
 		return
 	}
-	errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, tv.String(), ExplainEn, "it is not datetime, eg: 1996"+defaultDateSplit+"09"+defaultDateSplit+"28 23:00:00"))
+	errBuf.WriteString(GetJoinValidErrStr(
+		objName, fieldName, tv.String(), ExplainEn,
+		fmt.Sprintf("it is not datetime, eg: 1996%s09%s28%s23%s00%s00", defaultSplit[0], defaultSplit[0], defaultSplit[1], defaultSplit[2], defaultSplit[2]),
+	))
 }
 
 // Re 正则表达式
