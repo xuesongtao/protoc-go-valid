@@ -86,7 +86,7 @@ func ExampleLe() {
 	// "Tmp.Name" input "测试调", explain: it is more than 2 str-length; "Tmp.Age" input "1", explain: it is more than 0 num-size
 }
 
-func ExampleOto() {
+func ExampleOTo() {
 	type Tmp struct {
 		Name     string `valid:"oto=1~3"`
 		Age      int32  `valid:"oto=1~100"`
@@ -269,7 +269,7 @@ func ExampleEmail() {
 	// "Tmp.Email" input "xuesongtao512qq.com", explain: it is not email
 }
 
-func ExampleIdCard() {
+func ExampleIDCard() {
 	type Tmp struct {
 		IDCard string `valid:"idcard"`
 	}
@@ -466,7 +466,7 @@ func ExampleValidStructForMyValidFn() {
 	// "Tmp.Age" is not num
 }
 
-func ExampleForVar() {
+func ExampleVar() {
 	err := Var(101, Required, GenValidKV(VTo, "1~100", "年龄1~100"))
 	fmt.Println(err)
 
@@ -474,7 +474,7 @@ func ExampleForVar() {
 	// input "101", 说明: 年龄1~100
 }
 
-func ExampleForUrl() {
+func ExampleUrl() {
 	url := "http://test.com?name=test&age=10&nickname=test1"
 	ruleObj := NewRule()
 	ruleObj.Set("name", Required, GenValidKV(VTo, "5~10|姓名需在5-10之间"), GenValidKV(BothEq, "botheq=0"))
