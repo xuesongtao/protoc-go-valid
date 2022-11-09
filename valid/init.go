@@ -246,38 +246,52 @@ func GetOnlyExplainErr(errMsg string) string {
 }
 
 // GetTimeFmt 获取时间格式化
-func GetTimeFmt(fmtType int8, split ...string) (res string) {
-	defaultSplit := "-"
-	if len(split) > 0 {
-		defaultSplit = split[0]
+// splits 为分隔符
+// splits[0] 为 [年月日] 的分割符, 默认为 "-"
+// splits[1] 为 [年月日] 和 [时分秒] 的分割符, 默认为 " "
+// splits[2] 为 [时分秒] 的分割符, 默认为 ":"
+func GetTimeFmt(fmtType int8, splits ...string) (res string) {
+	defaultDateSplit := "-"
+	defaultDateTimeSplit := " "
+	defaultTimeSplit := ":"
+	l := len(splits)
+	switch l {
+	case 1:
+		defaultDateSplit = splits[0]
+	case 2:
+		defaultDateSplit = splits[0]
+		defaultDateTimeSplit = splits[1]
+	case 3:
+		defaultDateSplit = splits[0]
+		defaultDateTimeSplit = splits[1]
+		defaultTimeSplit = splits[2]
 	}
 
 	// 年月日
 	if fmtType&YearFmt > 0 {
-		res += "2006" + defaultSplit
+		res += "2006" + defaultDateSplit
 	}
 	if fmtType&MonthFmt > 0 {
-		res += "01" + defaultSplit
+		res += "01" + defaultDateSplit
 	}
 	if fmtType&DayFmt > 0 {
-		res += "02" + defaultSplit
+		res += "02" + defaultDateSplit
 	}
+	res = strings.TrimSuffix(res, defaultDateSplit)
 
 	// 时分秒
 	if res != "" {
-		res = strings.TrimSuffix(res, defaultSplit)
-		res += " " // 添加个空格进行分割
+		res += defaultDateTimeSplit
 	}
-	defaultSplit = ":"
 	if fmtType&HourFmt > 0 {
-		res += "15" + defaultSplit
+		res += "15" + defaultTimeSplit
 	}
 	if fmtType&MinFmt > 0 {
-		res += "04" + defaultSplit
+		res += "04" + defaultTimeSplit
 	}
 	if fmtType&SecFmt > 0 {
-		res += "05" + defaultSplit
+		res += "05" + defaultTimeSplit
 	}
-	res = strings.TrimSuffix(res, defaultSplit)
+	res = strings.TrimSuffix(res, defaultTimeSplit)
 	return
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"reflect"
 	"testing"
+	"time"
 
 	"gitee.com/xuesongtao/protoc-go-valid/test"
 	"github.com/go-playground/validator/v10"
@@ -24,6 +25,9 @@ func equal(dest, src interface{}) bool {
 }
 
 func TestTmp(t *testing.T) {
+	f := GetTimeFmt(DateTimeFmt, "/", " ", "/")
+	t.Log("fmt:", f)
+	t.Log(time.Now().Format(f))
 }
 
 type TestOrder struct {
