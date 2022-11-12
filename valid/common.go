@@ -116,12 +116,20 @@ func CheckFieldIsStr(objName, fieldName string, tv reflect.Value) (err error) {
 }
 
 // ReflectKindIsNum 值是否为数字
-func ReflectKindIsNum(kind reflect.Kind) (is bool) {
+func ReflectKindIsNum(kind reflect.Kind, isCanFloat ...bool) (is bool) {
+	defaultIsCanFloat := false
+	if len(isCanFloat) > 0 {
+		defaultIsCanFloat = isCanFloat[0]
+	}
 	switch kind {
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		is = true
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
 		is = true
+	case reflect.Float32, reflect.Float64:
+		if defaultIsCanFloat {
+			is = true
+		}
 	}
 	return
 }
@@ -383,4 +391,49 @@ func ValidNamesSplit(s string, sep ...byte) []string {
 		res = append(res, string(tmp))
 	}
 	return res
+}
+
+// StrEscape 转义
+func StrEscape(val string) string {
+	pos := 0
+	vLen := len(val)
+
+	buf := make([]byte, vLen*2)
+	for i := 0; i < vLen; i++ {
+		v := val[i]
+		switch v {
+		case '\'':
+			buf[pos] = '\\'
+			buf[pos+1] = '\''
+			pos += 2
+		case '"':
+			buf[pos] = '\\'
+			buf[pos+1] = '"'
+			pos += 2
+		case '\x00':
+			buf[pos] = '\\'
+			buf[pos+1] = '0'
+			pos += 2
+		case '\n':
+			buf[pos] = '\\'
+			buf[pos+1] = 'n'
+			pos += 2
+		case '\r':
+			buf[pos] = '\\'
+			buf[pos+1] = 'r'
+			pos += 2
+		case '\x1a':
+			buf[pos] = '\\'
+			buf[pos+1] = 'Z'
+			pos += 2
+		case '\\':
+			buf[pos] = '\\'
+			buf[pos+1] = '\\'
+			pos += 2
+		default:
+			buf[pos] = v
+			pos++
+		}
+	}
+	return internal.UnsafeBytes2Str(buf[:pos])
 }

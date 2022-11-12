@@ -64,6 +64,7 @@ const (
 	VIpv4       = "ipv4"       // ipv4
 	VIpv6       = "ipv6"       // ipv6
 	VUnique     = "unique"     // 唯一验证
+	VJson       = "json"       // json 格式验证
 )
 
 // 验证函数
@@ -97,6 +98,7 @@ var validName2FuncMap = map[string]CommonValidFn{
 	VIpv4:       Ipv4,
 	VIpv6:       Ipv6,
 	VUnique:     Unique,
+	VJson:       Json,
 }
 
 // 对象

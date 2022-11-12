@@ -103,7 +103,7 @@ reValid:
 		ty = ty.Elem()
 		goto reValid
 	default:
-		if ReflectKindIsNum(ty.Kind()) {
+		if ReflectKindIsNum(ty.Kind(), true) {
 			supportType = true
 		}
 	}

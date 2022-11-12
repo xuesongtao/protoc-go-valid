@@ -176,12 +176,12 @@ func ExampleDate() {
 	// "Tmp.Datetime" input "2021-01-11 23:22", 说明: 应该为 xxxx-xx-xx xx:xx:xx 的时间格式
 }
 
-func ExampleDatetime()  {
+func ExampleDatetime() {
 	type Tmp struct {
-		Datetime1   string `valid:"required,datetime|应该为 xxxx-xx-xx xx:xx:xx 的时间格式"`
-		Datetime2   string `valid:"required,datetime='/'|应该为 xxxx/xx/xx xx:xx:xx 的时间格式"`
-		Datetime3   string `valid:"required,datetime='/, ,/'|应该为 xxxx/xx/xx xx/xx/xx 的时间格式"`
-		Datetime4   string `valid:"required,datetime=', ,'|应该为 xxxxxxxx xxxxxx 的时间格式"`
+		Datetime1 string `valid:"required,datetime|应该为 xxxx-xx-xx xx:xx:xx 的时间格式"`
+		Datetime2 string `valid:"required,datetime='/'|应该为 xxxx/xx/xx xx:xx:xx 的时间格式"`
+		Datetime3 string `valid:"required,datetime='/, ,/'|应该为 xxxx/xx/xx xx/xx/xx 的时间格式"`
+		Datetime4 string `valid:"required,datetime=', ,'|应该为 xxxxxxxx xxxxxx 的时间格式"`
 	}
 	v := &Tmp{
 		Datetime1: "2022/11-09 10:05:00",
@@ -393,6 +393,24 @@ func ExampleUnique() {
 
 	// Output:
 	// "Tmp.Name" input "测试", 说明: 姓名必须为英文; "Tmp.Hobby" input "打篮球,踢足球,打篮球", 说明: 爱好唯一; "Tmp.LikeNum" input "[1,2,3,1]", 说明: 幸运数唯一
+}
+
+func ExampleJson() {
+	type Tmp struct {
+		Name  string `valid:"required"`
+		Json1 string `valid:"required,json|json格式不正确"`
+		Json2 string `valid:"required,json"`
+	}
+	tmp := &Tmp{
+		Name:  "测试json",
+		Json1: `[{"id":1,"name":"test","age":10,"cls_name":"初一","addr":"四川成都"},{"id":2,"name":"test","age":10,"cls_name":"初二","addr":"四川成都"}]`,
+		Json2: `{"name":"A-Tao","hobby":["play basketball","write golang code"],"class_name":"community university","addr":"ChengDu"}`,
+	}
+	err := Struct(tmp)
+	fmt.Println(err)
+
+	// Output:
+	// <nil>
 }
 
 func ExampleJoinTag2Val() {

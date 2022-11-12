@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"reflect"
 	"testing"
-	"time"
 
 	"gitee.com/xuesongtao/protoc-go-valid/test"
 	"github.com/go-playground/validator/v10"
@@ -25,9 +24,17 @@ func equal(dest, src interface{}) bool {
 }
 
 func TestTmp(t *testing.T) {
-	f := GetTimeFmt(DateTimeFmt, "/", " ", "/")
-	t.Log("fmt:", f)
-	t.Log(time.Now().Format(f))
+	type Tmp struct {
+		Name string `valid:"required"`
+		Json string `valid:"required,json"`
+	}
+	tmp := &Tmp{
+		Name: "测试json",
+		Json: `[{"id":1,"name":"test","age":10,"cls_name":"初一","addr":"四川成都"},{"id":2,"name":"test","age":10,"cls_name":"初二","addr":"四川成都"}]`,
+	}
+	if err := Struct(tmp); err != nil {
+		t.Error(err)
+	}
 }
 
 type TestOrder struct {
