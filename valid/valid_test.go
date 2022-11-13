@@ -22,17 +22,7 @@ func equal(dest, src interface{}) bool {
 }
 
 func TestTmp(t *testing.T) {
-	type Tmp struct {
-		Name string `valid:"required"`
-		Json string `valid:"required,json"`
-	}
-	tmp := &Tmp{
-		Name: "测试json",
-		Json: `[{"id":1,"name":"test","age":10,"cls_name":"初一","addr":"四川成都"},{"id":2,"name":"test","age":10,"cls_name":"初二","addr":"四川成都"}]`,
-	}
-	if err := Struct(tmp); err != nil {
-		t.Error(err)
-	}
+
 }
 
 func TestValidManyStruct(t *testing.T) {
@@ -57,6 +47,58 @@ func TestValidManyStruct(t *testing.T) {
 	}
 }
 
+func TestValidStructMap(t *testing.T) {
+	t.Run("map value is struct", func(t *testing.T) {
+		type Tmp struct {
+			Name string `valid:"required"`
+			Age  int    `valid:"required,to=1~100"`
+		}
+		tmp := &Tmp{
+			Name: "测试json",
+			Age:  101,
+		}
+		a := map[string]*Tmp{
+			"1": tmp,
+		}
+		sureMsg := `"map[1].Age" input "101", explain: it is more than 100 num-size`
+		err := Struct(a)
+		if err != nil && !equal(err.Error(), sureMsg) {
+			t.Error(err)
+		}
+	})
+
+	t.Run("struct have map filed", func(t *testing.T) {
+		type Tmp struct {
+			Name     string          `valid:"required"`
+			Age      int             `valid:"required,to=1~100"`
+			Students map[string]*Tmp `valid:"exist"`
+		}
+		tmp := &Tmp{
+			Name: "测试json",
+			Age:  20,
+			Students: map[string]*Tmp{
+				"同学1": {
+					Name: "同学1",
+					Age:  -1,
+				},
+				"同学2": {
+					Name: "同学2",
+					Age:  10,
+				},
+				"同学3": {
+					Name: "同学3",
+					Age:  20,
+				},
+			},
+		}
+		sureMsg := `"Tmp.Students[同学1].Age" input "-1", explain: it is less than 1 num-size`
+		err := Struct(tmp)
+		if err != nil && !equal(err.Error(), sureMsg) {
+			t.Error(err)
+		}
+	})
+}
+
 func TestValidManyStructRule(t *testing.T) {
 	type Tmp1 struct {
 		Name string
@@ -78,7 +120,6 @@ func TestValidManyStructRule(t *testing.T) {
 	}
 	sureMsg := `"Tmp.Ip" input "256.12.22.400", 说明: ip 格式不正确; "Tmp.T[0].Name" input "", 说明: 姓名必填`
 	err := NestedStructForRule(v, rmap)
-	t.Log(err)
 	if err != nil && !equal(err.Error(), sureMsg) {
 		t.Error(noEqErr)
 	}

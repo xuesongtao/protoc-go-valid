@@ -111,6 +111,14 @@ func (v *VStruct) Valid(src interface{}) error {
 			v.validate(structName+"["+ToStr(i)+"]", val, true)
 		}
 		return v.getError()
+	case reflect.Map:
+		iter := reflectValue.MapRange()
+		for iter.Next() {
+			k1 := iter.Key()
+			v1 := iter.Value()
+			v.validate("map["+ToStr(k1)+"]", v1, true)
+		}
+		return v.getError()
 	}
 	return v.validate("", reflectValue, false).getError()
 }
@@ -140,14 +148,15 @@ func (v *VStruct) getValidFn(validName string) (CommonValidFn, error) {
 }
 
 // validate 验证执行体
-func (v *VStruct) validate(structName string, value reflect.Value, isValidSlice ...bool) *VStruct {
+// isValidGatherObj 是否验证集合对象, 包含: slice/array/map
+func (v *VStruct) validate(structName string, value reflect.Value, isValidGatherObj ...bool) *VStruct {
 	tv := RemoveValuePtr(value)
 	ty := tv.Type()
 	// fmt.Printf("ty: %v, structName: %q\n", ty, structName)
 	// 如果不是结构体就退出
 	if tv.Kind() != reflect.Struct {
 		// 这里主要防止验证的切片为非结构体切片, 如 []int{1, 2, 3}, 这里会出现1, 为非指针所有需要退出
-		if len(isValidSlice) > 0 && isValidSlice[0] {
+		if len(isValidGatherObj) > 0 && isValidGatherObj[0] {
 			return v
 		}
 		v.errBuf.WriteString("src param \"" + structName + "." + ty.Name() + "\" is not struct" + ErrEndFlag)
@@ -252,7 +261,7 @@ func (v *VStruct) required(structName, fieldName, cusMsg string, tv reflect.Valu
 	ok := true
 	// 如果集合类型先判断下长度
 	switch tv.Kind() {
-	case reflect.Slice, reflect.Array:
+	case reflect.Slice, reflect.Array, reflect.Map:
 		if tv.Len() == 0 {
 			ok = false
 		}
@@ -287,6 +296,13 @@ func (v *VStruct) exist(isValidTvKind bool, structName, fieldName, cusMsg string
 	case reflect.Slice, reflect.Array:
 		for i := 0; i < tv.Len(); i++ {
 			v.validate(structName+"."+fieldName+"["+ToStr(i)+"]", tv.Index(i), true)
+		}
+	case reflect.Map:
+		iter := tv.MapRange()
+		for iter.Next() {
+			k1 := iter.Key()
+			v1 := iter.Value()
+			v.validate(structName+"."+fieldName+"["+ToStr(k1)+"]", v1, true)
 		}
 	default:
 		if isValidTvKind {
