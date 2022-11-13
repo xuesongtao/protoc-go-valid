@@ -382,13 +382,14 @@ func ValidNamesSplit(s string, sep ...byte) []string {
 		}
 
 		if v == defaultSep && stack.IsEmpty() {
+			// res = append(res, internal.UnsafeBytes2Str(tmp)) // 因为指针, 这样转有问题
 			res = append(res, string(tmp))
 			tmp = tmp[:0]
 		}
 	}
 
 	if len(tmp) > 0 {
-		res = append(res, string(tmp))
+		res = append(res, internal.UnsafeBytes2Str(tmp))
 	}
 	return res
 }

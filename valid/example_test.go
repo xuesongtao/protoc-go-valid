@@ -413,6 +413,31 @@ func ExampleJson() {
 	// <nil>
 }
 
+func ExampleNestedStructForRule() {
+	type Tmp1 struct {
+		Name string
+	}
+
+	type Tmp struct {
+		Ip string
+		T  []Tmp1
+	}
+	rmap := map[interface{}]RM{
+		// key 必须为 指针
+		&Tmp{}:  NewRule().Set("Ip,T", Required).Set("Ip", GenValidKV(VIp, "", "ip 格式不正确")),
+		&Tmp1{}: map[string]string{"Name": GenValidKV(Required, "", "姓名必填")},
+	}
+	v := &Tmp{
+		Ip: "256.12.22.400",
+		T:  []Tmp1{{Name: ""}, {Name: "2"}},
+	}
+	err := NestedStructForRule(v, rmap)
+	fmt.Println(err)
+
+	// Output:
+	// "Tmp.Ip" input "256.12.22.400", 说明: ip 格式不正确; "Tmp.T[0].Name" input "", 说明: 姓名必填
+}
+
 func ExampleJoinTag2Val() {
 	val := JoinTag2Val(VIn, "1/2/3", "必须在 1,2,3 之中")
 	fmt.Println(val)

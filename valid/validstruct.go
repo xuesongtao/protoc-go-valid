@@ -6,11 +6,15 @@ import (
 	"strings"
 )
 
+var (
+	validOnlyOuterObj = reflect.TypeOf("validOnlyOuterObj") // 标记只验证最外层的结构体
+)
+
 // VStruct 验证结构体
 type VStruct struct {
 	targetTag       string // 结构体中的待指定的验证的 tag
 	errBuf          *strings.Builder
-	ruleObj         RM                       // 验证规则
+	ruleMap         map[reflect.Type]RM      // 验证规则, k: 为结构体 reflect.Type, v: 为该结构体的规则
 	valid2FieldsMap map[string][]*name2Value // 已存在的, 用于辅助 either, bothexist, botheq tag
 	validFn         map[string]CommonValidFn // 存放自定义的验证函数, 可以做到调用完就被清理
 }
@@ -46,24 +50,41 @@ func NewVStruct(targetTag ...string) *VStruct {
 // free 释放
 func (v *VStruct) free() {
 	v.errBuf.Reset()
-	v.ruleObj = nil
+	v.ruleMap = nil
 	v.valid2FieldsMap = nil
 	v.validFn = nil
 	syncValidStructPool.Put(v)
 }
 
-// SetRule 添加验证规则
-func (v *VStruct) SetRule(ruleObj RM) *VStruct {
-	v.ruleObj = ruleObj
+// SetRule 指定结构体设置验证规则, 不传则验证最外层的结构体
+// obj 只支持一个参数, 多个无效, 此参数 待验证结构体
+func (v *VStruct) SetRule(rule RM, obj ...interface{}) *VStruct {
+	var ty reflect.Type
+	l := len(obj)
+	if l == 0 {
+		ty = validOnlyOuterObj // 只验证最外层 struct
+	} else if l > 0 && l == 1 {
+		ty = RemoveTypePtr(reflect.TypeOf(obj[0]))
+		if ty == timeReflectType {
+			return v
+		}
+	} else {
+		return v
+	}
+
+	if v.ruleMap == nil {
+		v.ruleMap = make(map[reflect.Type]RM, 1)
+	}
+	v.ruleMap[ty] = rule
 	return v
 }
 
 // getCusRule 根据字段名获取自定义验证规则
-func (v *VStruct) getCusRule(structFieldName string) string {
-	if v.ruleObj == nil {
-		return ""
+func (v *VStruct) getCusRule(ty reflect.Type) RM {
+	if v.ruleMap == nil {
+		return NewRule()
 	}
-	return v.ruleObj.Get(structFieldName)
+	return v.ruleMap[ty]
 }
 
 // Valid 验证
@@ -121,21 +142,32 @@ func (v *VStruct) getValidFn(validName string) (CommonValidFn, error) {
 // validate 验证执行体
 func (v *VStruct) validate(structName string, value reflect.Value, isValidSlice ...bool) *VStruct {
 	tv := RemoveValuePtr(value)
+	ty := tv.Type()
+	// fmt.Printf("ty: %v, structName: %q\n", ty, structName)
 	// 如果不是结构体就退出
 	if tv.Kind() != reflect.Struct {
 		// 这里主要防止验证的切片为非结构体切片, 如 []int{1, 2, 3}, 这里会出现1, 为非指针所有需要退出
 		if len(isValidSlice) > 0 && isValidSlice[0] {
 			return v
 		}
-		v.errBuf.WriteString("src param \"" + structName + "." + tv.Type().Name() + "\" is not struct" + ErrEndFlag)
+		v.errBuf.WriteString("src param \"" + structName + "." + ty.Name() + "\" is not struct" + ErrEndFlag)
 		return v
 	}
 
-	cacheStructType := v.getCacheStructType(tv.Type())
+	cacheStructType := v.getCacheStructType(ty)
 	totalFieldNum := len(cacheStructType.fieldInfos)
-	if structName == "" {
+	var cusRM RM
+	if structName == "" { // 只有最外层的结构体此值为空
 		structName = cacheStructType.name
+		// 在调用 SetRule 时没有设置验证对象时, 默认验证最外层结构体
+		cusRM = v.getCusRule(validOnlyOuterObj)
+		if len(cusRM) == 0 { // 设置了验证对象
+			cusRM = v.getCusRule(ty)
+		}
+	} else { // 递归验证嵌套对象
+		cusRM = v.getCusRule(ty)
 	}
+	// fmt.Printf("cusRM: %+v\n", cusRM)
 	for fieldNum := 0; fieldNum < totalFieldNum; fieldNum++ {
 		fieldInfo := cacheStructType.fieldInfos[fieldNum]
 		// 判断下是否可导出
@@ -144,10 +176,11 @@ func (v *VStruct) validate(structName string, value reflect.Value, isValidSlice 
 		}
 
 		// 如果设置了规则就覆盖 tag 中的验证内容
-		if rule := v.getCusRule(fieldInfo.name); rule != "" {
+		if rule := cusRM.Get(fieldInfo.name); rule != "" {
 			fieldInfo.validNames = rule
 		}
 
+		// fmt.Printf("name: %s, rule: %s\n", fieldInfo.name, fieldInfo.validNames)
 		// 没有 validNames 直接跳过
 		if fieldInfo.validNames == "" {
 			continue

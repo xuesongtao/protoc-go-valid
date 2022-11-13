@@ -118,7 +118,7 @@ protoFileDirName="test" # proto 存放的目录
 ###### 4.2.2 设置验证
 
 * 1. 通过设置 `tag` 进行设置验证规则, 默认目标为 `valid`
-* 2. 支持通过创建 `RM` 对象进行自定义设置验证规则, 其验证优先级高于 `xxx.pb.go` 里的规则,  `RM` 暂不支持嵌套
+* 2. 支持通过创建 `RM` 对象进行自定义设置验证规则, 其验证优先级高于 `xxx.pb.go` 里的规则,  `RM` 如果要设置嵌套可参考 `ExampleNestedStructForRule`
 
 ###### 4.2.3 其他
 

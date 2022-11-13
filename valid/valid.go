@@ -18,6 +18,17 @@ func StructForFn(src interface{}, ruleObj RM, targetTag ...string) error {
 	return NewVStruct(targetTag...).SetRule(ruleObj).Valid(src)
 }
 
+// NestedStructForRule 结构嵌套多个设置多个结构体规则
+// ruleMap  key: 结构体指针, value: RM
+// 注: ruleMap 的 key 必须为指针, 不然会报错 "hash of unhashable type"
+func NestedStructForRule(src interface{}, ruleMap map[interface{}]RM) error {
+	vs := NewVStruct()
+	for obj, rule := range ruleMap {
+		vs.SetRule(rule, obj)
+	}
+	return vs.Valid(src)
+}
+
 // ValidateStruct 验证结构体
 func ValidateStruct(src interface{}, targetTag ...string) error {
 	return NewVStruct(targetTag...).Valid(src)

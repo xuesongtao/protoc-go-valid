@@ -9,6 +9,29 @@ import (
 	"github.com/gookit/validate"
 )
 
+type TestOrder struct {
+	AppName string `alipay:"to=5~10" validate:"min=5,max=10"` // 应用名
+	// TotalFeeFloat        float64                 `alipay:"to=2~5" validate:"min:2|max:5"` // 订单总金额，单位为分，详见支付金额
+	TotalFeeFloat        float64                 `alipay:"to=2~5" validate:"min=2,max=5"` // 订单总金额，单位为分，详见支付金额
+	TestOrderDetailPtr   *TestOrderDetailPtr     `alipay:"required" validate:"required"`  // 商品详细描述
+	TestOrderDetailSlice []*TestOrderDetailSlice `alipay:"required" validate:"required"`  // 商品详细描述
+}
+
+type TestOrderDetailPtr struct {
+	TmpTest3  *TmpTest3 `alipay:"required" validate:"required"`
+	GoodsName string    `alipay:"to=1~2" validate:"min=1,max=2"`
+}
+
+type TestOrderDetailSlice struct {
+	TmpTest3   *TmpTest3 `alipay:"required" validate:"required"`
+	GoodsName  string    `alipay:"required" validate:"required"`
+	BuyerNames []string  `alipay:"required" validate:"required"`
+}
+
+type TmpTest3 struct {
+	Name string `alipay:"required" valid:"required" validate:"required"`
+}
+
 func BenchmarkStringSplitValid(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		_ = ValidNamesSplit("required,phone,test")

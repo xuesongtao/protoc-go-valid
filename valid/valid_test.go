@@ -6,8 +6,6 @@ import (
 	"testing"
 
 	"gitee.com/xuesongtao/protoc-go-valid/test"
-	"github.com/go-playground/validator/v10"
-	"github.com/gookit/validate"
 )
 
 const (
@@ -37,39 +35,19 @@ func TestTmp(t *testing.T) {
 	}
 }
 
-type TestOrder struct {
-	AppName string `alipay:"to=5~10" validate:"min=5,max=10"` // 应用名
-	// TotalFeeFloat        float64                 `alipay:"to=2~5" validate:"min:2|max:5"` // 订单总金额，单位为分，详见支付金额
-	TotalFeeFloat        float64                 `alipay:"to=2~5" validate:"min=2,max=5"` // 订单总金额，单位为分，详见支付金额
-	TestOrderDetailPtr   *TestOrderDetailPtr     `alipay:"required" validate:"required"`  // 商品详细描述
-	TestOrderDetailSlice []*TestOrderDetailSlice `alipay:"required" validate:"required"`  // 商品详细描述
-}
-
-type TestOrderDetailPtr struct {
-	TmpTest3 *TmpTest3 `alipay:"required" validate:"required"`
-	// GoodsName string    `alipay:"to=1~2" validate:"minLen:1|maxLen:2"`
-	GoodsName string `alipay:"to=1~2" validate:"min=1,max=2"`
-}
-
-type TestOrderDetailSlice struct {
-	TmpTest3   *TmpTest3 `alipay:"required" validate:"required"`
-	GoodsName  string    `alipay:"required" validate:"required"`
-	BuyerNames []string  `alipay:"required" validate:"required"`
-}
-
-type TmpTest3 struct {
-	Name string `alipay:"required" valid:"required" validate:"required"`
-}
-
 func TestValidManyStruct(t *testing.T) {
+	type Tmp1 struct {
+		Name string `valid:"required"`
+	}
+
 	type Tmp struct {
-		Ip string     `valid:"required,ipv4"`
-		T  []TmpTest3 `valid:"required"`
+		Ip string `valid:"required,ipv4"`
+		T  []Tmp1 `valid:"required"`
 	}
 
 	v := &Tmp{
 		Ip: "256.12.22.4",
-		T:  []TmpTest3{{Name: ""}},
+		T:  []Tmp1{{Name: ""}},
 	}
 	datas := append([]*Tmp{}, v, v)
 	sureMsg := `"*valid.Tmp[0].Ip" input "256.12.22.4", explain: it is not ipv4; "*valid.Tmp[0].T[0].Name" input "", explain: it is required; "*valid.Tmp[1].Ip" input "256.12.22.4", explain: it is not ipv4; "*valid.Tmp[1].T[0].Name" input "", explain: it is required`
@@ -79,102 +57,30 @@ func TestValidManyStruct(t *testing.T) {
 	}
 }
 
-func TestValidateManyStruct(t *testing.T) {
+func TestValidManyStructRule(t *testing.T) {
+	type Tmp1 struct {
+		Name string
+	}
+
 	type Tmp struct {
-		Ip string     `validate:"required,ipv4"`
-		T  []TmpTest3 `validate:"required,ipv4"`
+		Ip string
+		T  []Tmp1
 	}
-
+	rmap := map[interface{}]RM{
+		// key 必须为 指针
+		&Tmp{}:  NewRule().Set("Ip,T", Required).Set("Ip", GenValidKV(VIp, "", "ip 格式不正确")),
+		&Tmp1{}: map[string]string{"Name": GenValidKV(Required, "", "姓名必填")},
+	}
+	// t.Logf("rmap: %+v", rmap)
 	v := &Tmp{
-		Ip: "256.12.22.4",
-		T:  []TmpTest3{{Name: ""}},
+		Ip: "256.12.22.400",
+		T:  []Tmp1{{Name: ""}, {Name: "2"}},
 	}
-	datas := append([]*Tmp{}, v, v)
-
-	// TODO 不支持
-	validObj := validate.Struct(datas)
-	validObj.Validate()
-	for _, err := range validObj.Errors {
-		t.Log(err)
-	}
-}
-
-func TestValidatorManyStruct(t *testing.T) {
-	type Tmp struct {
-		Ip string     `validate:"required,ipv4"`
-		T  []TmpTest3 `validate:"required,ipv4"`
-	}
-
-	v := &Tmp{
-		Ip: "61.240.17.210",
-		T:  []TmpTest3{{Name: ""}},
-	}
-	datas := append([]*Tmp{}, v, v)
-
-	// 不支持valid 多个
-	validObj := validator.New()
-	err := validObj.Struct(datas)
-	if err != nil {
-		t.Log(err)
-	}
-}
-
-func TestValidateForValid(t *testing.T) {
-	type Users struct {
-		Phone  string `valid:"required"`
-		Passwd string `valid:"required,to=6~20"`
-		Code   string `valid:"required,eq=6"`
-	}
-
-	users := &Users{
-		Phone:  "1326654487",
-		Passwd: "123",
-		Code:   "123456",
-	}
-	validObj := NewVStruct()
-	err := validObj.Valid(users)
-	sureMsg := `"Users.Passwd" input "123", explain: it is less than 6 str-length`
-	if !equal(err.Error(), sureMsg) {
+	sureMsg := `"Tmp.Ip" input "256.12.22.400", 说明: ip 格式不正确; "Tmp.T[0].Name" input "", 说明: 姓名必填`
+	err := NestedStructForRule(v, rmap)
+	t.Log(err)
+	if err != nil && !equal(err.Error(), sureMsg) {
 		t.Error(noEqErr)
-	}
-}
-
-func TestValidateForValidate(t *testing.T) {
-	type Users struct {
-		Phone  string `validate:"required"`
-		Passwd string `validate:"required|minLen:6|maxLen:20"`
-		Code   string `validate:"required|eq:6"`
-	}
-
-	users := &Users{
-		Phone:  "1326654487",
-		Passwd: "123",
-		Code:   "123456",
-	}
-
-	validObj := validate.Struct(users)
-	if !validObj.Validate() {
-		t.Log(validObj.Errors)
-	}
-}
-
-func TestValidateForValidator(t *testing.T) {
-	type Users struct {
-		Phone  string `validate:"required"`
-		Passwd string `validate:"required,min=6,max=20"`
-		Code   string `validate:"required,len=6"`
-	}
-
-	users := &Users{
-		Phone:  "1326654487",
-		Passwd: "123",
-		Code:   "123456",
-	}
-
-	validObj := validator.New()
-	err := validObj.Struct(users)
-	if err != nil {
-		t.Log(err)
 	}
 }
 
@@ -209,67 +115,7 @@ func TestValidOrder(t *testing.T) {
 	}
 }
 
-func TestValidateOrder(t *testing.T) {
-	t.Skip("与 validator tag 冲突")
-	testOrderDetailPtr := &TestOrderDetailPtr{
-		TmpTest3:  &TmpTest3{Name: "测试"},
-		GoodsName: "玻尿酸",
-	}
-	// testOrderDetailPtr = nil
-
-	testOrderDetails := []*TestOrderDetailSlice{
-		{TmpTest3: &TmpTest3{Name: "测试1"}, BuyerNames: []string{"test1", "hello2"}},
-		{TmpTest3: &TmpTest3{Name: "测试2"}, GoodsName: "隆鼻"},
-		{GoodsName: "丰胸"},
-		{TmpTest3: &TmpTest3{Name: "测试4"}, GoodsName: "隆鼻"},
-	}
-	// testOrderDetails = nil
-
-	u := &TestOrder{
-		AppName:              "集美测试",
-		TotalFeeFloat:        2,
-		TestOrderDetailPtr:   testOrderDetailPtr,
-		TestOrderDetailSlice: testOrderDetails,
-	}
-	// TODO: 验证单个就直接退出了
-	validObj := validate.Struct(u)
-	validObj.Validate()
-	for _, err := range validObj.Errors {
-		t.Log(err)
-	}
-}
-
-func TestValidatorOrder(t *testing.T) {
-	testOrderDetailPtr := &TestOrderDetailPtr{
-		TmpTest3:  &TmpTest3{Name: "测试"},
-		GoodsName: "玻尿酸",
-	}
-	// testOrderDetailPtr = nil
-
-	testOrderDetails := []*TestOrderDetailSlice{
-		{TmpTest3: &TmpTest3{Name: "测试1"}, BuyerNames: []string{"test1", "hello2"}},
-		{TmpTest3: &TmpTest3{Name: "测试2"}, GoodsName: "隆鼻"},
-		{GoodsName: "丰胸"},
-		{TmpTest3: &TmpTest3{Name: "测试4"}, GoodsName: "隆鼻"},
-	}
-	// testOrderDetails = nil
-
-	u := &TestOrder{
-		AppName:              "集美测试",
-		TotalFeeFloat:        2,
-		TestOrderDetailPtr:   testOrderDetailPtr,
-		TestOrderDetailSlice: testOrderDetails,
-	}
-	validObj := validator.New()
-
-	// TODO: 不支持验证切片结构体
-	err := validObj.Struct(u)
-	if err != nil {
-		t.Log(err)
-	}
-}
-
-func TestProtoPb1(t *testing.T) {
+func TestProtoPb(t *testing.T) {
 	u := &test.User{
 		M: &test.Man{
 			Name: "",
