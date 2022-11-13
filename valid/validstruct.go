@@ -28,6 +28,7 @@ type structType struct {
 // structFieldInfo
 type structFieldInfo struct {
 	export     bool   // 是否可导出
+	offset     int    // 偏移量
 	name       string // 字段名
 	validNames string // 验证规则
 }
@@ -63,7 +64,7 @@ func (v *VStruct) SetRule(rule RM, obj ...interface{}) *VStruct {
 	l := len(obj)
 	if l == 0 {
 		ty = validOnlyOuterObj // 只验证最外层 struct
-	} else if l > 0 && l == 1 {
+	} else if l == 1 {
 		ty = RemoveTypePtr(reflect.TypeOf(obj[0]))
 		if ty == timeReflectType {
 			return v
@@ -82,7 +83,7 @@ func (v *VStruct) SetRule(rule RM, obj ...interface{}) *VStruct {
 // getCusRule 根据字段名获取自定义验证规则
 func (v *VStruct) getCusRule(ty reflect.Type) RM {
 	if v.ruleMap == nil {
-		return NewRule()
+		return nil
 	}
 	return v.ruleMap[ty]
 }
@@ -114,9 +115,7 @@ func (v *VStruct) Valid(src interface{}) error {
 	case reflect.Map:
 		iter := reflectValue.MapRange()
 		for iter.Next() {
-			k1 := iter.Key()
-			v1 := iter.Value()
-			v.validate("map["+ToStr(k1)+"]", v1, true)
+			v.validate("map["+ToStr(iter.Key())+"]", iter.Value(), true)
 		}
 		return v.getError()
 	}
@@ -195,7 +194,7 @@ func (v *VStruct) validate(structName string, value reflect.Value, isValidGather
 			continue
 		}
 
-		fieldValue := tv.Field(fieldNum)
+		fieldValue := tv.Field(fieldInfo.offset)
 		// 根据 tag 中的验证内容进行验证
 		for _, validName := range ValidNamesSplit(fieldInfo.validNames) {
 			if validName == "" {
@@ -245,8 +244,12 @@ func (v *VStruct) getCacheStructType(ty reflect.Type) structType {
 	obj.fieldInfos = make([]structFieldInfo, l)
 	for fieldNum := 0; fieldNum < l; fieldNum++ {
 		fieldInfo := ty.Field(fieldNum)
+		if fieldInfo.Type == timeReflectType {
+			continue
+		}
 		info := structFieldInfo{
 			export:     IsExported(fieldInfo.Name),
+			offset:     fieldNum,
 			name:       fieldInfo.Name,
 			validNames: fieldInfo.Tag.Get(v.targetTag),
 		}
@@ -289,7 +292,7 @@ func (v *VStruct) exist(isValidTvKind bool, structName, fieldName, cusMsg string
 	}
 	switch tv.Kind() {
 	case reflect.Ptr, reflect.Struct:
-		if structName == "Time" && tv.Type() == timeReflectType {
+		if tv.Type() == timeReflectType {
 			return
 		}
 		v.validate(structName+"."+fieldName, tv, false)
@@ -300,9 +303,7 @@ func (v *VStruct) exist(isValidTvKind bool, structName, fieldName, cusMsg string
 	case reflect.Map:
 		iter := tv.MapRange()
 		for iter.Next() {
-			k1 := iter.Key()
-			v1 := iter.Value()
-			v.validate(structName+"."+fieldName+"["+ToStr(k1)+"]", v1, true)
+			v.validate(structName+"."+fieldName+"["+ToStr(iter.Key())+"]", iter.Value(), true)
 		}
 	default:
 		if isValidTvKind {

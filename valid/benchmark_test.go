@@ -78,7 +78,7 @@ func BenchmarkValidateForValid(b *testing.B) {
 		_ = ValidateStruct(users)
 	}
 
-	// BenchmarkValidateForValid-8              1544240               771.6 ns/op           416 B/op          9 allocs/op
+	// BenchmarkValidateForValid-8              1614230               744.7 ns/op           416 B/op          9 allocs/op
 	// BenchmarkValidateForValid-8              1617544               739.9 ns/op           416 B/op          9 allocs/op
 	// BenchmarkValidateForValid-8              1618682               740.3 ns/op           416 B/op          9 allocs/op
 	// BenchmarkValidateForValid-8              1621915               739.2 ns/op           416 B/op          9 allocs/op
