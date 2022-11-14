@@ -22,8 +22,7 @@ func equal(dest, src interface{}) bool {
 }
 
 func TestTmp(t *testing.T) {
-	rm := NewVStruct().getCusRule(nil)
-	t.Log(rm == nil, rm.Get("name") == "")
+	t.Log(2<<17*6)
 }
 
 func TestValidManyStruct(t *testing.T) {

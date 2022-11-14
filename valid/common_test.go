@@ -64,8 +64,8 @@ func TestLRU(t *testing.T) {
 		return
 	}
 
-	if _, ok := obj.Load(0); ok {
-		t.Error("0 is not ok")
+	if _, ok := obj.Load(1); !ok {
+		t.Error("1 is not ok")
 		return
 	}
 

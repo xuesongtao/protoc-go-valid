@@ -14,7 +14,7 @@ var (
 type VStruct struct {
 	targetTag       string // 结构体中的待指定的验证的 tag
 	errBuf          *strings.Builder
-	ruleMap         map[reflect.Type]RM      // 验证规则, k: 为结构体 reflect.Type, v: 为该结构体的规则
+	ruleMap         map[reflect.Type]RM      // 验证规则, key: 为结构体 reflect.Type, value: 为该结构体的规则
 	valid2FieldsMap map[string][]*name2Value // 已存在的, 用于辅助 either, bothexist, botheq tag
 	validFn         map[string]CommonValidFn // 存放自定义的验证函数, 可以做到调用完就被清理
 }
@@ -164,16 +164,13 @@ func (v *VStruct) validate(structName string, value reflect.Value, isValidGather
 
 	cacheStructType := v.getCacheStructType(ty)
 	totalFieldNum := len(cacheStructType.fieldInfos)
-	var cusRM RM
+	cusRM := v.getCusRule(ty)
 	if structName == "" { // 只有最外层的结构体此值为空
 		structName = cacheStructType.name
 		// 在调用 SetRule 时没有设置验证对象时, 默认验证最外层结构体
-		cusRM = v.getCusRule(validOnlyOuterObj)
 		if len(cusRM) == 0 { // 设置了验证对象
-			cusRM = v.getCusRule(ty)
+			cusRM = v.getCusRule(validOnlyOuterObj)
 		}
-	} else { // 递归验证嵌套对象
-		cusRM = v.getCusRule(ty)
 	}
 	// fmt.Printf("cusRM: %+v\n", cusRM)
 	for fieldNum := 0; fieldNum < totalFieldNum; fieldNum++ {
