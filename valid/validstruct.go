@@ -12,11 +12,10 @@ var (
 
 // VStruct 验证结构体
 type VStruct struct {
-	targetTag       string // 结构体中的待指定的验证的 tag
-	errBuf          *strings.Builder
-	ruleMap         map[reflect.Type]RM      // 验证规则, key: 为结构体 reflect.Type, value: 为该结构体的规则
-	valid2FieldsMap map[string][]*name2Value // 已存在的, 用于辅助 either, bothexist, botheq tag
-	validFn         map[string]CommonValidFn // 存放自定义的验证函数, 可以做到调用完就被清理
+	targetTag string // 结构体中的待指定的验证的 tag
+	errBuf    *strings.Builder
+	ruleMap   map[reflect.Type]RM // 验证规则, key: 为结构体 reflect.Type, value: 为该结构体的规则
+	vc        *validCommon        // 组合验证
 }
 
 // structType
@@ -44,6 +43,7 @@ func NewVStruct(targetTag ...string) *VStruct {
 	if obj.errBuf == nil { // 储存使用的时候 new 下, 后续都是从缓存中处理
 		obj.errBuf = new(strings.Builder)
 	}
+	obj.vc = &validCommon{}
 	// obj.errBuf.Grow(1 << 7)
 	return obj
 }
@@ -52,8 +52,7 @@ func NewVStruct(targetTag ...string) *VStruct {
 func (v *VStruct) free() {
 	v.errBuf.Reset()
 	v.ruleMap = nil
-	v.valid2FieldsMap = nil
-	v.validFn = nil
+	v.vc = nil
 	syncValidStructPool.Put(v)
 }
 
@@ -124,26 +123,13 @@ func (v *VStruct) Valid(src interface{}) error {
 
 // SetValidFn 自定义设置验证函数
 func (v *VStruct) SetValidFn(validName string, fn CommonValidFn) *VStruct {
-	if v.validFn == nil {
-		v.validFn = make(map[string]CommonValidFn)
-	}
-	v.validFn[validName] = fn
+	v.vc.setValidFn(validName, fn)
 	return v
 }
 
 // getValidFn 获取验证函数
 func (v *VStruct) getValidFn(validName string) (CommonValidFn, error) {
-	// 先从本地找, 如果本地没有就从全局里找
-	fn, ok := v.validFn[validName]
-	if ok {
-		return fn, nil
-	}
-
-	fn, ok = validName2FuncMap[validName]
-	if !ok {
-		return nil, errors.New("valid \"" + validName + "\" is not exist, You can call SetValidFn")
-	}
-	return fn, nil
+	return v.vc.getValidFn(validName)
 }
 
 // validate 验证执行体
@@ -215,7 +201,13 @@ func (v *VStruct) validate(structName string, value reflect.Value, isValidGather
 				case Exist:
 					v.exist(true, structName, fieldInfo.name, cusMsg, fieldValue)
 				case Either, BothEq:
-					v.initValid2FieldsMap(validName, structName, fieldInfo.name, cusMsg, fieldValue)
+					v.vc.initValid2FieldsMap(&name2Value{
+						validName:  validName,
+						objName:    structName,
+						fieldName:  fieldInfo.name,
+						cusMsg:     cusMsg,
+						reflectVal: fieldValue,
+					})
 				}
 				continue
 			}
@@ -313,102 +305,11 @@ func (v *VStruct) exist(isValidTvKind bool, structName, fieldName, cusMsg string
 	}
 }
 
-// initValid2FieldsMap 为验证 either/bothexist/botheq 进行准备
-func (v *VStruct) initValid2FieldsMap(validName, structName, fieldName, cusMsg string, tv reflect.Value) {
-	if v.valid2FieldsMap == nil {
-		v.valid2FieldsMap = make(map[string][]*name2Value, 5)
-	}
-
-	if _, ok := v.valid2FieldsMap[validName]; !ok {
-		v.valid2FieldsMap[validName] = make([]*name2Value, 0, 2)
-	}
-	v.valid2FieldsMap[validName] = append(v.valid2FieldsMap[validName], &name2Value{objName: structName, fieldName: fieldName, cusMsg: cusMsg, reflectVal: tv})
-}
-
-// either 判断两者不能都为空
-func (v *VStruct) either(fieldInfos []*name2Value) {
-	l := len(fieldInfos)
-	if l == 1 { // 如果只有 1 个就没有必要向下执行了
-		info := fieldInfos[0]
-		v.errBuf.WriteString(GetJoinFieldErr(info.objName, info.fieldName, eitherValErr))
-		return
-	}
-	isZeroLen := 0
-	fieldInfoStr := "" // 拼接空的 structName, fliedName
-	for _, fieldInfo := range fieldInfos {
-		fieldInfoStr += "\"" + fieldInfo.objName + "." + fieldInfo.fieldName + "\", "
-		if fieldInfo.reflectVal.IsZero() {
-			isZeroLen++
-		}
-	}
-
-	// 判断下是否全部为空
-	if l == isZeroLen {
-		fieldInfoStr = strings.TrimSuffix(fieldInfoStr, ", ")
-		v.errBuf.WriteString(fieldInfoStr + " " + ExplainEn + " they shouldn't all be empty" + ErrEndFlag)
-	}
-}
-
-// bothEq 判断两者相等
-func (v *VStruct) bothEq(fieldInfos []*name2Value) {
-	l := len(fieldInfos)
-	if l == 1 { // 如果只有 1 个就没有必要向下执行了
-		info := fieldInfos[0]
-		v.errBuf.WriteString(GetJoinFieldErr(info.objName, info.fieldName, bothEqValErr))
-		return
-	}
-
-	var (
-		tmp          interface{}
-		fieldInfoStr string // 拼接空的 structName, fliedName
-		eq           = true
-	)
-	for i, fieldInfo := range fieldInfos {
-		fieldInfoStr += "\"" + fieldInfo.objName + "." + fieldInfo.fieldName + "\", "
-		if !eq { // 避免多次比较
-			continue
-		}
-
-		if i == 0 {
-			tmp = fieldInfo.reflectVal.Interface()
-			continue
-		}
-
-		if !reflect.DeepEqual(tmp, fieldInfo.reflectVal.Interface()) {
-			eq = false
-		}
-	}
-
-	if !eq {
-		fieldInfoStr = strings.TrimSuffix(fieldInfoStr, ", ")
-		v.errBuf.WriteString(fieldInfoStr + " " + ExplainEn + " they should be equal" + ErrEndFlag)
-	}
-}
-
-// againValid 再一次验证
-func (v *VStruct) againValid() {
-	// 判断下是否有值, 有就说明有 either 验证
-	if len(v.valid2FieldsMap) == 0 {
-		return
-	}
-
-	for validName, fieldInfos := range v.valid2FieldsMap {
-		validKey, _, _ := ParseValidNameKV(validName)
-		switch validKey {
-		case Either:
-			v.either(fieldInfos)
-		case BothEq:
-			v.bothEq(fieldInfos)
-		}
-	}
-}
-
 // getError 获取 err
 func (v *VStruct) getError() error {
 	defer v.free()
 
-	v.againValid()
-
+	v.vc.againValid(v.errBuf)
 	if v.errBuf.Len() == 0 {
 		return nil
 	}

@@ -9,15 +9,6 @@ import (
 	"gitee.com/xuesongtao/protoc-go-valid/valid/internal"
 )
 
-// name2Value
-type name2Value struct {
-	objName    string
-	fieldName  string
-	cusMsg     string
-	val        string
-	reflectVal reflect.Value
-}
-
 // ParseValidNameKV 解析 validName 中的 key, value 和 cusMsg,
 // 如: "required|必填", key 为 "required", value 为 "", cusMsg 为 "必填"
 // 如: "to=1~2|大于等于 1 且小于等于 2", key 为 "to", value 为 "1~2", cusMsg 为 "大于等于 1 且小于等于 2"

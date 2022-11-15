@@ -14,7 +14,7 @@ const (
 type VVar struct {
 	errBuf  *strings.Builder
 	ruleObj RM
-	validFn map[string]CommonValidFn // 存放自定义的验证函数, 可以做到调用完就被清理
+	vc      *validCommon // 组合验证
 }
 
 // NewVVar 单值校验
@@ -24,6 +24,7 @@ func NewVVar() *VVar {
 		obj.errBuf = new(strings.Builder)
 	}
 	// obj.errBuf.Grow(1 << 4)
+	obj.vc = &validCommon{}
 	obj.ruleObj = NewRule()
 	return obj
 }
@@ -32,7 +33,7 @@ func NewVVar() *VVar {
 func (v *VVar) free() {
 	v.errBuf.Reset()
 	v.ruleObj = nil
-	v.validFn = nil
+	v.vc = nil
 	syncValidVarPool.Put(v)
 }
 
@@ -66,26 +67,13 @@ func (v *VVar) SetRules(rules ...string) *VVar {
 
 // SetValidFn 自定义设置验证函数
 func (v *VVar) SetValidFn(validName string, fn CommonValidFn) *VVar {
-	if v.validFn == nil {
-		v.validFn = make(map[string]CommonValidFn)
-	}
-	v.validFn[validName] = fn
+	v.vc.setValidFn(validName, fn)
 	return v
 }
 
 // getValidFn 获取验证函数
 func (v *VVar) getValidFn(validName string) (CommonValidFn, error) {
-	// 先从本地找, 如果本地没有就从全局里找
-	fn, ok := v.validFn[validName]
-	if ok {
-		return fn, nil
-	}
-
-	fn, ok = validName2FuncMap[validName]
-	if !ok {
-		return nil, errors.New("valid \"" + validName + "\" is not exist, You can call SetValidFn")
-	}
-	return fn, nil
+	return v.vc.getValidFn(validName)
 }
 
 // validate 验证执行体
