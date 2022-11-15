@@ -61,14 +61,14 @@ func BenchmarkReComplice(b *testing.B) {
 
 func BenchmarkStrJoin1(b *testing.B) {
 	s := ""
-	for i := 0; i < 10; i++ {
+	for i := 0; i < 100; i++ {
 		s += fmt.Sprint(i) + ","
 	}
 	_ = s
 }
 func BenchmarkStrJoin2(b *testing.B) {
 	buf := newStrBuf()
-	for i := 0; i < 10; i++ {
+	for i := 0; i < 100; i++ {
 		buf.WriteString(fmt.Sprint(i) + ",")
 	}
 	_ = buf.String()

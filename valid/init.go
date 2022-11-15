@@ -211,7 +211,9 @@ func newStrBuf(size ...int) *strings.Builder {
 
 // putStrBuf
 func putStrBuf(buf *strings.Builder) {
-	buf.Reset()
+	if buf.Len() > 0 {
+		buf.Reset()
+	}
 	syncBufPool.Put(buf)
 }
 
