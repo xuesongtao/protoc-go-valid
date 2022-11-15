@@ -241,7 +241,7 @@ func GetOnlyExplainErr(errMsg string) string {
 	if errMsg == "" {
 		return ""
 	}
-	buf := newStrBuf()
+	buf := newStrBuf(1<<8)
 	defer putStrBuf(buf)
 	zhLen := len(ExplainZh)
 	enLen := len(ExplainEn)

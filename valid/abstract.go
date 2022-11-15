@@ -73,14 +73,15 @@ func (v *validCommon) either(errBuf *strings.Builder, fieldInfos []*name2Value) 
 		return
 	}
 	isZeroLen := 0
-	fieldInfoStr := "" // 拼接空的 structName, fliedName
+	fieldInfoBuf := newStrBuf(1 << 6) // 拼接空的 structName, fliedName
+	defer putStrBuf(fieldInfoBuf)
 	for _, fieldInfo := range fieldInfos {
 		if fieldInfo.objName != "" {
-			fieldInfoStr += "\"" + fieldInfo.objName + "."
+			fieldInfoBuf.WriteString("\"" + fieldInfo.objName + ".")
 		} else {
-			fieldInfoStr += "\""
+			fieldInfoBuf.WriteByte('"')
 		}
-		fieldInfoStr += fieldInfo.fieldName + "\", "
+		fieldInfoBuf.WriteString(fieldInfo.fieldName + "\", ")
 		if fieldInfo.reflectVal.IsZero() {
 			isZeroLen++
 		}
@@ -88,8 +89,7 @@ func (v *validCommon) either(errBuf *strings.Builder, fieldInfos []*name2Value) 
 
 	// 判断下是否全部为空
 	if l == isZeroLen {
-		fieldInfoStr = strings.TrimSuffix(fieldInfoStr, ", ")
-		errBuf.WriteString(fieldInfoStr + " " + ExplainEn + " they shouldn't all be empty" + ErrEndFlag)
+		errBuf.WriteString(strings.TrimSuffix(fieldInfoBuf.String(), ", ") + " " + ExplainEn + " they shouldn't all be empty" + ErrEndFlag)
 	}
 }
 
@@ -104,16 +104,17 @@ func (v *validCommon) bothEq(errBuf *strings.Builder, fieldInfos []*name2Value) 
 
 	var (
 		tmp          interface{}
-		fieldInfoStr string // 拼接空的 structName, fliedName
+		fieldInfoBuf = newStrBuf(1 << 8) // 拼接空的 structName, fliedName
 		eq           = true
 	)
+	defer putStrBuf(fieldInfoBuf)
 	for i, fieldInfo := range fieldInfos {
 		if fieldInfo.objName != "" {
-			fieldInfoStr += "\"" + fieldInfo.objName + "."
+			fieldInfoBuf.WriteString("\"" + fieldInfo.objName + ".")
 		} else {
-			fieldInfoStr += "\""
+			fieldInfoBuf.WriteByte('"')
 		}
-		fieldInfoStr += fieldInfo.fieldName + "\", "
+		fieldInfoBuf.WriteString(fieldInfo.fieldName + "\", ")
 		if !eq { // 避免多次比较
 			continue
 		}
@@ -129,8 +130,7 @@ func (v *validCommon) bothEq(errBuf *strings.Builder, fieldInfos []*name2Value) 
 	}
 
 	if !eq {
-		fieldInfoStr = strings.TrimSuffix(fieldInfoStr, ", ")
-		errBuf.WriteString(fieldInfoStr + " " + ExplainEn + " they should be equal" + ErrEndFlag)
+		errBuf.WriteString(strings.TrimSuffix(fieldInfoBuf.String(), ", ") + " " + ExplainEn + " they should be equal" + ErrEndFlag)
 	}
 }
 
