@@ -109,6 +109,7 @@ var (
 	// cacheStructType  CacheEr = new(sync.Map)
 	cacheStructType  CacheEr = NewLRU(1 << 8)
 	syncValidVarPool         = sync.Pool{New: func() interface{} { return new(VVar) }}
+	syncBufPool              = sync.Pool{New: func() interface{} { return new(strings.Builder) }}
 	timeReflectType          = reflect.TypeOf(time.Time{})
 	once             sync.Once
 )
@@ -175,25 +176,48 @@ var (
 
 // 正则
 var (
-	IncludeZhRe   = regexp.MustCompile("[\u4e00-\u9fa5]")         // 中文
-	PhoneRe       = regexp.MustCompile(`^1[3,4,5,6,7,8,9]\d{9}$`) // 手机号
-	Ipv4Re        = regexp.MustCompile(`^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)$`)
-	EmailRe       = regexp.MustCompile(`^\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$`)
-	IdCardRe      = regexp.MustCompile(`(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)`)
-	YearRe        = regexp.MustCompile(`^\d{4}$`)
-	Year2MonthRe  = regexp.MustCompile(`^\d{4}-\d{2}$`)
+	IncludeZhRe = regexp.MustCompile("[\u4e00-\u9fa5]")         // 中文
+	PhoneRe     = regexp.MustCompile(`^1[3,4,5,6,7,8,9]\d{9}$`) // 手机号
+	Ipv4Re      = regexp.MustCompile(`^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)$`)
+	EmailRe     = regexp.MustCompile(`^\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$`)
+	IdCardRe    = regexp.MustCompile(`(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)`)
+	IntRe       = regexp.MustCompile(`^\d+$`)
+	FloatRe     = regexp.MustCompile(`^\d+.\d+$`)
+
+	// Deprecated
+	YearRe = regexp.MustCompile(`^\d{4}$`)
+	// Deprecated
+	Year2MonthRe = regexp.MustCompile(`^\d{4}-\d{2}$`)
+	// Deprecated
 	Year2MonthRe2 = regexp.MustCompile(`^\d{4}/\d{2}$`)
-	DateRe        = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}$`)
-	DateRe2       = regexp.MustCompile(`^\d{4}/\d{2}/\d{2}$`)
-	DatetimeRe    = regexp.MustCompile(`^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$`)
-	DatetimeRe2   = regexp.MustCompile(`^\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}$`)
-	IntRe         = regexp.MustCompile(`^\d+$`)
-	FloatRe       = regexp.MustCompile(`^\d+.\d+$`)
+	// Deprecated
+	DateRe = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}$`)
+	// Deprecated
+	DateRe2 = regexp.MustCompile(`^\d{4}/\d{2}/\d{2}$`)
+	// Deprecated
+	DatetimeRe = regexp.MustCompile(`^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$`)
+	// Deprecated
+	DatetimeRe2 = regexp.MustCompile(`^\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}$`)
 )
+
+// newStrBuf
+func newStrBuf(size ...int) *strings.Builder {
+	obj := syncBufPool.Get().(*strings.Builder)
+	if len(size) > 0 {
+		obj.Grow(size[0])
+	}
+	return obj
+}
+
+// putStrBuf
+func putStrBuf(buf *strings.Builder) {
+	buf.Reset()
+	syncBufPool.Put(buf)
+}
 
 // CommonValidFn 通用验证函数, 主要用于回调
 // 注: 在写 errBuf 的时候建议用 GetJoinValidErrStr 包裹下, 这样产生的结果易读.
-//     否则需要再 errBuf.Writestring 最后要加上 ErrEndFlag 分割, 工具是通过 ErrEndFlag 进行分句
+//    否则需要再 errBuf.WriteString 最后要加上 ErrEndFlag 分割, 工具是通过 ErrEndFlag 进行分句
 type CommonValidFn func(errBuf *strings.Builder, validName, objName, fieldName string, tv reflect.Value)
 
 // SetCustomerValidFn 自定义验证函数
@@ -215,7 +239,8 @@ func GetOnlyExplainErr(errMsg string) string {
 	if errMsg == "" {
 		return ""
 	}
-	buf := new(strings.Builder)
+	buf := newStrBuf()
+	defer putStrBuf(buf)
 	zhLen := len(ExplainZh)
 	enLen := len(ExplainEn)
 	endLen := len(ErrEndFlag)

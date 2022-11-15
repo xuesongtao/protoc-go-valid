@@ -54,7 +54,9 @@ func GenValidKV(key string, values ...string) string {
 		return key
 	}
 
-	tagVal := key
+	buf := newStrBuf()
+	defer putStrBuf(buf)
+	buf.WriteString(key)
 	if values[0] != "" {
 		needAddEqual := values[0][0] != '=' // 判断第一个值得首字符是否为 "="
 
@@ -62,35 +64,35 @@ func GenValidKV(key string, values ...string) string {
 		switch key {
 		case Either, BothEq, VTo, VGe, VLe, VOTo, VGt, VLt, VEq, VNoEq:
 			if needAddEqual {
-				tagVal += "="
+				buf.WriteByte('=')
 			}
 		case VIn, VInclude:
 			if needAddEqual {
-				tagVal += "="
+				buf.WriteByte('=')
 			}
-			tagVal += "("
+			buf.WriteByte('(')
 		case VRe:
 			if needAddEqual {
-				tagVal += "="
+				buf.WriteByte('=')
 			}
-			tagVal += "'"
+			buf.WriteByte('\'')
 		}
 
 		// 处理 val
-		tagVal += values[0]
+		buf.WriteString(values[0])
 
 		// 处理 val 后缀
 		switch key {
 		case VIn, VInclude:
-			tagVal += ")"
+			buf.WriteByte(')')
 		case VRe:
-			tagVal += "'"
+			buf.WriteByte('\'')
 		}
 	}
 
 	// 自定义说明
 	if l >= 2 {
-		tagVal += "|" + values[1]
+		buf.WriteString("|" + values[1])
 	}
-	return tagVal
+	return buf.String()
 }

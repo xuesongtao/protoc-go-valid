@@ -68,7 +68,8 @@ func GetJoinFieldErr(objName, fieldName string, err interface{}) string {
 
 // GetJoinValidErrStr 获取拼接验证的错误消息, 内容直接通过空格隔开, 最后会拼接 ErrEndFlag
 func GetJoinValidErrStr(objName, fieldName, inputVal string, others ...string) string {
-	res := new(strings.Builder)
+	res := newStrBuf()
+	defer putStrBuf(res)
 	if objName != "" && fieldName != "" {
 		res.WriteString("\"" + objName + "." + fieldName + "\" ")
 	} else if objName == "" && fieldName != "" {

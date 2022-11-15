@@ -20,10 +20,7 @@ type VVar struct {
 // NewVVar 单值校验
 func NewVVar() *VVar {
 	obj := syncValidVarPool.Get().(*VVar)
-	if obj.errBuf == nil {
-		obj.errBuf = new(strings.Builder)
-	}
-	// obj.errBuf.Grow(1 << 4)
+	obj.errBuf = newStrBuf()
 	obj.vc = &validCommon{}
 	obj.ruleObj = NewRule()
 	return obj

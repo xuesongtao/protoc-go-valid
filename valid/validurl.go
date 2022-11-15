@@ -17,9 +17,8 @@ type VUrl struct {
 // NewVUrl
 func NewVUrl() *VUrl {
 	obj := new(VUrl)
-	obj.errBuf = new(strings.Builder)
+	obj.errBuf = newStrBuf()
 	obj.vc = &validCommon{}
-	// obj.errBuf.Grow(1 << 4)
 	return obj
 }
 
@@ -147,7 +146,8 @@ func (v *VUrl) required(fieldName, cusMsg, val string) {
 
 // getError 获取 err
 func (v *VUrl) getError() error {
-	v.vc.againValid(v.errBuf)
+	defer putStrBuf(v.errBuf)
+	v.vc.valid(v.errBuf)
 
 	if v.errBuf.Len() == 0 {
 		return nil

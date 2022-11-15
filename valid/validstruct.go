@@ -40,17 +40,14 @@ func NewVStruct(targetTag ...string) *VStruct {
 		tagName = targetTag[0]
 	}
 	obj.targetTag = tagName
-	if obj.errBuf == nil { // 储存使用的时候 new 下, 后续都是从缓存中处理
-		obj.errBuf = new(strings.Builder)
-	}
+	obj.errBuf = newStrBuf()
 	obj.vc = &validCommon{}
-	// obj.errBuf.Grow(1 << 7)
 	return obj
 }
 
 // free 释放
 func (v *VStruct) free() {
-	v.errBuf.Reset()
+	putStrBuf(v.errBuf)
 	v.ruleMap = nil
 	v.vc = nil
 	syncValidStructPool.Put(v)
@@ -309,7 +306,7 @@ func (v *VStruct) exist(isValidTvKind bool, structName, fieldName, cusMsg string
 func (v *VStruct) getError() error {
 	defer v.free()
 
-	v.vc.againValid(v.errBuf)
+	v.vc.valid(v.errBuf)
 	if v.errBuf.Len() == 0 {
 		return nil
 	}

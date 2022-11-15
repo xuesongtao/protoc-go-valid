@@ -52,10 +52,12 @@ func (v *validCommon) getValidFn(validName string) (CommonValidFn, error) {
 
 // initValid2FieldsMap 为验证 either/bothexist/botheq 进行准备
 func (v *validCommon) initValid2FieldsMap(data *name2Value) {
+	if data == nil {
+		return
+	}
 	if v.valid2FieldsMap == nil {
 		v.valid2FieldsMap = make(map[string][]*name2Value, 5)
 	}
-
 	if _, ok := v.valid2FieldsMap[data.validName]; !ok {
 		v.valid2FieldsMap[data.validName] = make([]*name2Value, 0, 2)
 	}
@@ -132,8 +134,8 @@ func (v *validCommon) bothEq(errBuf *strings.Builder, fieldInfos []*name2Value) 
 	}
 }
 
-// againValid 再一次验证
-func (v *validCommon) againValid(errBuf *strings.Builder) {
+// valid 验证
+func (v *validCommon) valid(errBuf *strings.Builder) {
 	// 判断下是否有值, 有就说明有 either 验证
 	if len(v.valid2FieldsMap) == 0 {
 		return

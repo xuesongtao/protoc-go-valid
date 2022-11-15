@@ -2,7 +2,6 @@ package valid
 
 import (
 	"container/list"
-	"strings"
 	"sync"
 )
 
@@ -63,7 +62,8 @@ func (l *LRUCache) Len() int {
 // Dump
 func (l *LRUCache) Dump() string {
 	head := l.list.Front()
-	buf := new(strings.Builder)
+	buf := newStrBuf()
+	defer putStrBuf(buf)
 	for head != nil {
 		buf.WriteString(ToStr(head.Value))
 		head = head.Next()

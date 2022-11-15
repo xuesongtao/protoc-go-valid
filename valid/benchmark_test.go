@@ -1,6 +1,7 @@
 package valid
 
 import (
+	"fmt"
 	"regexp"
 	"strings"
 	"testing"
@@ -56,6 +57,21 @@ func BenchmarkReComplice(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		_ = IntRe.MatchString(a)
 	}
+}
+
+func BenchmarkStrJoin1(b *testing.B) {
+	s := ""
+	for i := 0; i < 10; i++ {
+		s += fmt.Sprint(i) + ","
+	}
+	_ = s
+}
+func BenchmarkStrJoin2(b *testing.B) {
+	buf := newStrBuf()
+	for i := 0; i < 10; i++ {
+		buf.WriteString(fmt.Sprint(i) + ",")
+	}
+	_ = buf.String()
 }
 
 // go test -benchmem -run=^$ -bench ^BenchmarkValidateForValid gitee.com/xuesongtao/protoc-go-valid/valid -v -count=5
@@ -164,11 +180,11 @@ func BenchmarkComplexValid(b *testing.B) {
 		_ = ValidateStruct(&u, "alipay")
 	}
 
-	// BenchmarkComplexValid-8           189698              6276 ns/op            4404 B/op         78 allocs/op
-	// BenchmarkComplexValid-8           187850              6382 ns/op            4404 B/op         78 allocs/op
-	// BenchmarkComplexValid-8           185665              6312 ns/op            4404 B/op         78 allocs/op
-	// BenchmarkComplexValid-8           188355              6312 ns/op            4404 B/op         78 allocs/op
-	// BenchmarkComplexValid-8           187948              6263 ns/op            4404 B/op         78 allocs/op
+	// BenchmarkComplexValid-8           209080              5954 ns/op            3977 B/op         66 allocs/op
+	// BenchmarkComplexValid-8           205692              5717 ns/op            3977 B/op         66 allocs/op
+	// BenchmarkComplexValid-8           205198              5700 ns/op            3977 B/op         66 allocs/op
+	// BenchmarkComplexValid-8           206556              5813 ns/op            3977 B/op         66 allocs/op
+	// BenchmarkComplexValid-8           205345              5756 ns/op            3977 B/op         66 allocs/op
 }
 
 func BenchmarkComplexValidate(b *testing.B) {
