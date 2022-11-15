@@ -104,12 +104,12 @@ var validName2FuncMap = map[string]CommonValidFn{
 // 对象
 var (
 	syncValidStructPool = sync.Pool{New: func() interface{} { return new(VStruct) }}
-	// 考虑到性能, 用 sync.Map 缓存(缺点: 内存释放不到)
 	// 如果需要释放内存可以通过调用 SetStructTypeCache, 如: SetStructTypeCache(NewLRU(2 << 8))
+	// 考虑到性能, 用 sync.Map 缓存(缺点: 内存释放不到)
 	// cacheStructType  CacheEr = new(sync.Map)
-	cacheStructType  CacheEr = NewLRU(2 << 8)
-	syncValidVarPool         = sync.Pool{New: func() interface{} { return new(VVar) }}
-	timeReflectType          = reflect.TypeOf(time.Time{})
+	cacheStructType CacheEr = NewLRU(1 << 8)
+	syncValidVarPool = sync.Pool{New: func() interface{} { return new(VVar) }}
+	timeReflectType  = reflect.TypeOf(time.Time{})
 	once             sync.Once
 )
 
