@@ -50,7 +50,7 @@ func ValidStructForMyValidFn(src interface{}, validName string, validFn CommonVa
 // *******************************************************************************
 
 // Var 验证变量
-// 对切片/数组/单个[int 系列, float系列, bool系列, string系列]进行验证
+// 对切片/数组/单个[int,float,bool,string,struct]进行验证
 func Var(src interface{}, rules ...string) error {
 	return NewVVar().SetRules(rules...).Valid(src)
 }

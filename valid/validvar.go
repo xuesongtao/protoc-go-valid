@@ -35,7 +35,7 @@ func (v *VVar) free() {
 }
 
 // Valid 验证
-// 对切片/数组/单个[int 系列, float系列, bool系列, string系列]进行验证
+// 对切片/数组/单个[int,float,bool,string,struct]进行验证
 func (v *VVar) Valid(src interface{}) error {
 	if src == nil {
 		return errors.New("src is nil")
@@ -84,9 +84,14 @@ reValid:
 	switch ty.Kind() {
 	case reflect.String:
 		supportType = true
-	case reflect.Slice, reflect.Array: // 再验证下里面的内容类型
+	case reflect.Ptr, reflect.Slice, reflect.Array: // 再验证下里面的内容类型
 		ty = ty.Elem()
 		goto reValid
+	case reflect.Struct:
+		if err := Struct(value.Interface()); err != nil {
+			v.errBuf.WriteString(err.Error())
+			return v
+		}
 	default:
 		if ReflectKindIsNum(ty.Kind(), true) {
 			supportType = true
