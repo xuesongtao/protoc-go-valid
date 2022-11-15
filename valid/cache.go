@@ -30,13 +30,14 @@ func (l *LRUCache) Store(key, value interface{}) {
 		l.list.MoveToFront(node)
 		return
 	}
-	
-	front := l.list.PushFront(value)
-	l.nodeMap[key] = front
+
+	// 不存在
+	head := l.list.PushFront(value)
+	l.nodeMap[key] = head
 	// 判断是否已满, 满了就删除最后一个
-	if l.list.Len() >= l.maxSize {
-		endNode := l.list.Back()
-		delete(l.nodeMap, l.list.Remove(endNode))
+	if l.list.Len() > l.maxSize {
+		tail := l.list.Back()
+		delete(l.nodeMap, l.list.Remove(tail))
 	}
 }
 
