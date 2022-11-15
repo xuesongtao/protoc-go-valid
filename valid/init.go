@@ -203,7 +203,7 @@ type CacheEr interface {
 type CommonValidFn func(errBuf *strings.Builder, validName, objName, fieldName string, tv reflect.Value)
 
 // SetCustomerValidFn 自定义验证函数
-// 此函数会修改全局变量, 会导致内存释放不了, 此推荐 *VStruct.SetValidFn
+// 用于全局添加验证方法, 如果不想定义全局, 可根据验证对象分别调用 SetValidFn, 如: *VStruct.SetValidFn
 func SetCustomerValidFn(validName string, fn CommonValidFn) {
 	validName2FuncMap[validName] = fn
 }
