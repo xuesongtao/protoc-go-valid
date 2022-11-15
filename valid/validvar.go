@@ -41,17 +41,27 @@ func (v *VVar) Valid(src interface{}) error {
 		return errors.New("src is nil")
 	}
 
-	reflectValue := reflect.ValueOf(src)
-	switch reflectValue.Kind() {
-	case reflect.Ptr:
-		if reflectValue.IsNil() {
-			return errors.New("src \"" + reflectValue.Type().String() + "\" is nil")
+	reflectValue := RemoveValuePtr(reflect.ValueOf(src))
+	ty := reflectValue.Type()
+	supportType := false
+
+again:
+	// 判断是否能进行验证
+	switch kind := ty.Kind(); kind {
+	case reflect.String:
+		supportType = true
+	case reflect.Ptr, reflect.Slice, reflect.Array: // 再验证下里面的内容类型
+		ty = ty.Elem()
+		goto again
+	case reflect.Struct:
+		return Struct(src)
+	default:
+		if ReflectKindIsNum(kind, true) {
+			supportType = true
 		}
-		// case reflect.Slice, reflect.Array:
-		// 	for i := 0; i < reflectValue.Len(); i++ {
-		// 		v.validate(reflectValue.Index(i))
-		// 	}
-		// 	return v.getError()
+	}
+	if !supportType {
+		return errors.New("src no support")
 	}
 	return v.validate(reflectValue).getError()
 }
@@ -74,34 +84,7 @@ func (v *VVar) getValidFn(validName string) (CommonValidFn, error) {
 }
 
 // validate 验证执行体
-func (v *VVar) validate(value reflect.Value) *VVar {
-	supportType := false
-	tv := RemoveValuePtr(value)
-	ty := tv.Type()
-
-reValid:
-	// 判断是否能进行验证
-	switch ty.Kind() {
-	case reflect.String:
-		supportType = true
-	case reflect.Ptr, reflect.Slice, reflect.Array: // 再验证下里面的内容类型
-		ty = ty.Elem()
-		goto reValid
-	case reflect.Struct:
-		if err := Struct(value.Interface()); err != nil {
-			v.errBuf.WriteString(err.Error())
-			return v
-		}
-	default:
-		if ReflectKindIsNum(ty.Kind(), true) {
-			supportType = true
-		}
-	}
-	if !supportType {
-		v.errBuf.WriteString("src no support")
-		return v
-	}
-
+func (v *VVar) validate(tv reflect.Value) *VVar {
 	validNames := v.ruleObj.Get(validVarFieldName)
 	if validNames == "" {
 		v.errBuf.WriteString("you no set rule")

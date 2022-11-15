@@ -34,12 +34,12 @@ func (v *VUrl) Valid(src interface{}) error {
 		return errors.New("src is nil")
 	}
 
-	var srcStr *string
+	var srcStr string
 	switch v := src.(type) {
 	case string:
-		srcStr = &v
-	case *string:
 		srcStr = v
+	case *string:
+		srcStr = *v
 	default:
 		return errors.New("src must is string/*string")
 	}
@@ -58,33 +58,33 @@ func (v *VUrl) getValidFn(validName string) (CommonValidFn, error) {
 }
 
 // validate 验证执行体
-func (v *VUrl) validate(value *string) *VUrl {
+func (v *VUrl) validate(value string) *VUrl {
 	// 解码处理
-	decUrl, err := url.QueryUnescape(*value)
+	decUrl, err := url.QueryUnescape(value)
 	if err != nil {
 		v.errBuf.WriteString("url unescape is failed, err: " + err.Error())
 		return v
 	}
+	urlQuery := ""
 	queryIndex := strings.Index(decUrl, "?")
-	urlQuerys := ""
 	if queryIndex != -1 {
-		urlQuerys = decUrl[queryIndex+1:]
+		urlQuery = decUrl[queryIndex+1:]
 	}
-	if urlQuerys == "" {
+	if urlQuery == "" {
 		return v
 	}
 
 	var key, val string
-	for _, query := range strings.Split(urlQuerys, "&") {
+	for _, query := range strings.Split(urlQuery, "&") {
 		key = ""
 		val = ""
 		key2val := strings.Split(query, "=")
 		l := len(key2val)
 		if l > 0 {
 			key = key2val[0]
-			if l > 1 {
-				val = key2val[1]
-			}
+		}
+		if l > 1 {
+			val = key2val[1]
 		}
 
 		validNames := v.ruleObj.Get(key)
