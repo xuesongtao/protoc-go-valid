@@ -23,25 +23,21 @@ func NewLRU(max int) *LRUCache {
 
 // Store
 func (l *LRUCache) Store(key, value interface{}) {
-	// 判断下是否存在
 	l.rwMu.Lock()
 	defer l.rwMu.Unlock()
-	if l.list.Len() >= l.maxSize {
-		// 删除最后一个 node
-		endNode := l.list.Back()
-		// 删除 map
-		delete(l.nodeMap, l.list.Remove(endNode))
-	}
-
 	node, ok := l.nodeMap[key]
-	if !ok {
-		// 不存在就新建一个放到 头部
-		front := l.list.PushFront(value)
-		l.nodeMap[key] = front
+	if ok {
+		l.list.MoveToFront(node)
 		return
 	}
-	// 将节点移到 头部
-	l.list.MoveToFront(node)
+	
+	front := l.list.PushFront(value)
+	l.nodeMap[key] = front
+	// 判断是否已满, 满了就删除最后一个
+	if l.list.Len() >= l.maxSize {
+		endNode := l.list.Back()
+		delete(l.nodeMap, l.list.Remove(endNode))
+	}
 }
 
 // Load
