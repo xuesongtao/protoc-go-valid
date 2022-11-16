@@ -143,11 +143,9 @@ func (v *VUrl) validate(value string) *VUrl {
 func (v *VUrl) getError() error {
 	defer putStrBuf(v.errBuf)
 	v.vc.valid(v.errBuf)
-
 	if v.errBuf.Len() == 0 {
 		return nil
 	}
-
 	// 这里需要去掉最后一个 ErrEndFlag
 	return errors.New(strings.TrimSuffix(v.errBuf.String(), ErrEndFlag))
 }

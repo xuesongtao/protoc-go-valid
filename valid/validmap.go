@@ -126,7 +126,6 @@ func (v *VMap) getError() error {
 	if v.errBuf.Len() == 0 {
 		return nil
 	}
-
 	// 这里需要去掉最后一个 ErrEndFlag
 	return errors.New(strings.TrimSuffix(v.errBuf.String(), ErrEndFlag))
 }

@@ -306,12 +306,10 @@ func (v *VStruct) exist(isValidTvKind bool, structName, fieldName, cusMsg string
 // getError 获取 err
 func (v *VStruct) getError() error {
 	defer v.free()
-
 	v.vc.valid(v.errBuf)
 	if v.errBuf.Len() == 0 {
 		return nil
 	}
-
 	// 这里需要去掉最后一个 ErrEndFlag
 	return errors.New(strings.TrimSuffix(v.errBuf.String(), ErrEndFlag))
 }

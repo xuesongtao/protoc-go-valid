@@ -28,7 +28,7 @@ func NewVVar() *VVar {
 
 // free 释放
 func (v *VVar) free() {
-	v.errBuf.Reset()
+	putStrBuf(v.errBuf)
 	v.ruleObj = nil
 	v.vc = nil
 	syncValidVarPool.Put(v)
@@ -36,7 +36,7 @@ func (v *VVar) free() {
 
 // Valid 验证
 // 支持 单个 [int,float,bool,string] 验证
-// 支持 切片/数组 [int,float,bool,string] 验证(在使用时, 建议看下 readme.md 中对应的验证名所验证的内容)
+// 支持 切片/数组 [int,float,bool,string] 验证(在使用时, 建议看下 README.md 中对应的验证名所验证的内容)
 func (v *VVar) Valid(src interface{}) error {
 	if src == nil {
 		return errors.New("src is nil")
@@ -142,11 +142,9 @@ func (v *VVar) validate(tv reflect.Value) *VVar {
 // getError 获取 err
 func (v *VVar) getError() error {
 	defer v.free()
-
 	if v.errBuf.Len() == 0 {
 		return nil
 	}
-
 	// 这里需要去掉最后一个 ErrEndFlag
 	return errors.New(strings.TrimSuffix(v.errBuf.String(), ErrEndFlag))
 }
