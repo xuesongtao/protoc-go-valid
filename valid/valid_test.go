@@ -273,41 +273,6 @@ func TestValidVar(t *testing.T) {
 			t.Error(noEqErr)
 		}
 	})
-
-	t.Run("struct", func(t *testing.T) {
-		type Tmp struct {
-			Name string `valid:"required"`
-			Age  int    `valid:"required,to=1~100"`
-		}
-		tmp := &Tmp{
-			Name: "测试json",
-			Age:  101,
-		}
-		sureMsg := `"Tmp.Age" input "101", explain: it is more than 100 num-size`
-		err := Var(tmp)
-		if err != nil && !equal(err.Error(), sureMsg) {
-			t.Error(err)
-		}
-	})
-
-	t.Run("many struct", func(t *testing.T) {
-		type Tmp struct {
-			Name string `valid:"required"`
-			Age  int    `valid:"required,to=1~100"`
-		}
-		tmp := []*Tmp{{
-			Name: "测试",
-			Age:  101,
-		}, {
-			Name: "测试1",
-			Age:  -1,
-		}}
-		sureMsg := `"*valid.Tmp[0].Age" input "101", explain: it is more than 100 num-size; "*valid.Tmp[1].Age" input "-1", explain: it is less than 1 num-size`
-		err := Var(tmp)
-		if err != nil && !equal(err.Error(), sureMsg) {
-			t.Error(err)
-		}
-	})
 }
 
 func TestValidUrl(t *testing.T) {

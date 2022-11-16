@@ -35,8 +35,8 @@ func (v *VVar) free() {
 }
 
 // Valid 验证
-// 支持 单个 [int,float,bool,string,struct] 验证
-// 支持 切片/数组 [int,float,bool,string,struct] 验证(在使用时, 建议看下 readme.md 中对应的验证名所验证的内容)
+// 支持 单个 [int,float,bool,string] 验证
+// 支持 切片/数组 [int,float,bool,string] 验证(在使用时, 建议看下 readme.md 中对应的验证名所验证的内容)
 func (v *VVar) Valid(src interface{}) error {
 	if src == nil {
 		return errors.New("src is nil")
@@ -51,11 +51,11 @@ again:
 	switch kind := ty.Kind(); kind {
 	case reflect.String:
 		supportType = true
-	case reflect.Ptr, reflect.Slice, reflect.Array: // 再验证下里面的内容类型
+	case reflect.Slice, reflect.Array: // 再验证下里面的内容类型
 		ty = ty.Elem()
 		goto again
-	case reflect.Struct:
-		return Struct(src)
+	// case reflect.Struct: // 为了保持调用混乱, 这里不支持
+	// 	return Struct(src)
 	default:
 		if ReflectKindIsNum(kind, true) {
 			supportType = true

@@ -15,13 +15,11 @@ func Struct(src interface{}, ruleObj ...RM) error {
 }
 
 // StructForFn 验证结构体, 同时设置自定义参数
-// 支持[单个,slice,map]
 func StructForFn(src interface{}, ruleObj RM, targetTag ...string) error {
 	return NewVStruct(targetTag...).SetRule(ruleObj).Valid(src)
 }
 
-// StructForFns
-// 支持[单个,slice,map]
+// StructForFns 验证结构体, 可以设置自定义验证函数和规则
 func StructForFns(src interface{}, ruleObj RM, fnMap ValidName2ValidFnMap, targetTag ...string) error {
 	vs := NewVStruct(targetTag...).SetRule(ruleObj)
 	for validName, validFn := range fnMap {
@@ -67,15 +65,12 @@ func ValidStructForMyValidFn(src interface{}, validName string, validFn CommonVa
 // Map 验证 map
 // 支持:
 //    key:   string
-//    value: int,float,bool,string,struct
+//    value: int,float,bool,string
 func Map(src interface{}, ruleObj RM) error {
 	return NewVMap().SetRule(ruleObj).Valid(src)
 }
 
 // Map 验证 map
-// 支持:
-//    key:   string
-//    value: int,float,bool,string,struct
 func MapFn(src interface{}, ruleObj RM, fnMap ValidName2ValidFnMap) error {
 	obj := NewVMap().SetRule(ruleObj)
 	for validName, validFn := range fnMap {
@@ -89,15 +84,13 @@ func MapFn(src interface{}, ruleObj RM, fnMap ValidName2ValidFnMap) error {
 // *******************************************************************************
 
 // Var 验证变量
-// 支持 单个 [int,float,bool,string,struct] 验证
-// 支持 切片/数组 [int,float,bool,string,struct] 验证(在使用时, 建议看下 readme.md 中对应的验证名所验证的内容)
+// 支持 单个 [int,float,bool,string] 验证
+// 支持 切片/数组 [int,float,bool,string] 验证(在使用时, 建议看下 README.md 中对应的验证名所验证的内容)
 func Var(src interface{}, rules ...string) error {
 	return NewVVar().SetRules(rules...).Valid(src)
 }
 
 // VarForFn 验证变量, 同时设置自定义函数
-// 支持 单个 [int,float,bool,string,struct] 验证
-// 支持 切片/数组 [int,float,bool,string,struct] 验证(在使用时, 建议看下 readme.md 中对应的验证名所验证的内容)
 func VarForFn(src interface{}, validFn CommonValidFn) error {
 	return NewVVar().SetValidFn(validVarFieldName, validFn).Valid(src)
 }
