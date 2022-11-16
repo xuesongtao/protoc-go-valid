@@ -413,6 +413,45 @@ func ExampleJson() {
 	// <nil>
 }
 
+func ExampleStructForFns() {
+	type Tmp struct {
+		Name string
+		Addr string
+	}
+
+	isLower := func(errBuf *strings.Builder, validName, objName, fieldName string, tv reflect.Value) {
+		if err := CheckFieldIsStr(objName, fieldName, tv); err != nil {
+			errBuf.WriteString(err.Error())
+			return
+		}
+		if strings.ToLower(tv.String()) != tv.String() {
+			errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, tv.String(), ExplainEn, "it is not lower"))
+		}
+	}
+
+	isZh := func(errBuf *strings.Builder, validName, objName, fieldName string, tv reflect.Value) {
+		if err := CheckFieldIsStr(objName, fieldName, tv); err != nil {
+			errBuf.WriteString(err.Error())
+			return
+		}
+		if match, _ := regexp.MatchString("^[\u4e00-\u9fa5]+$", tv.String()); !match {
+			errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, tv.String(), ExplainEn, "it should is zh"))
+		}
+	}
+	fnMap := ValidName2ValidFnMap{"islower": isLower, "iszh": isZh}
+	rm := RM{"Name": "islower", "Addr": "iszh"}
+
+	v := &Tmp{
+		Name: "Test",
+		Addr: "四川",
+	}
+	err := StructForFns(v, rm, fnMap)
+	fmt.Println(err)
+
+	// Output:
+	// "Tmp.Name" input "Test", explain: it is not lower
+}
+
 func ExampleNestedStructForRule() {
 	type Tmp1 struct {
 		Name string
@@ -425,7 +464,7 @@ func ExampleNestedStructForRule() {
 	rmap := map[interface{}]RM{
 		// key 必须为 指针
 		&Tmp{}:  NewRule().Set("Ip,T", Required).Set("Ip", GenValidKV(VIp, "", "ip 格式不正确")),
-		&Tmp1{}: map[string]string{"Name": GenValidKV(Required, "", "姓名必填")},
+		&Tmp1{}: NewRule().Set("Name", GenValidKV(Required, "", "姓名必填")),
 	}
 	v := &Tmp{
 		Ip: "256.12.22.400",

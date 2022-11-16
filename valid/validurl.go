@@ -9,8 +9,8 @@ import (
 
 // VUrl 验证 url
 type VUrl struct {
-	errBuf  *strings.Builder
 	ruleObj RM
+	errBuf  *strings.Builder
 	vc      *validCommon // 组合验证
 }
 
@@ -62,7 +62,7 @@ func (v *VUrl) validate(value string) *VUrl {
 	// 解码处理
 	decUrl, err := url.QueryUnescape(value)
 	if err != nil {
-		v.errBuf.WriteString("url unescape is failed, err: " + err.Error())
+		v.errBuf.WriteString(GetJoinFieldErr("", "", "url unescape is failed, err: "+err.Error()))
 		return v
 	}
 	urlQuery := ""
@@ -108,7 +108,14 @@ func (v *VUrl) validate(value string) *VUrl {
 			if fn == nil {
 				switch validKey {
 				case Required:
-					v.required(key, cusMsg, val)
+					if val != "" { // 验证必填
+						continue
+					}
+					if cusMsg != "" {
+						v.errBuf.WriteString(GetJoinValidErrStr("", key, "", cusMsg))
+						continue
+					}
+					v.errBuf.WriteString(GetJoinValidErrStr("", key, "", ExplainEn, "it is", Required))
 				case Either, BothEq:
 					v.vc.initValid2FieldsMap(&name2Value{
 						validName:  validName,
@@ -130,18 +137,6 @@ func (v *VUrl) validate(value string) *VUrl {
 		}
 	}
 	return v
-}
-
-// required 验证 required
-func (v *VUrl) required(fieldName, cusMsg, val string) {
-	if val != "" { // 验证必填
-		return
-	}
-	if cusMsg != "" {
-		v.errBuf.WriteString(GetJoinValidErrStr("", fieldName, "", cusMsg))
-		return
-	}
-	v.errBuf.WriteString(GetJoinValidErrStr("", fieldName, "", ExplainEn, "it is", Required))
 }
 
 // getError 获取 err

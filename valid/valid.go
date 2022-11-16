@@ -5,6 +5,7 @@ package valid
 // *******************************************************************************
 
 // Struct 验证结构体
+// 支持[单个,slice,map]
 func Struct(src interface{}, ruleObj ...RM) error {
 	obj := NewVStruct()
 	if len(ruleObj) > 0 {
@@ -14,8 +15,19 @@ func Struct(src interface{}, ruleObj ...RM) error {
 }
 
 // StructForFn 验证结构体, 同时设置自定义参数
+// 支持[单个,slice,map]
 func StructForFn(src interface{}, ruleObj RM, targetTag ...string) error {
 	return NewVStruct(targetTag...).SetRule(ruleObj).Valid(src)
+}
+
+// StructForFns
+// 支持[单个,slice,map]
+func StructForFns(src interface{}, ruleObj RM, fnMap ValidName2ValidFnMap, targetTag ...string) error {
+	vs := NewVStruct(targetTag...).SetRule(ruleObj)
+	for validName, validFn := range fnMap {
+		vs.SetValidFn(validName, validFn)
+	}
+	return vs.Valid(src)
 }
 
 // NestedStructForRule 结构嵌套多个设置多个结构体规则
@@ -29,20 +41,47 @@ func NestedStructForRule(src interface{}, ruleMap map[interface{}]RM) error {
 	return vs.Valid(src)
 }
 
+// Deprecated 使用 Struct 替换
 // ValidateStruct 验证结构体
 func ValidateStruct(src interface{}, targetTag ...string) error {
 	return NewVStruct(targetTag...).Valid(src)
 }
 
+// Deprecated 使用 StructForFn 替换
 // ValidStructForRule 自定义验证规则并验证
 // 注: 通过字段名来匹配规则, 如果嵌套中如果有相同的名的都会走这个规则, 因此建议这种方式推荐使用非嵌套结构体
 func ValidStructForRule(ruleObj RM, src interface{}, targetTag ...string) error {
 	return NewVStruct(targetTag...).SetRule(ruleObj).Valid(src)
 }
 
+// Deprecated 使用 StructForFns 替换
 // ValidStructForMyValidFn 自定义单个验证函数
 func ValidStructForMyValidFn(src interface{}, validName string, validFn CommonValidFn, targetTag ...string) error {
 	return NewVStruct(targetTag...).SetValidFn(validName, validFn).Valid(src)
+}
+
+// *******************************************************************************
+// *                             验证 map                                        *
+// *******************************************************************************
+
+// Map 验证 map
+// 支持:
+//    key:   string
+//    value: int,float,bool,string,struct
+func Map(src interface{}, ruleObj RM) error {
+	return NewVMap().SetRule(ruleObj).Valid(src)
+}
+
+// Map 验证 map
+// 支持:
+//    key:   string
+//    value: int,float,bool,string,struct
+func MapFn(src interface{}, ruleObj RM, fnMap ValidName2ValidFnMap) error {
+	obj := NewVMap().SetRule(ruleObj)
+	for validName, validFn := range fnMap {
+		obj.SetValidFn(validName, validFn)
+	}
+	return obj.Valid(src)
 }
 
 // *******************************************************************************
@@ -50,13 +89,15 @@ func ValidStructForMyValidFn(src interface{}, validName string, validFn CommonVa
 // *******************************************************************************
 
 // Var 验证变量
-// 对切片/数组/单个[int,float,bool,string,struct]进行验证
+// 支持 单个 [int,float,bool,string,struct] 验证
+// 支持 切片/数组 [int,float,bool,string,struct] 验证(在使用时, 建议看下 readme.md 中对应的验证名所验证的内容)
 func Var(src interface{}, rules ...string) error {
 	return NewVVar().SetRules(rules...).Valid(src)
 }
 
 // VarForFn 验证变量, 同时设置自定义函数
-// 对切片/数组/单个[int 系列, float系列, bool系列, string系列]进行验证
+// 支持 单个 [int,float,bool,string,struct] 验证
+// 支持 切片/数组 [int,float,bool,string,struct] 验证(在使用时, 建议看下 readme.md 中对应的验证名所验证的内容)
 func VarForFn(src interface{}, validFn CommonValidFn) error {
 	return NewVVar().SetValidFn(validVarFieldName, validFn).Valid(src)
 }

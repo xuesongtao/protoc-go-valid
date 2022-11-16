@@ -294,6 +294,10 @@ func ToStr(src interface{}) string {
 	}
 
 	switch value := src.(type) {
+	case string:
+		return value
+	case []byte:
+		return string(value)
 	case int:
 		return strconv.Itoa(value)
 	case int8:
@@ -320,10 +324,6 @@ func ToStr(src interface{}) string {
 		return strconv.FormatFloat(value, 'f', -1, 64)
 	case bool:
 		return strconv.FormatBool(value)
-	case string:
-		return value
-	case []byte:
-		return string(value)
 	default:
 		return fmt.Sprintf("%v", value)
 	}

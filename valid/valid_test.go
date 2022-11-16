@@ -115,7 +115,7 @@ func TestValidManyStructRule(t *testing.T) {
 	rmap := map[interface{}]RM{
 		// key 必须为 指针
 		&Tmp{}:  NewRule().Set("Ip,T", Required).Set("Ip", GenValidKV(VIp, "", "ip 格式不正确")),
-		&Tmp1{}: map[string]string{"Name": GenValidKV(Required, "", "姓名必填")},
+		&Tmp1{}: NewRule().Set("Name", GenValidKV(Required, "", "姓名必填")),
 	}
 	// t.Logf("rmap: %+v", rmap)
 	v := &Tmp{
@@ -185,6 +185,38 @@ func TestGetJoinValidErrStr(t *testing.T) {
 	if !equal(res, `"User.Name" input "xue" len is less than 3;`) {
 		t.Error(noEqErr)
 	}
+}
+
+func TestValidMap(t *testing.T) {
+	t.Run("map[string]interface{}", func(t *testing.T) {
+		testMap := map[string]interface{}{"name": "", "addr": "chendu", "age": -1}
+		rm := NewRule().Set("name,addr", Required).Set("age", GenValidKV(VTo, "1~100", "年龄必须在1~100"))
+		err := Map(testMap, rm)
+		sureMsg := `"name" input "", explain: it is required; "age" input "-1", explain: 年龄必须在1~100`
+		if err != nil && !equal(err.Error(), sureMsg) {
+			t.Error(err)
+		}
+	})
+
+	t.Run("map[string]string", func(t *testing.T) {
+		testMap := map[string]string{"name": "", "addr": "chendu"}
+		rm := NewRule().Set("name,addr", Required)
+		err := Map(testMap, rm)
+		sureMsg := `"name" input "", explain: it is required`
+		if err != nil && !equal(err.Error(), sureMsg) {
+			t.Error(err)
+		}
+	})
+
+	t.Run("map[string]int", func(t *testing.T) {
+		testMap := map[string]int{"no1": 1, "no2": 2}
+		rm := NewRule().Set("no1", GenValidKV(VEq, "2", "no1必须等于1")).Set("no2", GenValidKV(VEq, "2", "no2必须等于2"))
+		err := Map(testMap, rm)
+		sureMsg := `"no1" input "1", 说明: no1必须等于1`
+		if err != nil && !equal(err.Error(), sureMsg) {
+			t.Error(err)
+		}
+	})
 }
 
 func TestValidVar(t *testing.T) {

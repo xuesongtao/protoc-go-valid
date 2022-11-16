@@ -12,10 +12,10 @@ var (
 
 // VStruct 验证结构体
 type VStruct struct {
-	targetTag string // 结构体中的待指定的验证的 tag
-	errBuf    *strings.Builder
+	targetTag string              // 结构体中的待指定的验证的 tag
 	ruleMap   map[reflect.Type]RM // 验证规则, key: 为结构体 reflect.Type, value: 为该结构体的规则
-	vc        *validCommon        // 组合验证
+	errBuf    *strings.Builder
+	vc        *validCommon // 组合验证
 }
 
 // structType
@@ -87,12 +87,13 @@ func (v *VStruct) getCusRule(ty reflect.Type) RM {
 // Valid 验证
 // 1. 支持单结构体验证
 // 2. 支持切片/数组类型结构体验证
+// 3. 支持map类型结构体验证
 func (v *VStruct) Valid(src interface{}) error {
 	if src == nil {
 		return errors.New("src is nil")
 	}
 
-	reflectValue := reflect.ValueOf(src)
+	reflectValue := RemoveValuePtr(reflect.ValueOf(src))
 	switch reflectValue.Kind() {
 	case reflect.Ptr:
 		if reflectValue.IsNil() {
@@ -141,7 +142,7 @@ func (v *VStruct) validate(structName string, value reflect.Value, isValidGather
 		if len(isValidGatherObj) > 0 && isValidGatherObj[0] {
 			return v
 		}
-		v.errBuf.WriteString("src param \"" + structName + "." + ty.Name() + "\" is not struct" + ErrEndFlag)
+		v.errBuf.WriteString(GetJoinFieldErr(structName, ty.Name(), "is not struct"))
 		return v
 	}
 

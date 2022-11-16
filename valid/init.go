@@ -222,6 +222,9 @@ func putStrBuf(buf *strings.Builder) {
 //    否则需要再 errBuf.WriteString 最后要加上 ErrEndFlag 分割, 工具是通过 ErrEndFlag 进行分句
 type CommonValidFn func(errBuf *strings.Builder, validName, objName, fieldName string, tv reflect.Value)
 
+// ValidName2ValidFnMap 自定义验证名对应自定义验证函数
+type ValidName2ValidFnMap map[string]CommonValidFn
+
 // SetCustomerValidFn 自定义验证函数
 // 用于全局添加验证方法, 如果不想定义全局, 可根据验证对象分别调用 SetValidFn, 如: *VStruct.SetValidFn
 func SetCustomerValidFn(validName string, fn CommonValidFn) {

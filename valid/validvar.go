@@ -12,8 +12,8 @@ const (
 
 // VVar 验证单字段
 type VVar struct {
-	errBuf  *strings.Builder
 	ruleObj RM
+	errBuf  *strings.Builder
 	vc      *validCommon // 组合验证
 }
 
@@ -35,7 +35,8 @@ func (v *VVar) free() {
 }
 
 // Valid 验证
-// 对切片/数组/单个[int,float,bool,string,struct]进行验证
+// 支持 单个 [int,float,bool,string,struct] 验证
+// 支持 切片/数组 [int,float,bool,string,struct] 验证(在使用时, 建议看下 readme.md 中对应的验证名所验证的内容)
 func (v *VVar) Valid(src interface{}) error {
 	if src == nil {
 		return errors.New("src is nil")
@@ -87,7 +88,7 @@ func (v *VVar) getValidFn(validName string) (CommonValidFn, error) {
 func (v *VVar) validate(tv reflect.Value) *VVar {
 	validNames := v.ruleObj.Get(validVarFieldName)
 	if validNames == "" {
-		v.errBuf.WriteString("you no set rule")
+		v.errBuf.WriteString(GetJoinFieldErr("", "", "have no set rule"))
 		return v
 	}
 
