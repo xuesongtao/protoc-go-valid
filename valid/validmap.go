@@ -16,7 +16,7 @@ type VMap struct {
 func NewVMap() *VMap {
 	return &VMap{
 		errBuf: newStrBuf(),
-		vc:     &validCommon{},
+		vc:     new(validCommon),
 	}
 }
 

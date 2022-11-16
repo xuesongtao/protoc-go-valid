@@ -21,7 +21,7 @@ type VVar struct {
 func NewVVar() *VVar {
 	obj := syncValidVarPool.Get().(*VVar)
 	obj.errBuf = newStrBuf()
-	obj.vc = &validCommon{}
+	obj.vc = new(validCommon)
 	obj.ruleObj = NewRule()
 	return obj
 }

@@ -41,7 +41,7 @@ func NewVStruct(targetTag ...string) *VStruct {
 	}
 	obj.targetTag = tagName
 	obj.errBuf = newStrBuf()
-	obj.vc = &validCommon{}
+	obj.vc = new(validCommon)
 	return obj
 }
 

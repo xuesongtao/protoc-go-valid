@@ -18,7 +18,7 @@ type VUrl struct {
 func NewVUrl() *VUrl {
 	obj := new(VUrl)
 	obj.errBuf = newStrBuf()
-	obj.vc = &validCommon{}
+	obj.vc = new(validCommon)
 	return obj
 }
 
