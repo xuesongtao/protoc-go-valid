@@ -109,6 +109,8 @@ protoFileDirName="test" # proto 存放的目录
 | re        | yes   | yes | yes | yes | yes       | 正则验证, 格式为: "re='xxx'", 如: "re='[a-z]+'" |
 | unique    | yes   | yes | yes | yes | yes       | 唯一验证, 说明: 1.对以逗号隔开的字符串进行唯一验证; 2. 对切片/数组元素[int 系列, float系列, bool系列, string系列]进行唯一验证 |
 | json      | yes   | yes | yes | yes | yes       | json 格式验证 |
+| prefix    | yes   | yes | yes | yes | yes       | 字符串包含前缀验证 |
+| suffix    | yes   | yes | yes | yes | yes       | 字符串包含后缀验证  |
 
 * 自定义 msg 写法如下, 可以通过调用 `GenValidKV` 来动态生成:
   * 1. 如: `required|必填`, key 为 `required`, value 为 ``, cusMsg 为 `必填`;

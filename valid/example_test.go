@@ -413,6 +413,34 @@ func ExampleJson() {
 	// <nil>
 }
 
+func ExamplePrefix() {
+	type Tmp struct {
+		Name string `valid:"required,prefix=test|前缀必须为test"`
+	}
+	tmp := &Tmp{
+		Name: "ceshi",
+	}
+	err := Struct(tmp)
+	fmt.Println(err)
+
+	// Output:
+	// "Tmp.Name" input "ceshi", 说明: 前缀必须为test
+}
+
+func ExampleSuffix() {
+	type Tmp struct {
+		Name string `valid:"required,suffix=test|后缀必须为test"`
+	}
+	tmp := &Tmp{
+		Name: "mytest",
+	}
+	err := Struct(tmp)
+	fmt.Println(err)
+
+	// Output:
+	// <nil>
+}
+
 func ExampleStructForFns() {
 	type Tmp struct {
 		Name string

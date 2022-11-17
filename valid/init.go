@@ -64,6 +64,8 @@ const (
 	VIpv6       = "ipv6"       // ipv6
 	VUnique     = "unique"     // 唯一验证
 	VJson       = "json"       // json 格式验证
+	VPrefix     = "prefix"     // 包含前缀
+	VSuffix     = "suffix"     // 包含后缀
 )
 
 // CommonValidFn 通用验证函数, 主要用于回调
@@ -106,6 +108,8 @@ var validName2FnMap = Name2FnMap{
 	VIpv6:       Ipv6,
 	VUnique:     Unique,
 	VJson:       Json,
+	VPrefix:     Prefix,
+	VSuffix:     Suffix,
 }
 
 // 对象
