@@ -22,11 +22,7 @@ func equal(dest, src interface{}) bool {
 }
 
 func TestTmp(t *testing.T) {
-	err := Var([]string{"test", "test1", "test"}, Required, VUnique)
-	sureMsg := `input "[test,test1,test]", explain: they're not unique`
-	if !equal(err.Error(), sureMsg) {
-		t.Error(noEqErr)
-	}
+	
 }
 
 func TestValidManyStruct(t *testing.T) {

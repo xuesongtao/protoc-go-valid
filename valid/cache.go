@@ -5,11 +5,16 @@ import (
 	"sync"
 )
 
+const (
+	lruSize = 2 << 8 // lru 最大值
+)
+
 type LRUCache struct {
-	rwMu    sync.RWMutex
-	maxSize int
-	nodeMap map[interface{}]*list.Element
-	list    *list.List
+	rwMu        sync.RWMutex
+	maxSize     int
+	delMapCount int // 记录 delete map 的次数, 当次数大于 2*lruSize 重建下 nodeMap, 防止 delete 没有释放内存
+	nodeMap     map[interface{}]*list.Element
+	list        *list.List
 }
 
 func NewLRU(max int) *LRUCache {
@@ -36,6 +41,17 @@ func (l *LRUCache) Store(key, value interface{}) {
 	if l.list.Len() > l.maxSize {
 		tail := l.list.Back()
 		delete(l.nodeMap, l.list.Remove(tail))
+		l.delMapCount++
+
+		// 重建 map
+		if l.delMapCount > 2*lruSize {
+			tmp := l.nodeMap
+			l.nodeMap = make(map[interface{}]*list.Element)
+			for k, v := range tmp {
+				l.nodeMap[k] = v
+			}
+			l.delMapCount = 0
+		}
 	}
 }
 
