@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// VMap
 type VMap struct {
 	ruleObj RM
 	errBuf  *strings.Builder
@@ -107,7 +108,6 @@ func (v *VMap) validate(tv reflect.Value) *VMap {
 					v.errBuf.WriteString(GetJoinFieldErr("", key, "valid \""+validName+"\" is no support"))
 				}
 				continue
-
 			}
 			// 拓展的验证方法
 			if val.IsZero() { // 空就直接跳过

@@ -15,7 +15,7 @@ type VStruct struct {
 	targetTag string              // 结构体中的待指定的验证的 tag
 	ruleMap   map[reflect.Type]RM // 验证规则, key: 为结构体 reflect.Type, value: 为该结构体的规则
 	errBuf    *strings.Builder
-	vc        *validCommon // 组合验证
+	vc        *validCommon
 }
 
 // structType
@@ -87,7 +87,7 @@ func (v *VStruct) getCusRule(ty reflect.Type) RM {
 // Valid 验证
 // 1. 支持单结构体验证
 // 2. 支持切片/数组类型结构体验证
-// 3. 支持map类型结构体验证
+// 3. 支持map: key为普通类型, value为结构体 验证
 func (v *VStruct) Valid(src interface{}) error {
 	if src == nil {
 		return errors.New("src is nil")
@@ -148,13 +148,16 @@ func (v *VStruct) validate(structName string, value reflect.Value, isValidGather
 
 	cacheStructType := v.getCacheStructType(ty)
 	totalFieldNum := len(cacheStructType.fieldInfos)
-	cusRM := v.getCusRule(ty)
+	var cusRM RM
 	if structName == "" { // 只有最外层的结构体此值为空
 		structName = cacheStructType.name
+		cusRM = v.getCusRule(ty)
 		// 在调用 SetRule 时没有设置验证对象时, 默认验证最外层结构体
 		if len(cusRM) == 0 { // 设置了验证对象
 			cusRM = v.getCusRule(validOnlyOuterObj)
 		}
+	} else {
+		cusRM = v.getCusRule(ty)
 	}
 	// fmt.Printf("cusRM: %+v\n", cusRM)
 	for fieldNum := 0; fieldNum < totalFieldNum; fieldNum++ {
@@ -271,7 +274,7 @@ func (v *VStruct) required(structName, fieldName, cusMsg string, tv reflect.Valu
 	v.exist(false, structName, fieldName, cusMsg, tv)
 }
 
-// exist 存在验证, 用于验证嵌套结构, 切片
+// exist 存在验证, 用于验证嵌套结构,slice,map
 func (v *VStruct) exist(isValidTvKind bool, structName, fieldName, cusMsg string, tv reflect.Value) {
 	// 如果空的就没必要验证了
 	if tv.IsZero() {

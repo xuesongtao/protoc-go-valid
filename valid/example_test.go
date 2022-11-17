@@ -438,7 +438,7 @@ func ExampleStructForFns() {
 			errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, tv.String(), ExplainEn, "it should is zh"))
 		}
 	}
-	fnMap := ValidName2ValidFnMap{"islower": isLower, "iszh": isZh}
+	fnMap := ValidName2FnMap{"islower": isLower, "iszh": isZh}
 	rm := RM{"Name": "islower", "Addr": "iszh"}
 
 	v := &Tmp{

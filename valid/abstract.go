@@ -43,7 +43,7 @@ func (v *validCommon) getValidFn(validName string) (CommonValidFn, error) {
 		return fn, nil
 	}
 
-	fn, ok = validName2FuncMap[validName]
+	fn, ok = validName2FnMap[validName]
 	if !ok {
 		return nil, errors.New("valid \"" + validName + "\" is not exist, You can call SetValidFn")
 	}

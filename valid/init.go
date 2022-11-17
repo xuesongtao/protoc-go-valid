@@ -67,8 +67,16 @@ const (
 	VJson       = "json"       // json 格式验证
 )
 
+// CommonValidFn 通用验证函数, 主要用于回调
+// 注: 在写 errBuf 的时候建议用 GetJoinValidErrStr 包裹下, 这样产生的结果易读.
+//    否则需要再 errBuf.WriteString 最后要加上 ErrEndFlag 分割, 工具是通过 ErrEndFlag 进行分句
+type CommonValidFn func(errBuf *strings.Builder, validName, objName, fieldName string, tv reflect.Value)
+
+// ValidName2FnMap 自定义验证名对应自定义验证函数
+type ValidName2FnMap map[string]CommonValidFn
+
 // 验证函数
-var validName2FuncMap = map[string]CommonValidFn{
+var validName2FnMap = ValidName2FnMap{
 	Required:    nil,
 	Exist:       nil,
 	Either:      nil,
@@ -217,18 +225,10 @@ func putStrBuf(buf *strings.Builder) {
 	syncBufPool.Put(buf)
 }
 
-// CommonValidFn 通用验证函数, 主要用于回调
-// 注: 在写 errBuf 的时候建议用 GetJoinValidErrStr 包裹下, 这样产生的结果易读.
-//    否则需要再 errBuf.WriteString 最后要加上 ErrEndFlag 分割, 工具是通过 ErrEndFlag 进行分句
-type CommonValidFn func(errBuf *strings.Builder, validName, objName, fieldName string, tv reflect.Value)
-
-// ValidName2ValidFnMap 自定义验证名对应自定义验证函数
-type ValidName2ValidFnMap map[string]CommonValidFn
-
 // SetCustomerValidFn 自定义验证函数
 // 用于全局添加验证方法, 如果不想定义全局, 可根据验证对象分别调用 SetValidFn, 如: *VStruct.SetValidFn
 func SetCustomerValidFn(validName string, fn CommonValidFn) {
-	validName2FuncMap[validName] = fn
+	validName2FnMap[validName] = fn
 }
 
 // SetStructTypeCache 设置 structType 缓存类型

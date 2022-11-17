@@ -14,7 +14,7 @@ const (
 type VVar struct {
 	ruleObj RM
 	errBuf  *strings.Builder
-	vc      *validCommon // 组合验证
+	vc      *validCommon
 }
 
 // NewVVar 单值校验
@@ -55,11 +55,11 @@ again:
 		ty = ty.Elem()
 		goto again
 	// case reflect.Struct: // 为了保持调用混乱, 这里不支持
-	// 	return Struct(src)
+		// 	return Struct(src)
 	default:
 		if ReflectKindIsNum(kind, true) {
 			supportType = true
-		}
+	}
 	}
 	if !supportType {
 		return errors.New("src no support")

@@ -11,7 +11,7 @@ import (
 type VUrl struct {
 	ruleObj RM
 	errBuf  *strings.Builder
-	vc      *validCommon // 组合验证
+	vc      *validCommon
 }
 
 // NewVUrl

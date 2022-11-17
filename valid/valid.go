@@ -5,7 +5,9 @@ package valid
 // *******************************************************************************
 
 // Struct 验证结构体
-// 支持[单个,slice,map]
+// 1. 支持单结构体验证
+// 2. 支持切片/数组类型结构体验证
+// 3. 支持map: key为普通类型, value为结构体 验证
 func Struct(src interface{}, ruleObj ...RM) error {
 	obj := NewVStruct()
 	if len(ruleObj) > 0 {
@@ -20,7 +22,7 @@ func StructForFn(src interface{}, ruleObj RM, targetTag ...string) error {
 }
 
 // StructForFns 验证结构体, 可以设置自定义验证函数和规则
-func StructForFns(src interface{}, ruleObj RM, fnMap ValidName2ValidFnMap, targetTag ...string) error {
+func StructForFns(src interface{}, ruleObj RM, fnMap ValidName2FnMap, targetTag ...string) error {
 	vs := NewVStruct(targetTag...).SetRule(ruleObj)
 	for validName, validFn := range fnMap {
 		vs.SetValidFn(validName, validFn)
@@ -71,7 +73,7 @@ func Map(src interface{}, ruleObj RM) error {
 }
 
 // Map 验证 map
-func MapFn(src interface{}, ruleObj RM, fnMap ValidName2ValidFnMap) error {
+func MapFn(src interface{}, ruleObj RM, fnMap ValidName2FnMap) error {
 	obj := NewVMap().SetRule(ruleObj)
 	for validName, validFn := range fnMap {
 		obj.SetValidFn(validName, validFn)
@@ -85,7 +87,7 @@ func MapFn(src interface{}, ruleObj RM, fnMap ValidName2ValidFnMap) error {
 
 // Var 验证变量
 // 支持 单个 [int,float,bool,string] 验证
-// 支持 切片/数组 [int,float,bool,string] 验证(在使用时, 建议看下 README.md 中对应的验证名所验证的内容)
+// 支持 切片/数组 [int,float,bool,string] 验证时会对对象中的每个值进行验证
 func Var(src interface{}, rules ...string) error {
 	return NewVVar().SetRules(rules...).Valid(src)
 }
