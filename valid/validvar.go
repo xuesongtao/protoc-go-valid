@@ -54,12 +54,12 @@ again:
 	case reflect.Slice, reflect.Array: // 再验证下里面的内容类型
 		ty = ty.Elem()
 		goto again
-	// case reflect.Struct: // 为了保持调用混乱, 这里不支持
-		// 	return Struct(src)
+	// case reflect.Struct: // 为了防止调用混乱, 这里不支持
+	// 	return Struct(src)
 	default:
 		if ReflectKindIsNum(kind, true) {
 			supportType = true
-	}
+		}
 	}
 	if !supportType {
 		return errors.New("src no support")
