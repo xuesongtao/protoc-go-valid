@@ -215,10 +215,10 @@ func TestValidMap(t *testing.T) {
 	})
 
 	t.Run("[]map[string]string", func(t *testing.T) {
-		testMap := []map[string]string{{"name": "", "addr": "chendu"}}
+		testMap := []map[string]string{{"name": "", "addr": "chendu"}, {"name": "test", "addr": ""}}
 		rm := NewRule().Set("name,addr", Required)
 		err := Map(testMap, rm)
-		sureMsg := `"[0]map[name]" input "", explain: it is required`
+		sureMsg := `"[0]map[name]" input "", explain: it is required; "[1]map[addr]" input "", explain: it is required`
 		if err != nil && !equal(err.Error(), sureMsg) {
 			t.Error(err)
 		}

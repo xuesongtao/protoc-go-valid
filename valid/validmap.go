@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// VMap 验证 map
 type VMap struct {
 	ruleObj RM
 	errBuf  *strings.Builder
@@ -38,7 +39,8 @@ func (v *VMap) getValidFn(validName string) (CommonValidFn, error) {
 }
 
 // Valid 验证
-// 支持 key 为 [string]
+//    key:   string
+//    value: int,float,bool,string
 func (v *VMap) Valid(src interface{}) error {
 	if src == nil {
 		return errors.New("src is nil")

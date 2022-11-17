@@ -34,15 +34,26 @@ type TmpTest3 struct {
 }
 
 func BenchmarkStringSplitValid(b *testing.B) {
+	var s []string
 	for i := 0; i < b.N; i++ {
-		_ = ValidNamesSplit("required,phone,test")
+		s = ValidNamesSplit("required,phone,test")
 	}
+	_ = s
+}
+func BenchmarkStringSplitValid1(b *testing.B) {
+	var s []string
+	for i := 0; i < b.N; i++ {
+		s = ValidNamesSplit("required,phone,test|'test'")
+	}
+	_ = s
 }
 
 func BenchmarkStringSplit(b *testing.B) {
+	var s []string
 	for i := 0; i < b.N; i++ {
-		_ = strings.Split("required,phone,test", ",")
+		s = strings.Split("required,phone,test", ",")
 	}
+	_ = s
 }
 
 func BenchmarkReNoComplice(b *testing.B) {
