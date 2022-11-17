@@ -46,7 +46,7 @@ func (l *LRUCache) Store(key, value interface{}) {
 		// 重建 map
 		if l.delMapCount > 2*lruSize {
 			tmp := l.nodeMap
-			l.nodeMap = make(map[interface{}]*list.Element)
+			l.nodeMap = make(map[interface{}]*list.Element, len(tmp))
 			for k, v := range tmp {
 				l.nodeMap[k] = v
 			}
