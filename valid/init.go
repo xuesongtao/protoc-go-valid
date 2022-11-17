@@ -180,8 +180,7 @@ var (
 	uniqueErr = errors.New(defaultTargetTag + " \"unique\" is not ok, eg: " +
 		"type Test struct {\n" +
 		"    Hobby1 string `valid:\"unique\"`\n" + // 按 "," 进行分割对字符串进行判断是否唯一
-		"    Hobby2 []string `valid:\"ints\"`\n" + // 遍历切片中的元素是否唯一
-		"    Hobby3 []int `valid:\"ints\"`\n" + // 遍历切片中的元素是否唯一
+		"    Hobby2 []string `valid:\"unique\"`\n" + // 遍历切片中的元素是否唯一
 		"}")
 )
 
