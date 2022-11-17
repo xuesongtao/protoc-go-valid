@@ -32,7 +32,7 @@ func (r RM) Get(fieldName string) string {
 	return r[fieldName]
 }
 
-// Deprecated 名字存在歧义, 因为已上线不能删除, 特此标记, 推荐使用 GenValidKV
+// Deprecated: 名字存在歧义, 因为已上线不能删除, 特此标记, 推荐使用 GenValidKV
 // JoinTag2Val 生成 defaultTargetTag 的值
 func JoinTag2Val(key string, values ...string) string {
 	return GenValidKV(key, values...)

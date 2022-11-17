@@ -41,20 +41,20 @@ func NestedStructForRule(src interface{}, ruleMap map[interface{}]RM) error {
 	return vs.Valid(src)
 }
 
-// Deprecated 使用 Struct 替换
+// Deprecated: 使用 Struct 替换
 // ValidateStruct 验证结构体
 func ValidateStruct(src interface{}, targetTag ...string) error {
 	return NewVStruct(targetTag...).Valid(src)
 }
 
-// Deprecated 使用 StructForFn 替换
+// Deprecated: 使用 StructForFn 替换
 // ValidStructForRule 自定义验证规则并验证
 // 注: 通过字段名来匹配规则, 如果嵌套中如果有相同的名的都会走这个规则, 因此建议这种方式推荐使用非嵌套结构体
 func ValidStructForRule(ruleObj RM, src interface{}, targetTag ...string) error {
 	return NewVStruct(targetTag...).SetRule(ruleObj).Valid(src)
 }
 
-// Deprecated 使用 StructForFns 替换
+// Deprecated: 使用 StructForFns 替换
 // ValidStructForMyValidFn 自定义单个验证函数
 func ValidStructForMyValidFn(src interface{}, validName string, validFn CommonValidFn, targetTag ...string) error {
 	return NewVStruct(targetTag...).SetValidFn(validName, validFn).Valid(src)
@@ -72,7 +72,7 @@ func Map(src interface{}, ruleObj RM) error {
 	return NewVMap().SetRule(ruleObj).Valid(src)
 }
 
-// Map 验证 map
+// MapFn 验证 map
 func MapFn(src interface{}, ruleObj RM, fnMap ValidName2FnMap) error {
 	obj := NewVMap().SetRule(ruleObj)
 	for validName, validFn := range fnMap {
