@@ -9,19 +9,18 @@ import (
 	"time"
 )
 
+// err msg
 const (
-	// err msg 单位
 	strUnitStr      = "str-length"
 	numUnitStr      = "num-size"
 	sliceLenUnitStr = "slice-len"
 
-	// err msg 前缀
 	ExplainEn = "explain:"
 	ExplainZh = "说明:"
 )
 
+// 时间格式
 const (
-	// 时间格式
 	YearFmt int8 = 1 << iota
 	MonthFmt
 	DayFmt
@@ -72,11 +71,11 @@ const (
 //    否则需要再 errBuf.WriteString 最后要加上 ErrEndFlag 分割, 工具是通过 ErrEndFlag 进行分句
 type CommonValidFn func(errBuf *strings.Builder, validName, objName, fieldName string, tv reflect.Value)
 
-// ValidName2FnMap 自定义验证名对应自定义验证函数
-type ValidName2FnMap map[string]CommonValidFn
+// Name2FnMap 自定义验证名对应自定义验证函数
+type Name2FnMap map[string]CommonValidFn
 
 // 验证函数
-var validName2FnMap = ValidName2FnMap{
+var validName2FnMap = Name2FnMap{
 	Required:    nil,
 	Exist:       nil,
 	Either:      nil,

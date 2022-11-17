@@ -6,14 +6,13 @@ import (
 	"strings"
 )
 
-// VMap
 type VMap struct {
 	ruleObj RM
 	errBuf  *strings.Builder
 	vc      *validCommon
 }
 
-// NewVMap
+// NewVMap 验证 map
 func NewVMap() *VMap {
 	return &VMap{
 		errBuf: newStrBuf(),
@@ -21,7 +20,7 @@ func NewVMap() *VMap {
 	}
 }
 
-// SetRule
+// SetRule 设置规则
 func (v *VMap) SetRule(ruleObj RM) *VMap {
 	v.ruleObj = ruleObj
 	return v

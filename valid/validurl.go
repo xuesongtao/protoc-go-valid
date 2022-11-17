@@ -14,7 +14,7 @@ type VUrl struct {
 	vc      *validCommon
 }
 
-// NewVUrl
+// NewVUrl 验证 url
 func NewVUrl() *VUrl {
 	obj := new(VUrl)
 	obj.errBuf = newStrBuf()

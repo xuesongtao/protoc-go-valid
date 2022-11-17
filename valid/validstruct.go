@@ -18,13 +18,13 @@ type VStruct struct {
 	vc        *validCommon
 }
 
-// structType
+// structType 结构体类型
 type structType struct {
 	name       string            // 名字
 	fieldInfos []structFieldInfo // 偏移量对应的字段信息内容
 }
 
-// structFieldInfo
+// structFieldInfo 结构体字段信息
 type structFieldInfo struct {
 	export     bool   // 是否可导出
 	offset     int    // 偏移量

@@ -45,7 +45,7 @@ func JoinTag2Val(key string, values ...string) string {
 // values[1] 会被解析为自定义错误信息
 // 如1.: GenValidKV(VTo, "1~10", "需要在 1-10 的区间")
 // => to=1~10|需要在 1-10 的区间
-
+//
 // 如2: GenValidKV(VRe, "\\d+", "必须为纯数字")
 // => re='\\d+'|必须为纯数字
 func GenValidKV(key string, values ...string) string {

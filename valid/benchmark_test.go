@@ -91,7 +91,7 @@ func BenchmarkValidateForValid(b *testing.B) {
 	}
 
 	for i := 0; i < b.N; i++ {
-		_ = ValidateStruct(users)
+		_ = Struct(users)
 	}
 
 	// BenchmarkValidateForValid-8              1614230               744.7 ns/op           416 B/op          9 allocs/op
@@ -177,7 +177,7 @@ func BenchmarkComplexValid(b *testing.B) {
 		TestOrderDetailSlice: testOrderDetails,
 	}
 	for i := 0; i < b.N; i++ {
-		_ = ValidateStruct(&u, "alipay")
+		_ = StructForFn(&u, nil, "alipay")
 	}
 
 	// BenchmarkComplexValid-8           209080              5954 ns/op            3977 B/op         66 allocs/op

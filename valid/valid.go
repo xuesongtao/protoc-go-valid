@@ -22,7 +22,7 @@ func StructForFn(src interface{}, ruleObj RM, targetTag ...string) error {
 }
 
 // StructForFns 验证结构体, 可以设置自定义验证函数和规则
-func StructForFns(src interface{}, ruleObj RM, fnMap ValidName2FnMap, targetTag ...string) error {
+func StructForFns(src interface{}, ruleObj RM, fnMap Name2FnMap, targetTag ...string) error {
 	vs := NewVStruct(targetTag...).SetRule(ruleObj)
 	for validName, validFn := range fnMap {
 		vs.SetValidFn(validName, validFn)
@@ -73,7 +73,7 @@ func Map(src interface{}, ruleObj RM) error {
 }
 
 // MapFn 验证 map
-func MapFn(src interface{}, ruleObj RM, fnMap ValidName2FnMap) error {
+func MapFn(src interface{}, ruleObj RM, fnMap Name2FnMap) error {
 	obj := NewVMap().SetRule(ruleObj)
 	for validName, validFn := range fnMap {
 		obj.SetValidFn(validName, validFn)

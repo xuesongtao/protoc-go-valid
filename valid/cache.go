@@ -20,7 +20,6 @@ func NewLRU(max int) *LRUCache {
 	}
 }
 
-// Store
 func (l *LRUCache) Store(key, value interface{}) {
 	l.rwMu.Lock()
 	defer l.rwMu.Unlock()
@@ -40,7 +39,6 @@ func (l *LRUCache) Store(key, value interface{}) {
 	}
 }
 
-// Load
 func (l *LRUCache) Load(key interface{}) (data interface{}, ok bool) {
 	l.rwMu.RLock()
 	defer l.rwMu.RUnlock()
@@ -52,14 +50,12 @@ func (l *LRUCache) Load(key interface{}) (data interface{}, ok bool) {
 	return
 }
 
-// Len
 func (l *LRUCache) Len() int {
 	l.rwMu.RLock()
 	defer l.rwMu.RUnlock()
 	return l.list.Len()
 }
 
-// Dump
 func (l *LRUCache) Dump() string {
 	head := l.list.Front()
 	buf := newStrBuf()
