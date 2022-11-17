@@ -45,21 +45,31 @@ func (v *VMap) Valid(src interface{}) error {
 		return errors.New("src is nil")
 	}
 
-	tv := RemoveValuePtr(reflect.ValueOf(src))
-	if tv.Type().Key().Kind() != reflect.String {
-		return errors.New("map key must string")
-	}
-
 	if len(v.ruleObj) == 0 {
 		return errors.New("have no set rules")
 	}
-	return v.validate(tv).getError()
+
+	tv := RemoveValuePtr(reflect.ValueOf(src))
+	switch tv.Kind() {
+	case reflect.Array, reflect.Slice:
+		l := tv.Len()
+		for i := 0; i < l; i++ {
+			v.validate("["+ToStr(i)+"]", tv.Index(i))
+		}
+		return v.getError()
+	}
+	return v.validate("", tv).getError()
 }
 
 // validate 验证执行体
-func (v *VMap) validate(tv reflect.Value) *VMap {
+func (v *VMap) validate(prefix string, tv reflect.Value) *VMap {
+	if tv.Type().Key().Kind() != reflect.String {
+		v.errBuf.WriteString(GetJoinFieldErr("", prefix, "map key must string"))
+		return v
+	}
+
 	if tv.Kind() != reflect.Map {
-		v.errBuf.WriteString(GetJoinFieldErr("", "", "val must map"))
+		v.errBuf.WriteString(GetJoinFieldErr("", prefix, "val must map"))
 		return v
 	}
 
@@ -93,10 +103,10 @@ func (v *VMap) validate(tv reflect.Value) *VMap {
 						continue
 					}
 					if cusMsg != "" {
-						v.errBuf.WriteString(GetJoinValidErrStr("", key, "", cusMsg))
+						v.errBuf.WriteString(GetJoinValidErrStr("", v.getKey(prefix, key), "", cusMsg))
 						continue
 					}
-					v.errBuf.WriteString(GetJoinValidErrStr("", key, "", ExplainEn, "it is", Required))
+					v.errBuf.WriteString(GetJoinValidErrStr("", v.getKey(prefix, key), "", ExplainEn, "it is", Required))
 				case Either, BothEq:
 					v.vc.initValid2FieldsMap(&name2Value{
 						validName:  validName,
@@ -105,7 +115,7 @@ func (v *VMap) validate(tv reflect.Value) *VMap {
 						reflectVal: reflect.ValueOf(val),
 					})
 				default:
-					v.errBuf.WriteString(GetJoinFieldErr("", key, "valid \""+validName+"\" is no support"))
+					v.errBuf.WriteString(GetJoinFieldErr("", v.getKey(prefix, key), "valid \""+validName+"\" is no support"))
 				}
 				continue
 			}
@@ -113,10 +123,21 @@ func (v *VMap) validate(tv reflect.Value) *VMap {
 			if val.IsZero() { // 空就直接跳过
 				continue
 			}
-			fn(v.errBuf, validName, "", key, val)
+			fn(v.errBuf, validName, "", v.getKey(prefix, key), val)
 		}
 	}
 	return v
+}
+
+// getKey 获取 key
+func (v *VMap) getKey(prefix, key string) string {
+	if prefix == "" && key == "" {
+		return ""
+	}
+	if key == "" {
+		return prefix + "map"
+	}
+	return prefix + "map[" + key + "]"
 }
 
 // getError 获取 err

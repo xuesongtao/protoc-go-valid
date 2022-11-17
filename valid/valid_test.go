@@ -202,7 +202,7 @@ func TestValidMap(t *testing.T) {
 		testMap := map[string]string{"name": "", "addr": "chendu"}
 		rm := NewRule().Set("name,addr", Required)
 		err := Map(testMap, rm)
-		sureMsg := `"name" input "", explain: it is required`
+		sureMsg := `"map[name]" input "", explain: it is required`
 		if err != nil && !equal(err.Error(), sureMsg) {
 			t.Error(err)
 		}
@@ -212,7 +212,17 @@ func TestValidMap(t *testing.T) {
 		testMap := map[string]int{"no1": 1, "no2": 2}
 		rm := NewRule().Set("no1", GenValidKV(VEq, "2", "no1必须等于1")).Set("no2", GenValidKV(VEq, "2", "no2必须等于2"))
 		err := Map(testMap, rm)
-		sureMsg := `"no1" input "1", 说明: no1必须等于1`
+		sureMsg := `"map[no1]" input "1", 说明: no1必须等于1`
+		if err != nil && !equal(err.Error(), sureMsg) {
+			t.Error(err)
+		}
+	})
+
+	t.Run("[]map[string]string", func(t *testing.T) {
+		testMap := []map[string]string{{"name": "", "addr": "chendu"}}
+		rm := NewRule().Set("name,addr", Required)
+		err := Map(testMap, rm)
+		sureMsg := `"[0]map[name]" input "", explain: it is required`
 		if err != nil && !equal(err.Error(), sureMsg) {
 			t.Error(err)
 		}
