@@ -9,19 +9,18 @@ import (
 	"time"
 )
 
+// err msg
 const (
-	// err msg 单位
 	strUnitStr      = "str-length"
 	numUnitStr      = "num-size"
 	sliceLenUnitStr = "slice-len"
 
-	// err msg 前缀
 	ExplainEn = "explain:"
 	ExplainZh = "说明:"
 )
 
+// 时间格式
 const (
-	// 时间格式
 	YearFmt int8 = 1 << iota
 	MonthFmt
 	DayFmt
@@ -64,10 +63,21 @@ const (
 	VIpv4       = "ipv4"       // ipv4
 	VIpv6       = "ipv6"       // ipv6
 	VUnique     = "unique"     // 唯一验证
+	VJson       = "json"       // json 格式验证
+	VPrefix     = "prefix"     // 包含前缀
+	VSuffix     = "suffix"     // 包含后缀
 )
 
+// CommonValidFn 通用验证函数, 主要用于回调
+// 注: 在写 errBuf 的时候建议用 GetJoinValidErrStr 包裹下, 这样产生的结果易读.
+//    否则需要再 errBuf.WriteString 最后要加上 ErrEndFlag 分割, 工具是通过 ErrEndFlag 进行分句
+type CommonValidFn func(errBuf *strings.Builder, validName, objName, fieldName string, tv reflect.Value)
+
+// Name2FnMap 自定义验证名对应自定义验证函数
+type Name2FnMap map[string]CommonValidFn
+
 // 验证函数
-var validName2FuncMap = map[string]CommonValidFn{
+var validName2FnMap = Name2FnMap{
 	Required:    nil,
 	Exist:       nil,
 	Either:      nil,
@@ -97,15 +107,20 @@ var validName2FuncMap = map[string]CommonValidFn{
 	VIpv4:       Ipv4,
 	VIpv6:       Ipv6,
 	VUnique:     Unique,
+	VJson:       Json,
+	VPrefix:     Prefix,
+	VSuffix:     Suffix,
 }
 
 // 对象
 var (
 	syncValidStructPool = sync.Pool{New: func() interface{} { return new(VStruct) }}
-	// 考虑到性能, 用 sync.Map 缓存(缺点: 内存释放不到)
 	// 如果需要释放内存可以通过调用 SetStructTypeCache, 如: SetStructTypeCache(NewLRU(2 << 8))
-	cacheStructType  CacheEr = new(sync.Map)
+	// 考虑到性能, 用 sync.Map 缓存(缺点: 内存释放不到)
+	// cacheStructType  CacheEr = new(sync.Map)
+	cacheStructType  CacheEr = NewLRU(lruSize)
 	syncValidVarPool         = sync.Pool{New: func() interface{} { return new(VVar) }}
+	syncBufPool              = sync.Pool{New: func() interface{} { return new(strings.Builder) }}
 	timeReflectType          = reflect.TypeOf(time.Time{})
 	once             sync.Once
 )
@@ -165,44 +180,57 @@ var (
 	uniqueErr = errors.New(defaultTargetTag + " \"unique\" is not ok, eg: " +
 		"type Test struct {\n" +
 		"    Hobby1 string `valid:\"unique\"`\n" + // 按 "," 进行分割对字符串进行判断是否唯一
-		"    Hobby2 []string `valid:\"ints\"`\n" + // 遍历切片中的元素是否唯一
-		"    Hobby3 []int `valid:\"ints\"`\n" + // 遍历切片中的元素是否唯一
+		"    Hobby2 []string `valid:\"unique\"`\n" + // 遍历切片中的元素是否唯一
 		"}")
 )
 
 // 正则
 var (
-	IncludeZhRe   = regexp.MustCompile("[\u4e00-\u9fa5]")         // 中文
-	PhoneRe       = regexp.MustCompile(`^1[3,4,5,6,7,8,9]\d{9}$`) // 手机号
-	Ipv4Re        = regexp.MustCompile(`^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)$`)
-	EmailRe       = regexp.MustCompile(`^\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$`)
-	IdCardRe      = regexp.MustCompile(`(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)`)
-	YearRe        = regexp.MustCompile(`^\d{4}$`)
-	Year2MonthRe  = regexp.MustCompile(`^\d{4}-\d{2}$`)
+	IncludeZhRe = regexp.MustCompile("[\u4e00-\u9fa5]")         // 中文
+	PhoneRe     = regexp.MustCompile(`^1[3,4,5,6,7,8,9]\d{9}$`) // 手机号
+	Ipv4Re      = regexp.MustCompile(`^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)$`)
+	EmailRe     = regexp.MustCompile(`^\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$`)
+	IdCardRe    = regexp.MustCompile(`(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)`)
+	IntRe       = regexp.MustCompile(`^\d+$`)
+	FloatRe     = regexp.MustCompile(`^\d+.\d+$`)
+
+	// Deprecated
+	YearRe = regexp.MustCompile(`^\d{4}$`)
+	// Deprecated
+	Year2MonthRe = regexp.MustCompile(`^\d{4}-\d{2}$`)
+	// Deprecated
 	Year2MonthRe2 = regexp.MustCompile(`^\d{4}/\d{2}$`)
-	DateRe        = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}$`)
-	DateRe2       = regexp.MustCompile(`^\d{4}/\d{2}/\d{2}$`)
-	DatetimeRe    = regexp.MustCompile(`^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$`)
-	DatetimeRe2   = regexp.MustCompile(`^\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}$`)
-	IntRe         = regexp.MustCompile(`^\d+$`)
-	FloatRe       = regexp.MustCompile(`^\d+.\d+$`)
+	// Deprecated
+	DateRe = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}$`)
+	// Deprecated
+	DateRe2 = regexp.MustCompile(`^\d{4}/\d{2}/\d{2}$`)
+	// Deprecated
+	DatetimeRe = regexp.MustCompile(`^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$`)
+	// Deprecated
+	DatetimeRe2 = regexp.MustCompile(`^\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}$`)
 )
 
-// CacheEr 缓存接口
-type CacheEr interface {
-	Load(key interface{}) (interface{}, bool)
-	Store(key, value interface{})
+// newStrBuf
+func newStrBuf(size ...int) *strings.Builder {
+	obj := syncBufPool.Get().(*strings.Builder)
+	if len(size) > 0 {
+		obj.Grow(size[0])
+	}
+	return obj
 }
 
-// CommonValidFn 通用验证函数, 主要用于回调
-// 注: 在写 errBuf 的时候建议用 GetJoinValidErrStr 包裹下, 这样产生的结果易读.
-//     否则需要再 errBuf.Writestring 最后要加上 ErrEndFlag 分割, 工具是通过 ErrEndFlag 进行分句
-type CommonValidFn func(errBuf *strings.Builder, validName, objName, fieldName string, tv reflect.Value)
+// putStrBuf
+func putStrBuf(buf *strings.Builder) {
+	if buf.Len() > 0 {
+		buf.Reset()
+	}
+	syncBufPool.Put(buf)
+}
 
 // SetCustomerValidFn 自定义验证函数
-// 此函数会修改全局变量, 会导致内存释放不了, 此推荐 *VStruct.SetValidFn
+// 用于全局添加验证方法, 如果不想定义全局, 可根据验证对象分别调用 SetValidFn, 如: *VStruct.SetValidFn
 func SetCustomerValidFn(validName string, fn CommonValidFn) {
-	validName2FuncMap[validName] = fn
+	validName2FnMap[validName] = fn
 }
 
 // SetStructTypeCache 设置 structType 缓存类型
@@ -218,7 +246,8 @@ func GetOnlyExplainErr(errMsg string) string {
 	if errMsg == "" {
 		return ""
 	}
-	buf := new(strings.Builder)
+	buf := newStrBuf(1 << 8)
+	defer putStrBuf(buf)
 	zhLen := len(ExplainZh)
 	enLen := len(ExplainEn)
 	endLen := len(ErrEndFlag)

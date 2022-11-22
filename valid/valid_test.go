@@ -20,41 +20,22 @@ func equal(dest, src interface{}) bool {
 }
 
 func TestTmp(t *testing.T) {
-}
 
-type TestOrder struct {
-	AppName string `alipay:"to=5~10" validate:"min=5,max=10"` // 应用名
-	// TotalFeeFloat        float64                 `alipay:"to=2~5" validate:"min:2|max:5"` // 订单总金额，单位为分，详见支付金额
-	TotalFeeFloat        float64                 `alipay:"to=2~5" validate:"min=2,max=5"` // 订单总金额，单位为分，详见支付金额
-	TestOrderDetailPtr   *TestOrderDetailPtr     `alipay:"required" validate:"required"`  // 商品详细描述
-	TestOrderDetailSlice []*TestOrderDetailSlice `alipay:"required" validate:"required"`  // 商品详细描述
-}
-
-type TestOrderDetailPtr struct {
-	TmpTest3 *TmpTest3 `alipay:"required" validate:"required"`
-	// GoodsName string    `alipay:"to=1~2" validate:"minLen:1|maxLen:2"`
-	GoodsName string `alipay:"to=1~2" validate:"min=1,max=2"`
-}
-
-type TestOrderDetailSlice struct {
-	TmpTest3   *TmpTest3 `alipay:"required" validate:"required"`
-	GoodsName  string    `alipay:"required" validate:"required"`
-	BuyerNames []string  `alipay:"required" validate:"required"`
-}
-
-type TmpTest3 struct {
-	Name string `alipay:"required" valid:"required" validate:"required"`
 }
 
 func TestValidManyStruct(t *testing.T) {
+	type Tmp1 struct {
+		Name string `valid:"required"`
+	}
+
 	type Tmp struct {
-		Ip string     `valid:"required,ipv4"`
-		T  []TmpTest3 `valid:"required"`
+		Ip string `valid:"required,ipv4"`
+		T  []Tmp1 `valid:"required"`
 	}
 
 	v := &Tmp{
 		Ip: "256.12.22.4",
-		T:  []TmpTest3{{Name: ""}},
+		T:  []Tmp1{{Name: ""}},
 	}
 	datas := append([]*Tmp{}, v, v)
 	sureMsg := `"*valid.Tmp[0].Ip" input "256.12.22.4", explain: it is not ipv4; "*valid.Tmp[0].T[0].Name" input "", explain: it is required; "*valid.Tmp[1].Ip" input "256.12.22.4", explain: it is not ipv4; "*valid.Tmp[1].T[0].Name" input "", explain: it is required`
@@ -64,21 +45,80 @@ func TestValidManyStruct(t *testing.T) {
 	}
 }
 
-func TestValidateForValid(t *testing.T) {
-	type Users struct {
-		Phone  string `valid:"required"`
-		Passwd string `valid:"required,to=6~20"`
-		Code   string `valid:"required,eq=6"`
+func TestValidStructMap(t *testing.T) {
+	t.Run("map value is struct", func(t *testing.T) {
+		type Tmp struct {
+			Name string `valid:"required"`
+			Age  int    `valid:"required,to=1~100"`
+		}
+		tmp := &Tmp{
+			Name: "测试json",
+			Age:  101,
+		}
+		a := map[string]*Tmp{
+			"1": tmp,
+		}
+		sureMsg := `"map[1].Age" input "101", explain: it is more than 100 num-size`
+		err := Struct(a)
+		if err != nil && !equal(err.Error(), sureMsg) {
+			t.Error(err)
+		}
+	})
+
+	t.Run("struct have map filed", func(t *testing.T) {
+		type Tmp struct {
+			Name     string          `valid:"required"`
+			Age      int             `valid:"required,to=1~100"`
+			Students map[string]*Tmp `valid:"exist"`
+		}
+		tmp := &Tmp{
+			Name: "测试json",
+			Age:  20,
+			Students: map[string]*Tmp{
+				"同学1": {
+					Name: "同学1",
+					Age:  -1,
+				},
+				"同学2": {
+					Name: "同学2",
+					Age:  10,
+				},
+				"同学3": {
+					Name: "同学3",
+					Age:  20,
+				},
+			},
+		}
+		sureMsg := `"Tmp.Students[同学1].Age" input "-1", explain: it is less than 1 num-size`
+		err := Struct(tmp)
+		if err != nil && !equal(err.Error(), sureMsg) {
+			t.Error(err)
+		}
+	})
+}
+
+func TestValidManyStructRule(t *testing.T) {
+	type Tmp1 struct {
+		Name string
 	}
 
-	users := &Users{
-		Phone:  "1326654487",
-		Passwd: "123",
-		Code:   "123456",
+	type Tmp struct {
+		Ip string
+		T  []Tmp1
 	}
-	err := Struct(users)
-	sureMsg := `"Users.Passwd" input "123", explain: it is less than 6 str-length`
-	if !equal(err.Error(), sureMsg) {
+	rmap := map[interface{}]RM{
+		// key 必须为 指针
+		&Tmp{}:  NewRule().Set("Ip,T", Required).Set("Ip", GenValidKV(VIp, "", "ip 格式不正确")),
+		&Tmp1{}: NewRule().Set("Name", GenValidKV(Required, "", "姓名必填")),
+	}
+	// t.Logf("rmap: %+v", rmap)
+	v := &Tmp{
+		Ip: "256.12.22.400",
+		T:  []Tmp1{{Name: ""}, {Name: "2"}},
+	}
+	sureMsg := `"Tmp.Ip" input "256.12.22.400", 说明: ip 格式不正确; "Tmp.T[0].Name" input "", 说明: 姓名必填`
+	err := NestedStructForRule(v, rmap)
+	if err != nil && !equal(err.Error(), sureMsg) {
 		t.Error(noEqErr)
 	}
 }
@@ -120,6 +160,48 @@ func TestGetJoinValidErrStr(t *testing.T) {
 	if !equal(res, `"User.Name" input "xue" len is less than 3;`) {
 		t.Error(noEqErr)
 	}
+}
+
+func TestValidMap(t *testing.T) {
+	t.Run("map[string]interface{}", func(t *testing.T) {
+		testMap := map[string]interface{}{"name": "", "addr": "chendu", "age": -1}
+		rm := NewRule().Set("name,addr", Required).Set("age", GenValidKV(VTo, "1~100", "年龄必须在1~100"))
+		err := Map(testMap, rm)
+		sureMsg := `"name" input "", explain: it is required; "age" input "-1", explain: 年龄必须在1~100`
+		if err != nil && !equal(err.Error(), sureMsg) {
+			t.Error(err)
+		}
+	})
+
+	t.Run("map[string]string", func(t *testing.T) {
+		testMap := map[string]string{"name": "", "addr": "chendu"}
+		rm := NewRule().Set("name,addr", Required)
+		err := Map(testMap, rm)
+		sureMsg := `"map[name]" input "", explain: it is required`
+		if err != nil && !equal(err.Error(), sureMsg) {
+			t.Error(err)
+		}
+	})
+
+	t.Run("map[string]int", func(t *testing.T) {
+		testMap := map[string]int{"no1": 1, "no2": 2}
+		rm := NewRule().Set("no1", GenValidKV(VEq, "2", "no1必须等于1")).Set("no2", GenValidKV(VEq, "2", "no2必须等于2"))
+		err := Map(testMap, rm)
+		sureMsg := `"map[no1]" input "1", 说明: no1必须等于1`
+		if err != nil && !equal(err.Error(), sureMsg) {
+			t.Error(err)
+		}
+	})
+
+	t.Run("[]map[string]string", func(t *testing.T) {
+		testMap := []map[string]string{{"name": "", "addr": "chendu"}, {"name": "test", "addr": ""}}
+		rm := NewRule().Set("name,addr", Required)
+		err := Map(testMap, rm)
+		sureMsg := `"[0]map[name]" input "", explain: it is required; "[1]map[addr]" input "", explain: it is required`
+		if err != nil && !equal(err.Error(), sureMsg) {
+			t.Error(err)
+		}
+	})
 }
 
 func TestValidVar(t *testing.T) {

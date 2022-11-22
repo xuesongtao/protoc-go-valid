@@ -12,48 +12,57 @@ const (
 
 // VVar 验证单字段
 type VVar struct {
-	errBuf  *strings.Builder
 	ruleObj RM
-	validFn map[string]CommonValidFn // 存放自定义的验证函数, 可以做到调用完就被清理
+	errBuf  *strings.Builder
+	vc      *validCommon
 }
 
 // NewVVar 单值校验
 func NewVVar() *VVar {
 	obj := syncValidVarPool.Get().(*VVar)
-	if obj.errBuf == nil {
-		obj.errBuf = new(strings.Builder)
-	}
-	// obj.errBuf.Grow(1 << 4)
+	obj.errBuf = newStrBuf()
+	obj.vc = new(validCommon)
 	obj.ruleObj = NewRule()
 	return obj
 }
 
 // free 释放
 func (v *VVar) free() {
-	v.errBuf.Reset()
+	putStrBuf(v.errBuf)
 	v.ruleObj = nil
-	v.validFn = nil
+	v.vc = nil
 	syncValidVarPool.Put(v)
 }
 
 // Valid 验证
-// 对切片/数组/单个[int 系列, float系列, bool系列, string系列]进行验证
+// 支持 单个 [int,float,bool,string] 验证
+// 支持 切片/数组 [int,float,bool,string] 验证(在使用时, 建议看下 README.md 中对应的验证名所验证的内容)
 func (v *VVar) Valid(src interface{}) error {
 	if src == nil {
 		return errors.New("src is nil")
 	}
 
-	reflectValue := reflect.ValueOf(src)
-	switch reflectValue.Kind() {
-	case reflect.Ptr:
-		if reflectValue.IsNil() {
-			return errors.New("src \"" + reflectValue.Type().String() + "\" is nil")
+	reflectValue := RemoveValuePtr(reflect.ValueOf(src))
+	ty := reflectValue.Type()
+	supportType := false
+
+again:
+	// 判断是否能进行验证
+	switch kind := ty.Kind(); kind {
+	case reflect.String:
+		supportType = true
+	case reflect.Slice, reflect.Array: // 再验证下里面的内容类型
+		ty = ty.Elem()
+		goto again
+	// case reflect.Struct: // 为了防止调用混乱, 这里不支持
+	// 	return Struct(src)
+	default:
+		if ReflectKindIsNum(kind, true) {
+			supportType = true
 		}
-		// case reflect.Slice, reflect.Array:
-		// 	for i := 0; i < reflectValue.Len(); i++ {
-		// 		v.validate(reflectValue.Index(i))
-		// 	}
-		// 	return v.getError()
+	}
+	if !supportType {
+		return errors.New("src no support")
 	}
 	return v.validate(reflectValue).getError()
 }
@@ -66,55 +75,20 @@ func (v *VVar) SetRules(rules ...string) *VVar {
 
 // SetValidFn 自定义设置验证函数
 func (v *VVar) SetValidFn(validName string, fn CommonValidFn) *VVar {
-	if v.validFn == nil {
-		v.validFn = make(map[string]CommonValidFn)
-	}
-	v.validFn[validName] = fn
+	v.vc.setValidFn(validName, fn)
 	return v
 }
 
 // getValidFn 获取验证函数
 func (v *VVar) getValidFn(validName string) (CommonValidFn, error) {
-	// 先从本地找, 如果本地没有就从全局里找
-	fn, ok := v.validFn[validName]
-	if ok {
-		return fn, nil
-	}
-
-	fn, ok = validName2FuncMap[validName]
-	if !ok {
-		return nil, errors.New("valid \"" + validName + "\" is not exist, You can call SetValidFn")
-	}
-	return fn, nil
+	return v.vc.getValidFn(validName)
 }
 
 // validate 验证执行体
-func (v *VVar) validate(value reflect.Value) *VVar {
-	supportType := false
-	tv := RemoveValuePtr(value)
-	ty := tv.Type()
-
-reValid:
-	// 判断是否能进行验证
-	switch ty.Kind() {
-	case reflect.String:
-		supportType = true
-	case reflect.Slice, reflect.Array: // 再验证下里面的内容类型
-		ty = ty.Elem()
-		goto reValid
-	default:
-		if ReflectKindIsNum(ty.Kind()) {
-			supportType = true
-		}
-	}
-	if !supportType {
-		v.errBuf.WriteString("src no support")
-		return v
-	}
-
+func (v *VVar) validate(tv reflect.Value) *VVar {
 	validNames := v.ruleObj.Get(validVarFieldName)
 	if validNames == "" {
-		v.errBuf.WriteString("you no set rule")
+		v.errBuf.WriteString(GetJoinFieldErr("", "", "have no set rule"))
 		return v
 	}
 
@@ -168,11 +142,9 @@ reValid:
 // getError 获取 err
 func (v *VVar) getError() error {
 	defer v.free()
-
 	if v.errBuf.Len() == 0 {
 		return nil
 	}
-
 	// 这里需要去掉最后一个 ErrEndFlag
 	return errors.New(strings.TrimSuffix(v.errBuf.String(), ErrEndFlag))
 }

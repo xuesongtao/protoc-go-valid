@@ -1,6 +1,7 @@
 package valid
 
 import (
+	"encoding/json"
 	"fmt"
 	"net"
 	"reflect"
@@ -8,6 +9,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"gitee.com/xuesongtao/protoc-go-valid/valid/internal"
 )
 
 // To 验证输入的大小区间, 注: 左右都为闭区间
@@ -689,4 +692,60 @@ func Unique(errBuf *strings.Builder, validName, objName, fieldName string, tv re
 		return
 	}
 	errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, inVal, ExplainEn, "they're not unique"))
+}
+
+// Json 验证是否为 json
+func Json(errBuf *strings.Builder, validName, objName, fieldName string, tv reflect.Value) {
+	if err := CheckFieldIsStr(objName, fieldName, tv); err != nil {
+		errBuf.WriteString(err.Error())
+		return
+	}
+	valStr := tv.String()
+	if json.Valid(internal.UnsafeStr2Bytes(valStr)) {
+		return
+	}
+	if len(valStr) > 2<<7 {
+		valStr = "more than 256 byte(it is ignore)"
+	}
+	valStr = StrEscape(valStr)
+	_, _, cusMsg := ParseValidNameKV(validName)
+	if cusMsg != "" {
+		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, cusMsg))
+		return
+	}
+	errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, ExplainEn, "it is not float"))
+}
+
+// Prefix 验证字符串包含前缀
+func Prefix(errBuf *strings.Builder, validName, objName, fieldName string, tv reflect.Value) {
+	if err := CheckFieldIsStr(objName, fieldName, tv); err != nil {
+		errBuf.WriteString(err.Error())
+		return
+	}
+	_, prefix, cusMsg := ParseValidNameKV(validName)
+	if strings.HasPrefix(tv.String(), prefix) {
+		return
+	}
+	if cusMsg != "" {
+		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, tv.String(), cusMsg))
+		return
+	}
+	errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, tv.String(), ExplainEn, "prefix is not ok"))
+}
+
+// Suffix 验证字符串包含后缀
+func Suffix(errBuf *strings.Builder, validName, objName, fieldName string, tv reflect.Value) {
+	if err := CheckFieldIsStr(objName, fieldName, tv); err != nil {
+		errBuf.WriteString(err.Error())
+		return
+	}
+	_, suffix, cusMsg := ParseValidNameKV(validName)
+	if strings.HasSuffix(tv.String(), suffix) {
+		return
+	}
+	if cusMsg != "" {
+		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, tv.String(), cusMsg))
+		return
+	}
+	errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, tv.String(), ExplainEn, "suffix is not ok"))
 }

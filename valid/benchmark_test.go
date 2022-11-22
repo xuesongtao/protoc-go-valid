@@ -1,21 +1,56 @@
 package valid
 
 import (
+	"fmt"
 	"regexp"
 	"strings"
 	"testing"
 )
 
+type TestOrder struct {
+	AppName string `alipay:"to=5~10" validate:"min=5,max=10"` // 应用名
+	// TotalFeeFloat        float64                 `alipay:"to=2~5" validate:"min:2|max:5"` // 订单总金额，单位为分，详见支付金额
+	TotalFeeFloat        float64                 `alipay:"to=2~5" validate:"min=2,max=5"` // 订单总金额，单位为分，详见支付金额
+	TestOrderDetailPtr   *TestOrderDetailPtr     `alipay:"required" validate:"required"`  // 商品详细描述
+	TestOrderDetailSlice []*TestOrderDetailSlice `alipay:"required" validate:"required"`  // 商品详细描述
+}
+
+type TestOrderDetailPtr struct {
+	TmpTest3  *TmpTest3 `alipay:"required" validate:"required"`
+	GoodsName string    `alipay:"to=1~2" validate:"min=1,max=2"`
+}
+
+type TestOrderDetailSlice struct {
+	TmpTest3   *TmpTest3 `alipay:"required" validate:"required"`
+	GoodsName  string    `alipay:"required" validate:"required"`
+	BuyerNames []string  `alipay:"required" validate:"required"`
+}
+
+type TmpTest3 struct {
+	Name string `alipay:"required" valid:"required" validate:"required"`
+}
+
 func BenchmarkStringSplitValid(b *testing.B) {
+	var s []string
 	for i := 0; i < b.N; i++ {
-		_ = ValidNamesSplit("required,phone,test")
+		s = ValidNamesSplit("required,phone,test")
 	}
+	_ = s
+}
+func BenchmarkStringSplitValid1(b *testing.B) {
+	var s []string
+	for i := 0; i < b.N; i++ {
+		s = ValidNamesSplit("required,phone,test|'test'")
+	}
+	_ = s
 }
 
 func BenchmarkStringSplit(b *testing.B) {
+	var s []string
 	for i := 0; i < b.N; i++ {
-		_ = strings.Split("required,phone,test", ",")
+		s = strings.Split("required,phone,test", ",")
 	}
+	_ = s
 }
 
 func BenchmarkReNoComplice(b *testing.B) {
@@ -30,6 +65,21 @@ func BenchmarkReComplice(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		_ = IntRe.MatchString(a)
 	}
+}
+
+func BenchmarkStrJoin1(b *testing.B) {
+	s := ""
+	for i := 0; i < 100; i++ {
+		s += fmt.Sprint(i) + ","
+	}
+	_ = s
+}
+func BenchmarkStrJoin2(b *testing.B) {
+	buf := newStrBuf()
+	for i := 0; i < 100; i++ {
+		buf.WriteString(fmt.Sprint(i) + ",")
+	}
+	_ = buf.String()
 }
 
 // go test -benchmem -run=^$ -bench ^BenchmarkValidateForValid gitee.com/xuesongtao/protoc-go-valid/valid -v -count=5
@@ -49,10 +99,10 @@ func BenchmarkValidateForValid(b *testing.B) {
 	}
 
 	for i := 0; i < b.N; i++ {
-		_ = ValidateStruct(users)
+		_ = Struct(users)
 	}
 
-	// BenchmarkValidateForValid-8              1544240               771.6 ns/op           416 B/op          9 allocs/op
+	// BenchmarkValidateForValid-8              1614230               744.7 ns/op           416 B/op          9 allocs/op
 	// BenchmarkValidateForValid-8              1617544               739.9 ns/op           416 B/op          9 allocs/op
 	// BenchmarkValidateForValid-8              1618682               740.3 ns/op           416 B/op          9 allocs/op
 	// BenchmarkValidateForValid-8              1621915               739.2 ns/op           416 B/op          9 allocs/op
@@ -84,14 +134,14 @@ func BenchmarkComplexValid(b *testing.B) {
 		TestOrderDetailSlice: testOrderDetails,
 	}
 	for i := 0; i < b.N; i++ {
-		_ = ValidateStruct(&u, "alipay")
+		_ = StructForFn(&u, nil, "alipay")
 	}
 
-	// BenchmarkComplexValid-8           189698              6276 ns/op            4404 B/op         78 allocs/op
-	// BenchmarkComplexValid-8           187850              6382 ns/op            4404 B/op         78 allocs/op
-	// BenchmarkComplexValid-8           185665              6312 ns/op            4404 B/op         78 allocs/op
-	// BenchmarkComplexValid-8           188355              6312 ns/op            4404 B/op         78 allocs/op
-	// BenchmarkComplexValid-8           187948              6263 ns/op            4404 B/op         78 allocs/op
+	// BenchmarkComplexValid-8           209080              5954 ns/op            3977 B/op         66 allocs/op
+	// BenchmarkComplexValid-8           205692              5717 ns/op            3977 B/op         66 allocs/op
+	// BenchmarkComplexValid-8           205198              5700 ns/op            3977 B/op         66 allocs/op
+	// BenchmarkComplexValid-8           206556              5813 ns/op            3977 B/op         66 allocs/op
+	// BenchmarkComplexValid-8           205345              5756 ns/op            3977 B/op         66 allocs/op
 }
 
 func BenchmarkComplexValidIf(b *testing.B) {

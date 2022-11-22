@@ -41,12 +41,12 @@ func TestStack(t *testing.T) {
 }
 
 func TestByte2Str(t *testing.T) {
-	t.Log(UnsafeBytesToStr([]byte("hello 你好 a")))
+	t.Log(UnsafeBytes2Str([]byte("hello 你好 a")))
 }
 
 func BenchmarkByte2Str1(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		_ = UnsafeBytesToStr([]byte("hello 你好"))
+		_ = UnsafeBytes2Str([]byte("hello 你好"))
 	}
 }
 

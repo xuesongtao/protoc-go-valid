@@ -9,30 +9,22 @@ import (
 	"gitee.com/xuesongtao/protoc-go-valid/valid/internal"
 )
 
-// name2Value
-type name2Value struct {
-	objName    string
-	fieldName  string
-	cusMsg     string
-	val        string
-	reflectVal reflect.Value
-}
-
 // ParseValidNameKV 解析 validName 中的 key, value 和 cusMsg,
 // 如: "required|必填", key 为 "required", value 为 "", cusMsg 为 "必填"
 // 如: "to=1~2|大于等于 1 且小于等于 2", key 为 "to", value 为 "1~2", cusMsg 为 "大于等于 1 且小于等于 2"
 func ParseValidNameKV(validName string) (key, value, cusMsg string) {
+	tmp := validName
 	// 因为 validName 中的 k, v 通过 = 连接
-	splitIndex := strings.Index(validName, "=")
+	splitIndex := strings.Index(tmp, "=")
 
 	// 如果没有则代表 validName 不为 k=v 类型, 只有一个字段如: required
 	if splitIndex == -1 {
 		// 需要确定下是否包含自定义 msg, 格式为: validName|xxx, 如: required|必填
-		key = validName
-		cusMsgIndex := strings.Index(validName, "|")
-		if cusMsgIndex != -1 && len(validName)-1 > cusMsgIndex+1 {
-			key = validName[:cusMsgIndex]
-			cusMsg = validName[cusMsgIndex+1:]
+		key = tmp
+		cusMsgIndex := strings.Index(tmp, "|")
+		if cusMsgIndex != -1 && len(tmp)-1 > cusMsgIndex+1 {
+			key = tmp[:cusMsgIndex]
+			cusMsg = tmp[cusMsgIndex+1:]
 			// 根据如果说明有中文就加前缀为: 说明; 否则为 Explain
 			if match := IncludeZhRe.MatchString(cusMsg); match {
 				cusMsg = ExplainZh + " " + cusMsg
@@ -43,8 +35,8 @@ func ParseValidNameKV(validName string) (key, value, cusMsg string) {
 		return
 	}
 
-	key = validName[:splitIndex]
-	value = validName[splitIndex+1:]
+	key = tmp[:splitIndex]
+	value = tmp[splitIndex+1:]
 	// 需要确定下是否包含自定义 msg, 格式为: validName|xxx, 如: "to=1~2|大于等于 1 且小于等于 2"
 	cusMsgIndex := strings.Index(value, "|")
 	if cusMsgIndex != -1 && len(value)-1 > cusMsgIndex+1 {
@@ -62,22 +54,25 @@ func ParseValidNameKV(validName string) (key, value, cusMsg string) {
 
 // GetJoinFieldErr 拼接字段错误
 func GetJoinFieldErr(objName, fieldName string, err interface{}) string {
-	res := ""
+	res := newStrBuf(1 << 4)
+	defer putStrBuf(res)
 	if objName != "" && fieldName != "" {
-		res += "\"" + objName + "." + fieldName + "\" "
+		res.WriteString("\"" + objName + "." + fieldName + "\" ")
 	}
 	switch v := err.(type) {
 	case string:
-		res += v
+		res.WriteString(v)
 	case error:
-		res += v.Error()
+		res.WriteString(v.Error())
 	}
-	return res + ErrEndFlag
+	res.WriteString(ErrEndFlag)
+	return res.String()
 }
 
 // GetJoinValidErrStr 获取拼接验证的错误消息, 内容直接通过空格隔开, 最后会拼接 ErrEndFlag
 func GetJoinValidErrStr(objName, fieldName, inputVal string, others ...string) string {
-	res := new(strings.Builder)
+	res := newStrBuf(1 << 8)
+	defer putStrBuf(res)
 	if objName != "" && fieldName != "" {
 		res.WriteString("\"" + objName + "." + fieldName + "\" ")
 	} else if objName == "" && fieldName != "" {
@@ -116,12 +111,20 @@ func CheckFieldIsStr(objName, fieldName string, tv reflect.Value) (err error) {
 }
 
 // ReflectKindIsNum 值是否为数字
-func ReflectKindIsNum(kind reflect.Kind) (is bool) {
+func ReflectKindIsNum(kind reflect.Kind, isCanFloat ...bool) (is bool) {
+	defaultIsCanFloat := false
+	if len(isCanFloat) > 0 {
+		defaultIsCanFloat = isCanFloat[0]
+	}
 	switch kind {
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		is = true
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
 		is = true
+	case reflect.Float32, reflect.Float64:
+		if defaultIsCanFloat {
+			is = true
+		}
 	}
 	return
 }
@@ -291,6 +294,10 @@ func ToStr(src interface{}) string {
 	}
 
 	switch value := src.(type) {
+	case string:
+		return value
+	case []byte:
+		return string(value)
 	case int:
 		return strconv.Itoa(value)
 	case int8:
@@ -317,10 +324,6 @@ func ToStr(src interface{}) string {
 		return strconv.FormatFloat(value, 'f', -1, 64)
 	case bool:
 		return strconv.FormatBool(value)
-	case string:
-		return value
-	case []byte:
-		return string(value)
 	default:
 		return fmt.Sprintf("%v", value)
 	}
@@ -374,13 +377,59 @@ func ValidNamesSplit(s string, sep ...byte) []string {
 		}
 
 		if v == defaultSep && stack.IsEmpty() {
+			// res = append(res, internal.UnsafeBytes2Str(tmp)) // 因为指针, 这样转有问题
 			res = append(res, string(tmp))
 			tmp = tmp[:0]
 		}
 	}
 
 	if len(tmp) > 0 {
-		res = append(res, string(tmp))
+		res = append(res, internal.UnsafeBytes2Str(tmp))
 	}
 	return res
+}
+
+// StrEscape 转义
+func StrEscape(val string) string {
+	pos := 0
+	vLen := len(val)
+
+	buf := make([]byte, vLen*2)
+	for i := 0; i < vLen; i++ {
+		v := val[i]
+		switch v {
+		case '\'':
+			buf[pos] = '\\'
+			buf[pos+1] = '\''
+			pos += 2
+		case '"':
+			buf[pos] = '\\'
+			buf[pos+1] = '"'
+			pos += 2
+		case '\x00':
+			buf[pos] = '\\'
+			buf[pos+1] = '0'
+			pos += 2
+		case '\n':
+			buf[pos] = '\\'
+			buf[pos+1] = 'n'
+			pos += 2
+		case '\r':
+			buf[pos] = '\\'
+			buf[pos+1] = 'r'
+			pos += 2
+		case '\x1a':
+			buf[pos] = '\\'
+			buf[pos+1] = 'Z'
+			pos += 2
+		case '\\':
+			buf[pos] = '\\'
+			buf[pos+1] = '\\'
+			pos += 2
+		default:
+			buf[pos] = v
+			pos++
+		}
+	}
+	return internal.UnsafeBytes2Str(buf[:pos])
 }

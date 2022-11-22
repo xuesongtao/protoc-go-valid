@@ -17,7 +17,7 @@ type dumpStruct struct {
 // NewDumpStruct
 func NewDumpStruct() *dumpStruct {
 	return &dumpStruct{
-		buf: &strings.Builder{},
+		buf: newStrBuf(),
 	}
 }
 
@@ -70,7 +70,7 @@ func (d *dumpStruct) HandleDumpStruct(v reflect.Value, isSlice ...bool) *dumpStr
 
 // Get 获取打印的结果
 func (d *dumpStruct) Get() string {
-	defer d.buf.Reset()
+	defer putStrBuf(d.buf)
 	return d.buf.String()
 }
 
@@ -156,7 +156,8 @@ func GetDumpStructStr(v interface{}) string {
 
 // GetDumpStructStrForJson 先 json 序列化, 再获取
 func GetDumpStructStrForJson(v interface{}) string {
-	buf := new(strings.Builder)
+	buf := newStrBuf()
+	defer putStrBuf(buf)
 	enc := json.NewEncoder(buf)
 	enc.SetEscapeHTML(false)
 	_ = enc.Encode(v)

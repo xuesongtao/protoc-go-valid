@@ -176,12 +176,12 @@ func ExampleDate() {
 	// "Tmp.Datetime" input "2021-01-11 23:22", 说明: 应该为 xxxx-xx-xx xx:xx:xx 的时间格式
 }
 
-func ExampleDatetime()  {
+func ExampleDatetime() {
 	type Tmp struct {
-		Datetime1   string `valid:"required,datetime|应该为 xxxx-xx-xx xx:xx:xx 的时间格式"`
-		Datetime2   string `valid:"required,datetime='/'|应该为 xxxx/xx/xx xx:xx:xx 的时间格式"`
-		Datetime3   string `valid:"required,datetime='/, ,/'|应该为 xxxx/xx/xx xx/xx/xx 的时间格式"`
-		Datetime4   string `valid:"required,datetime=', ,'|应该为 xxxxxxxx xxxxxx 的时间格式"`
+		Datetime1 string `valid:"required,datetime|应该为 xxxx-xx-xx xx:xx:xx 的时间格式"`
+		Datetime2 string `valid:"required,datetime='/'|应该为 xxxx/xx/xx xx:xx:xx 的时间格式"`
+		Datetime3 string `valid:"required,datetime='/, ,/'|应该为 xxxx/xx/xx xx/xx/xx 的时间格式"`
+		Datetime4 string `valid:"required,datetime=', ,'|应该为 xxxxxxxx xxxxxx 的时间格式"`
 	}
 	v := &Tmp{
 		Datetime1: "2022/11-09 10:05:00",
@@ -395,6 +395,116 @@ func ExampleUnique() {
 	// "Tmp.Name" input "测试", 说明: 姓名必须为英文; "Tmp.Hobby" input "打篮球,踢足球,打篮球", 说明: 爱好唯一; "Tmp.LikeNum" input "[1,2,3,1]", 说明: 幸运数唯一
 }
 
+func ExampleJson() {
+	type Tmp struct {
+		Name  string `valid:"required"`
+		Json1 string `valid:"required,json|json格式不正确"`
+		Json2 string `valid:"required,json"`
+	}
+	tmp := &Tmp{
+		Name:  "测试json",
+		Json1: `[{"id":1,"name":"test","age":10,"cls_name":"初一","addr":"四川成都"},{"id":2,"name":"test","age":10,"cls_name":"初二","addr":"四川成都"}]`,
+		Json2: `{"name":"A-Tao","hobby":["play basketball","write golang code"],"class_name":"community university","addr":"ChengDu"}`,
+	}
+	err := Struct(tmp)
+	fmt.Println(err)
+
+	// Output:
+	// <nil>
+}
+
+func ExamplePrefix() {
+	type Tmp struct {
+		Name string `valid:"required,prefix=test|前缀必须为test"`
+	}
+	tmp := &Tmp{
+		Name: "ceshi",
+	}
+	err := Struct(tmp)
+	fmt.Println(err)
+
+	// Output:
+	// "Tmp.Name" input "ceshi", 说明: 前缀必须为test
+}
+
+func ExampleSuffix() {
+	type Tmp struct {
+		Name string `valid:"required,suffix=test|后缀必须为test"`
+	}
+	tmp := &Tmp{
+		Name: "mytest",
+	}
+	err := Struct(tmp)
+	fmt.Println(err)
+
+	// Output:
+	// <nil>
+}
+
+func ExampleStructForFns() {
+	type Tmp struct {
+		Name string
+		Addr string
+	}
+
+	isLower := func(errBuf *strings.Builder, validName, objName, fieldName string, tv reflect.Value) {
+		if err := CheckFieldIsStr(objName, fieldName, tv); err != nil {
+			errBuf.WriteString(err.Error())
+			return
+		}
+		if strings.ToLower(tv.String()) != tv.String() {
+			errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, tv.String(), ExplainEn, "it is not lower"))
+		}
+	}
+
+	isZh := func(errBuf *strings.Builder, validName, objName, fieldName string, tv reflect.Value) {
+		if err := CheckFieldIsStr(objName, fieldName, tv); err != nil {
+			errBuf.WriteString(err.Error())
+			return
+		}
+		if match, _ := regexp.MatchString("^[\u4e00-\u9fa5]+$", tv.String()); !match {
+			errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, tv.String(), ExplainEn, "it should is zh"))
+		}
+	}
+	fnMap := Name2FnMap{"islower": isLower, "iszh": isZh}
+	rm := RM{"Name": "islower", "Addr": "iszh"}
+
+	v := &Tmp{
+		Name: "Test",
+		Addr: "四川",
+	}
+	err := StructForFns(v, rm, fnMap)
+	fmt.Println(err)
+
+	// Output:
+	// "Tmp.Name" input "Test", explain: it is not lower
+}
+
+func ExampleNestedStructForRule() {
+	type Tmp1 struct {
+		Name string
+	}
+
+	type Tmp struct {
+		Ip string
+		T  []Tmp1
+	}
+	rmap := map[interface{}]RM{
+		// key 必须为 指针
+		&Tmp{}:  NewRule().Set("Ip,T", Required).Set("Ip", GenValidKV(VIp, "", "ip 格式不正确")),
+		&Tmp1{}: NewRule().Set("Name", GenValidKV(Required, "", "姓名必填")),
+	}
+	v := &Tmp{
+		Ip: "256.12.22.400",
+		T:  []Tmp1{{Name: ""}, {Name: "2"}},
+	}
+	err := NestedStructForRule(v, rmap)
+	fmt.Println(err)
+
+	// Output:
+	// "Tmp.Ip" input "256.12.22.400", 说明: ip 格式不正确; "Tmp.T[0].Name" input "", 说明: 姓名必填
+}
+
 func ExampleJoinTag2Val() {
 	val := JoinTag2Val(VIn, "1/2/3", "必须在 1,2,3 之中")
 	fmt.Println(val)
@@ -436,7 +546,6 @@ func ExampleSetCustomerValidFn() {
 		}
 	}
 
-	// 弃用
 	SetCustomerValidFn("num", isNumFn)
 	v := Tmp{Name: "12", Age: "1ha"}
 	fmt.Println(Struct(&v))
@@ -460,6 +569,7 @@ func ExampleValidStructForMyValidFn() {
 	}
 
 	v := Tmp{Name: "12", Age: "1ha"}
+
 	fmt.Println(ValidStructForMyValidFn(v, "num", isNumFn))
 
 	// Output:
