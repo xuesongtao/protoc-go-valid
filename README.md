@@ -69,7 +69,7 @@ protoFileDirName="test" # proto 存放的目录
 
 ##### 4.1 介绍
 
-* 支持对 **一个或多个struct**, **会一次性根据对 `struct` 设置的规则进行验证(包含嵌套验证), 将最终的所有错误都返回**
+* 支持对 **一个/多个struct/map类型struct**, **会一次性根据对 `struct` 设置的规则进行验证(包含嵌套验证), 将最终的所有错误都返回**
 * 支持对 **单个变量** 的验证, 变量可以为切片/数组/单个[int,float,bool,string]进行验证
 * 支持对 **query url** 的验证
 * 支持对 **map[string]interface{}** 的验证
