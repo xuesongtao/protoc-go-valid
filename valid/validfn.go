@@ -416,7 +416,7 @@ func Year2Month(errBuf *strings.Builder, validName, objName, fieldName string, t
 	defaultDateSplit := "-" // 默认时间拼接符号
 	_, val, cusMsg := ParseValidNameKV(validName)
 	if val != "" {
-		defaultDateSplit = val
+		defaultDateSplit = strings.Trim(val, "'")
 	}
 	_, err := time.Parse(GetTimeFmt(YearFmt|MonthFmt, defaultDateSplit), tv.String())
 	if err == nil {
@@ -440,7 +440,7 @@ func Date(errBuf *strings.Builder, validName, objName, fieldName string, tv refl
 	defaultDateSplit := "-" // 默认时间拼接符号
 	_, val, cusMsg := ParseValidNameKV(validName)
 	if val != "" {
-		defaultDateSplit = val
+		defaultDateSplit = strings.Trim(val, "'")
 	}
 	_, err := time.Parse(GetTimeFmt(DateFmt, defaultDateSplit), tv.String())
 	if err == nil {
