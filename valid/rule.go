@@ -60,6 +60,7 @@ func GenValidKV(key string, values ...string) string {
 	if values[0] != "" {
 		needAddEqual := values[0][0] != '=' // 判断第一个值得首字符是否为 "="
 
+		// 将常用的进行处理, 如果内容缺少可以参考 README.md 进行添加
 		// 处理 val 前缀
 		switch key {
 		case Either, BothEq, VTo, VGe, VLe, VOTo, VGt, VLt, VEq, VNoEq:

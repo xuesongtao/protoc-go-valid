@@ -20,7 +20,6 @@ func equal(dest, src interface{}) bool {
 }
 
 func TestTmp(t *testing.T) {
-
 }
 
 func TestValidManyStruct(t *testing.T) {

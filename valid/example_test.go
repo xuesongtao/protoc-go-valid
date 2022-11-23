@@ -167,9 +167,10 @@ func ExampleDate() {
 		Year       string `valid:"year"`
 		Year2Month string `valid:"year2month=/"`
 		Date       string `valid:"date=/"`
+		Date2       string `valid:"date=''"`
 		Datetime   string `valid:"datetime|应该为 xxxx-xx-xx xx:xx:xx 的时间格式"`
 	}
-	v := &Tmp{Year: "2001", Year2Month: "2000/01", Date: "2021/01/22", Datetime: "2021-01-11 23:22"}
+	v := &Tmp{Year: "2001", Year2Month: "2000/01", Date: "2021/01/22", Date2: "20210122", Datetime: "2021-01-11 23:22"}
 	fmt.Println(Struct(v))
 
 	// Output:
@@ -182,12 +183,14 @@ func ExampleDatetime() {
 		Datetime2 string `valid:"required,datetime='/'|应该为 xxxx/xx/xx xx:xx:xx 的时间格式"`
 		Datetime3 string `valid:"required,datetime='/, ,/'|应该为 xxxx/xx/xx xx/xx/xx 的时间格式"`
 		Datetime4 string `valid:"required,datetime=', ,'|应该为 xxxxxxxx xxxxxx 的时间格式"`
+		Datetime5 string `valid:"required,datetime=',,'|应该为 xxxxxxxxxxxxxx 的时间格式"`
 	}
 	v := &Tmp{
 		Datetime1: "2022/11-09 10:05:00",
 		Datetime2: "2022/11/09 10:05:00",
 		Datetime3: "2022/11/09 10/05/00",
 		Datetime4: "20221109 100500",
+		Datetime5: "20221109100500",
 	}
 	fmt.Println(Struct(v))
 
