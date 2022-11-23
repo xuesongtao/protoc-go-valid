@@ -22,7 +22,8 @@ func equal(dest, src interface{}) bool {
 }
 
 func TestTmp(t *testing.T) {
-	
+	t.Log(GetTimeFmt(DateTimeFmt))
+	t.Log(GetTimeFmt(DateFmt))
 }
 
 func TestValidManyStruct(t *testing.T) {
