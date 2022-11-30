@@ -713,7 +713,7 @@ func Json(errBuf *strings.Builder, validName, objName, fieldName string, tv refl
 		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, cusMsg))
 		return
 	}
-	errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, ExplainEn, "it is not float"))
+	errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, ExplainEn, "it is not json"))
 }
 
 // Prefix 验证字符串包含前缀
