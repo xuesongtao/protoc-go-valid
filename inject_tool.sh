@@ -12,10 +12,10 @@ function checkIsOk() {
     # $1 操作名
 
     if [[ $? > 0 ]]; then
-        echo -e "\"${1}\" is \033[31mFailed\e[0m"
+        echo -e "\"${1}\" is \033[1;31mFailed\033[0m"
         exit 1
     fi
-    echo -e "\"${1}\" is \033[32mSuccess\e[0m"
+    echo -e "\"${1}\" is \033[1;32mSuccess\033[0m"
 }
 
 function main() {

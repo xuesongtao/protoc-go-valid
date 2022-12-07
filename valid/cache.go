@@ -39,8 +39,7 @@ func (l *LRUCache) Store(key, value interface{}) {
 	l.nodeMap[key] = head
 	// 判断是否已满, 满了就删除最后一个
 	if l.list.Len() > l.maxSize {
-		tail := l.list.Back()
-		delete(l.nodeMap, l.list.Remove(tail))
+		delete(l.nodeMap, l.list.Remove(l.list.Back()))
 		l.delMapCount++
 
 		// 重建 map
@@ -56,13 +55,14 @@ func (l *LRUCache) Store(key, value interface{}) {
 }
 
 func (l *LRUCache) Load(key interface{}) (data interface{}, ok bool) {
-	l.rwMu.RLock()
-	defer l.rwMu.RUnlock()
+	l.rwMu.Lock()
+	defer l.rwMu.Unlock()
 	node, ok := l.nodeMap[key]
 	if !ok {
 		return
 	}
 	data = node.Value
+	l.list.MoveToFront(node)
 	return
 }
 

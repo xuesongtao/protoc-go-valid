@@ -30,10 +30,10 @@ var (
 	levelColor = map[int]string{
 		-1: "\033[0m", // 重置
 		// LevelDebug: "DEBU",
-		LevelInfo:  "\033[32m",   // 绿色
-		LevelWarn:  "\033[33m",   // 黄色
-		LevelError: "\033[31m",   // 红色
-		LevelPanic: "\033[35m",   // 紫红色
+		LevelInfo:  "\033[1;32m",   // 绿色
+		LevelWarn:  "\033[1;33m",   // 黄色
+		LevelError: "\033[1;31m",   // 红色
+		LevelPanic: "\033[1;35m",   // 紫红色
 		LevelFatal: "\033[1;35m", // 加粗紫红色
 	}
 )
