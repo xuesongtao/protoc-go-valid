@@ -58,7 +58,7 @@ func TestLRU(t *testing.T) {
 		}(i)
 	}
 	wg.Wait()
-	// fmt.Println(obj.Dump())
+	fmt.Println(obj.Dump())
 	if obj.Len() != lruSize {
 		t.Error("size is not ok")
 		return
