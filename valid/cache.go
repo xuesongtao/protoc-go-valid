@@ -20,7 +20,7 @@ type LRUCache struct {
 func NewLRU(max int) *LRUCache {
 	return &LRUCache{
 		maxSize: max,
-		nodeMap: make(map[interface{}]*list.Element),
+		nodeMap: make(map[interface{}]*list.Element, max),
 		list:    list.New(),
 	}
 }
