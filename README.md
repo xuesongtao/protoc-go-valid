@@ -2,7 +2,7 @@
 
 [![OSCS Status](https://www.oscs1024.com/platform/badge/xuesongtao/protoc-go-valid.svg?size=small)](https://www.oscs1024.com/project/xuesongtao/protoc-go-valid?ref=badge_small)
 
-#### 项目背景
+#### 🔥项目背景🔥
 
 * 1. 在 protobuf 方面验证器常用的为 `go-proto-validators` 验证器, 使用方面个人认为较为繁琐，代码量比较多, 使用如下:  
 
@@ -19,7 +19,7 @@ message InnerMessage {
 }
 ```
 
-* 2. 本验证器, 相同功能使用如下:  
+* 2. 本验证器, ✨相同功能代码量少, 易自定义错误信息✨使用如下:  
 
 ```proto
 syntax = "proto3";
@@ -27,9 +27,9 @@ package examples;
 
 message InnerMessage {
     // some_integer can only be in range (0, 100).
-    int32 some_integer = 1; // @tag oto=0~100
+    int32 some_integer = 1; // @tag oto=0~100|应该在0~100
     // some_float can only be in range (0;1).
-    double some_float = 2; // @tag oto=0~1
+    double some_float = 2; // @tag oto=0~1|应该在0~1
 }
 ```
 
@@ -168,4 +168,4 @@ fmt.Println(ValidateStruct(m))
 
 #### 最后
 
-* 欢迎大佬们指正, 同时也希望大佬给 **star**，[to gitee](https://gitee.com/xuesongtao/protoc-go-valid)
+* 欢迎大佬们指正, 同时也希望大佬给 ❤️，[to gitee](https://gitee.com/xuesongtao/protoc-go-valid)
