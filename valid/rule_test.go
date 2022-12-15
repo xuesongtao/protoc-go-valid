@@ -116,7 +116,7 @@ func TestGenValidKV(t *testing.T) {
 		t.Error(noEqErr)
 	}
 
-	if !equal(GenValidKV(VRe, "[0-9]+", "必须为数字"), VRe+"='[0-9]+'|必须为数字") {
+	if !equal(GenValidKV(VRe, "'[0-9]+'", "必须为数字"), VRe+"='[0-9]+'|必须为数字") {
 		t.Error(noEqErr)
 	}
 }
