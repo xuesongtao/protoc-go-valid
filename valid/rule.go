@@ -46,7 +46,7 @@ func JoinTag2Val(key string, values ...string) string {
 // 如1.: GenValidKV(VTo, "1~10", "需要在 1-10 的区间")
 // => to=1~10|需要在 1-10 的区间
 //
-// 如2: GenValidKV(VRe, "\\d+", "必须为纯数字")
+// 如2: GenValidKV(VRe, "'\\d+'", "必须为纯数字")
 // => re='\\d+'|必须为纯数字
 func GenValidKV(key string, values ...string) string {
 	l := len(values)
@@ -56,38 +56,27 @@ func GenValidKV(key string, values ...string) string {
 
 	buf := newStrBuf()
 	defer putStrBuf(buf)
+	buf.Grow(1 << 4)
 	buf.WriteString(key)
 	if values[0] != "" {
-		needAddEqual := values[0][0] != '=' // 判断第一个值得首字符是否为 "="
-
-		// 将常用的进行处理, 如果内容缺少可以参考 README.md 进行添加
-		// 处理 val 前缀
-		switch key {
-		case Either, BothEq, VTo, VGe, VLe, VOTo, VGt, VLt, VEq, VNoEq:
-			if needAddEqual {
-				buf.WriteByte('=')
-			}
-		case VIn, VInclude:
-			if needAddEqual {
-				buf.WriteByte('=')
-			}
-			buf.WriteByte('(')
-		case VRe:
-			if needAddEqual {
-				buf.WriteByte('=')
-			}
-			buf.WriteByte('\'')
+		// 判断第一个值得首字符是否为 "="
+		if values[0][0] != '=' {
+			buf.WriteByte('=')
 		}
 
-		// 处理 val
-		buf.WriteString(values[0])
-
-		// 处理 val 后缀
+		// 处理 val 前缀
+		// 说明: 为了兼容老版本 in, include, re 特此只处理了3个
 		switch key {
 		case VIn, VInclude:
-			buf.WriteByte(')')
+			buf.WriteString("(" + values[0] + ")")
 		case VRe:
-			buf.WriteByte('\'')
+			if len(values[0]) > 1 && (values[0][0] == '\'' || values[0][1] == '\'') {
+				buf.WriteString(values[0])
+			} else {
+				buf.WriteString("'" + values[0] + "'")
+			}
+		default:
+			buf.WriteString(values[0])
 		}
 	}
 

@@ -346,6 +346,7 @@ func ValidNamesSplit(s string, sep ...byte) []string {
 		return strings.Split(s, string(defaultSep))
 	}
 
+	// slow path
 	stack := internal.NewStackByte(2)
 	defer stack.Reset()
 
@@ -417,6 +418,10 @@ func StrEscape(val string) string {
 		case '\r':
 			buf[pos] = '\\'
 			buf[pos+1] = 'r'
+			pos += 2
+		case '\t':
+			buf[pos] = '\\'
+			buf[pos+1] = 't'
 			pos += 2
 		case '\x1a':
 			buf[pos] = '\\'

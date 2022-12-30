@@ -13,6 +13,10 @@ import (
 	"gitee.com/xuesongtao/protoc-go-valid/valid/internal"
 )
 
+// 注: 拓展规则
+// 	1. 如果为 key value 的需要通过 "=" 连接
+//	2. 如果 value 中有包裹情况, 只能通过 "''" 进行包裹; 已上线其他字符包裹了一直保留兼容, 如: in=(xxx); include=(xxx) 等
+
 // To 验证输入的大小区间, 注: 左右都为闭区间
 // 1. 如果为字符串则是验证字符个数
 // 2. 如果是数字的话就验证数字的大小
