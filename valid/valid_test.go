@@ -24,7 +24,17 @@ func equal(dest, src interface{}) bool {
 func TestTmp(t *testing.T) {
 	// t.Log(GetTimeFmt(DateTimeFmt))
 	// t.Log(GetTimeFmt(DateFmt))
-	t.Log(Var("20220101", GenValidKV(VDate, "=''", "格式不正确(格式: 20220101)")))
+}
+
+func TestGetTimeFmt(t *testing.T) {
+	res := GetTimeFmt(DateFmt)
+	if res != "2006-01-02" {
+		t.Error("res is not ok")
+	}
+	res = GetTimeFmt(DateTimeFmt)
+	if res != "2006-01-02 15:04:05" {
+		t.Error("res is not ok")
+	}
 }
 
 func TestValidManyStruct(t *testing.T) {
