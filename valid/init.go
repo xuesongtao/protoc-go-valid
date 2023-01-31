@@ -279,7 +279,7 @@ func GetOnlyExplainErr(errMsg string) string {
 // splits[0] 为 [年月日] 的分割符, 默认为 "-"
 // splits[1] 为 [年月日] 和 [时分秒] 的分割符, 默认为 " "
 // splits[2] 为 [时分秒] 的分割符, 默认为 ":"
-func GetTimeFmt(fmtType int8, splits ...string) (res string) {
+func GetTimeFmt(fmtType int8, splits ...string) string {
 	defaultDateSplit := "-"
 	defaultDateTimeSplit := " "
 	defaultTimeSplit := ":"
@@ -296,31 +296,38 @@ func GetTimeFmt(fmtType int8, splits ...string) (res string) {
 		defaultTimeSplit = splits[2]
 	}
 
+	joinFn := func(old, split, join string) string {
+		if old == "" {
+			return join
+		}
+		if join == "" {
+			return old
+		}
+		return old + split + join
+	}
+
 	// 年月日
+	prefix := ""
 	if fmtType&YearFmt > 0 {
-		res += "2006" + defaultDateSplit
+		prefix = joinFn(prefix, defaultDateSplit, "2006")
 	}
 	if fmtType&MonthFmt > 0 {
-		res += "01" + defaultDateSplit
+		prefix = joinFn(prefix, defaultDateSplit, "01")
 	}
 	if fmtType&DayFmt > 0 {
-		res += "02" + defaultDateSplit
+		prefix = joinFn(prefix, defaultDateSplit, "02")
 	}
-	res = strings.TrimSuffix(res, defaultDateSplit)
 
 	// 时分秒
-	if res != "" {
-		res += defaultDateTimeSplit
-	}
+	suffix := ""
 	if fmtType&HourFmt > 0 {
-		res += "15" + defaultTimeSplit
+		suffix = joinFn(suffix, defaultTimeSplit, "15")
 	}
 	if fmtType&MinFmt > 0 {
-		res += "04" + defaultTimeSplit
+		suffix = joinFn(suffix, defaultTimeSplit, "04")
 	}
 	if fmtType&SecFmt > 0 {
-		res += "05" + defaultTimeSplit
+		suffix = joinFn(suffix, defaultTimeSplit, "05")
 	}
-	res = strings.TrimSuffix(res, defaultTimeSplit)
-	return
+	return joinFn(prefix, defaultDateTimeSplit, suffix)
 }

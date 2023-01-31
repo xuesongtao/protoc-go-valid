@@ -264,8 +264,9 @@ func in(errBuf *strings.Builder, validName, objName, fieldName string, tv reflec
 		tvVal = ToStr(tv.Interface())
 	}
 
-	for _, v := range strings.Split(inVals, "/") {
-		if fn(tvVal, v) {
+	for _, v := range ValidNamesSplit(inVals, '/') {
+		// 需要去掉 "'", 有可能包含转义
+		if fn(tvVal, strings.Trim(v, "'")) {
 			isIn = true
 			break
 		}

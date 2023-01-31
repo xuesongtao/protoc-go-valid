@@ -167,7 +167,7 @@ func ExampleDate() {
 		Year       string `valid:"year"`
 		Year2Month string `valid:"year2month=/"`
 		Date       string `valid:"date=/"`
-		Date2       string `valid:"date=''"`
+		Date2      string `valid:"date=''"`
 		Datetime   string `valid:"datetime|应该为 xxxx-xx-xx xx:xx:xx 的时间格式"`
 	}
 	v := &Tmp{Year: "2001", Year2Month: "2000/01", Date: "2021/01/22", Date2: "20210122", Datetime: "2021-01-11 23:22"}
@@ -229,10 +229,11 @@ func ExampleBothEq() {
 
 func ExampleIn() {
 	type Tmp struct {
-		SelectNum int32  `valid:"in=(1/2/3/4)"`
-		SelectStr string `valid:"in=(a/b/c/d)|应该在 a/b/c/d 里选择"`
+		SelectNum  int32  `valid:"in=(1/2/3/4)"`
+		SelectStr  string `valid:"in=(a/b/c/d)|应该在 a/b/c/d 里选择"`
+		SelectStr1 string `valid:"in=(a/'/d')|应该在 a/'/d' 里选择"` // 转义
 	}
-	v := &Tmp{SelectNum: 1, SelectStr: "ac"}
+	v := &Tmp{SelectNum: 1, SelectStr: "ac", SelectStr1: "/d"}
 	fmt.Println(Struct(v))
 
 	// Output:

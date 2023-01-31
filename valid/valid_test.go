@@ -20,6 +20,19 @@ func equal(dest, src interface{}) bool {
 }
 
 func TestTmp(t *testing.T) {
+	// t.Log(GetTimeFmt(DateTimeFmt))
+	// t.Log(GetTimeFmt(DateFmt))
+}
+
+func TestGetTimeFmt(t *testing.T) {
+	res := GetTimeFmt(DateFmt)
+	if res != "2006-01-02" {
+		t.Error("res is not ok")
+	}
+	res = GetTimeFmt(DateTimeFmt)
+	if res != "2006-01-02 15:04:05" {
+		t.Error("res is not ok")
+	}
 }
 
 func TestValidManyStruct(t *testing.T) {
