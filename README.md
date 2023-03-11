@@ -4,7 +4,7 @@
 
 #### 🔥项目背景🔥
 
-* 1. 在 protobuf 方面验证器常用的为 `go-proto-validators` 验证器, 使用方面个人认为较为繁琐，代码量比较多, 使用如下:  
+* 1. 在 protobuf 方面验证器常用的为 `go-proto-validators` 验证器, 使用方面个人认为较为繁琐, 代码量比较多, 使用如下:  
 
 ```proto
 syntax = "proto3";
@@ -19,7 +19,7 @@ message InnerMessage {
 }
 ```
 
-* 2. 本验证器, ✨相同功能代码量少, 易自定义错误信息✨使用如下:  
+* 2. 本验证器, ✨相同功能代码量少, 方便自定义错误信息, 方便自定义验证规则✨使用如下:  
 
 ```proto
 syntax = "proto3";
