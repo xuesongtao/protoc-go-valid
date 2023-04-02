@@ -4,7 +4,23 @@
 
 #### 🔥项目背景🔥
 
-* 1. 在 protobuf 方面验证器常用的为 `go-proto-validators` 验证器, 使用方面个人认为较为繁琐, 代码量比较多, 使用如下:  
+* 1. 孵化之初是在做支付的时候, 抽象类的验证存在多种规则, 后期可能会在增加, 如下:
+
+```go
+// UnifiedOrderReq 下单
+type UnifiedOrderReq struct {
+ AppName     string            `alipay:"required,size=1~50" wechat:"required,size=1~25"`  // 应用名
+ GoodsName   string            `alipay:"required,size=1~150" wechat:"required,size=1~25"` // 商品名
+ OutTradeNo  string            `alipay:"required,size=1~64" wechat:"required,size=1~25"`  // 商户订单号
+ TotalAmount int32             `alipay:"required,ge=0" wechat:"required,ge=0"`            // 订单总金额，单位为分，详见支付金额
+ NotifyUrl   string            `alipay:"required" wechat:"required"`                      // 回调地址
+ TimeStart   string            `alipay:"required,datetime"` // 支付时间
+ TimeExpire  string            `alipay:"required,datetime" wechat:"datetime"` // 交易过期时间
+ OtherMap    map[string]string // 其他补充字段
+}
+```
+
+* 2. 在 protobuf 方面验证器常用的为 `go-proto-validators` 验证器, 使用方面个人认为较为繁琐, 代码量比较多, 使用如下:  
 
 ```proto
 syntax = "proto3";
@@ -19,7 +35,7 @@ message InnerMessage {
 }
 ```
 
-* 2. 本验证器, ✨相同功能**代码量少**, 方便自定义**错误信息**, **验证规则**✨使用如下:  
+* 3. 本验证器, ✨相同功能**代码量少**, 方便自定义**错误信息**, **验证规则**✨使用如下:  
 
 ```proto
 syntax = "proto3";
