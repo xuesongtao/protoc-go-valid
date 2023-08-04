@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"reflect"
 	"testing"
-
-	"gitee.com/xuesongtao/protoc-go-valid/test"
 )
 
 const (
@@ -169,8 +167,18 @@ func TestValidOrder(t *testing.T) {
 }
 
 func TestProtoPb(t *testing.T) {
-	u := &test.User{
-		M: &test.Man{
+	type Man struct {
+		Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty" valid:"required|姓名必填,to=1~3"` // 姓名 @tag valid:"required|姓名必填,to=1~3"
+		Age  int32  `protobuf:"varint,2,opt,name=age,proto3" json:"age,omitempty" valid:"to=1~150"`              // 年龄 @tag valid:"to=1~150"
+		Tmp  string `protobuf:"bytes,3,opt,name=tmp,proto3" json:"tmp,omitempty" valid:"he"`                     // 临时 @tag valid:"he"
+	}
+	type User struct {
+		M     *Man   `protobuf:"bytes,1,opt,name=m,proto3" json:"m,omitempty" valid:"required"`      // 人 @tag valid:"required"
+		Phone string `protobuf:"bytes,2,opt,name=phone,proto3" json:"phone,omitempty" valid:"phone"` // 手机 @tag valid:"phone"
+	}
+	
+	u := &User{
+		M: &Man{
 			Name: "",
 			Age:  0,
 		},

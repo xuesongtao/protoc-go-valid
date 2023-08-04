@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"gitee.com/xuesongtao/protoc-go-valid/valid/internal"
+	// "gitlab.cd.anpro/go/common/valid/internal"
 )
 
 // 注: 拓展规则

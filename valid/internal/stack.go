@@ -1,9 +1,5 @@
 package internal
 
-import (
-	"gitee.com/xuesongtao/protoc-go-valid/log"
-)
-
 type stackByte struct {
 	data []byte
 }
@@ -49,8 +45,4 @@ func (s *stackByte) IsEqualLastVal(b byte) bool {
 
 func (s *stackByte) Reset() {
 	s.data = nil
-}
-
-func (s *stackByte) Dump() {
-	log.Infof("%+v", s.data)
 }

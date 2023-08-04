@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"gitee.com/xuesongtao/protoc-go-valid/valid/internal"
+	// "gitlab.cd.anpro/go/common/valid/internal"
 )
 
 // ParseValidNameKV 解析 validName 中的 key, value 和 cusMsg,
@@ -330,7 +331,7 @@ func ToStr(src interface{}) string {
 }
 
 // ValidNamesSplit 验证点进行分割
-// 会按给定 sep(默认 ",") 进行分割, 如果遇到被 '' 进行包裹的内容会跳过
+// 会按给定 sep(默认 ",") 进行分割, 如果遇到被 ” 进行包裹的内容会跳过
 func ValidNamesSplit(s string, sep ...byte) []string {
 	if s == "" {
 		return nil
