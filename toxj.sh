@@ -23,13 +23,14 @@ function main() {
             printf "${goFile} is skip\n"
             continue
         fi
-        
+        tmpFile=${goFile##"./valid/"}
         # gitee.com
         # gitlab.cd.anpro
+        targetFile="${targetDir}/${tmpFile}"
         sed -e "s/\/\/ \"gitlab.cd.anpro/\"gitlab.cd.anpro/g" \
             -e "s/\"gitee.com\\/xuesongtao\\/protoc-go-valid\\/valid\\/internal\"/\/\/ \"gitee.com\\/xuesongtao\\/protoc-go-valid\\/valid\\/internal\"/g" \
-            $goFile >"${XJ_COMMON_DIR}/${goFile}"
-        checkIsOk "repalce: $goFile ${XJ_COMMON_DIR}/valid"
+            $goFile >$targetFile
+        checkIsOk "repalce: ${goFile} ${targetFile}"
     done
 
     # 将 readme.md 也移动过去
