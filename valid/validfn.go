@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net"
+	"os"
 	"reflect"
 	"regexp"
 	"strconv"
@@ -754,4 +755,58 @@ func Suffix(errBuf *strings.Builder, validName, objName, fieldName string, tv re
 		return
 	}
 	errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, tv.String(), ExplainEn, "suffix is not ok"))
+}
+
+// File 验证是否为文件
+func File(errBuf *strings.Builder, validName, objName, fieldName string, tv reflect.Value) {
+	if err := CheckFieldIsStr(objName, fieldName, tv); err != nil {
+		errBuf.WriteString(err.Error())
+		return
+	}
+	valStr := tv.String()
+	isDir, err := dir(valStr)
+	if err != nil {
+		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, err.Error()))
+		return
+	}
+	if !isDir {
+		return
+	}
+	_, _, cusMsg := ParseValidNameKV(validName)
+	if cusMsg != "" {
+		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, cusMsg))
+		return
+	}
+	errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, ExplainEn, "it is not file"))
+}
+
+// Dir 验证是否为目录
+func Dir(errBuf *strings.Builder, validName, objName, fieldName string, tv reflect.Value) {
+	if err := CheckFieldIsStr(objName, fieldName, tv); err != nil {
+		errBuf.WriteString(err.Error())
+		return
+	}
+	valStr := tv.String()
+	isDir, err := dir(valStr)
+	if err != nil {
+		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, err.Error()))
+		return
+	}
+	if isDir {
+		return
+	}
+	_, _, cusMsg := ParseValidNameKV(validName)
+	if cusMsg != "" {
+		errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, cusMsg))
+		return
+	}
+	errBuf.WriteString(GetJoinValidErrStr(objName, fieldName, valStr, ExplainEn, "it is not dir"))
+}
+
+func dir(path string) (bool, error) {
+	fileInfo, err := os.Stat(path)
+	if err != nil {
+		return false, err
+	}
+	return fileInfo.IsDir(), nil
 }
