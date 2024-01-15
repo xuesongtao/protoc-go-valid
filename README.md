@@ -128,6 +128,8 @@ protoFileDirName="test" # proto 存放的目录
 | json      | yes   | yes | yes | yes | yes       | json 格式验证 |
 | prefix    | yes   | yes | yes | yes | yes       | 字符串包含前缀验证 |
 | suffix    | yes   | yes | yes | yes | yes       | 字符串包含后缀验证  |
+| file      | yes   | yes | yes | yes | yes       | 字符串包含后缀验证  |
+| dir       | yes   | yes | yes | yes | yes       | 字符串包含后缀验证  |
 
 * 自定义 msg 写法如下, 可以通过调用 `GenValidKV` 来动态生成:
   * 1. 如: `required|必填`, key 为 `required`, value 为 ``, cusMsg 为 `必填`;

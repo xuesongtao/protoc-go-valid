@@ -66,11 +66,14 @@ const (
 	VJson       = "json"       // json 格式验证
 	VPrefix     = "prefix"     // 包含前缀
 	VSuffix     = "suffix"     // 包含后缀
+	VFile       = "file"       // 文件
+	VDir        = "dir"        // 目录
 )
 
 // CommonValidFn 通用验证函数, 主要用于回调
 // 注: 在写 errBuf 的时候建议用 GetJoinValidErrStr 包裹下, 这样产生的结果易读.
-//    否则需要再 errBuf.WriteString 最后要加上 ErrEndFlag 分割, 工具是通过 ErrEndFlag 进行分句
+//
+//	否则需要再 errBuf.WriteString 最后要加上 ErrEndFlag 分割, 工具是通过 ErrEndFlag 进行分句
 type CommonValidFn func(errBuf *strings.Builder, validName, objName, fieldName string, tv reflect.Value)
 
 // Name2FnMap 自定义验证名对应自定义验证函数
@@ -110,6 +113,8 @@ var validName2FnMap = Name2FnMap{
 	VJson:       Json,
 	VPrefix:     Prefix,
 	VSuffix:     Suffix,
+	VFile:       File,
+	VDir:        Dir,
 }
 
 // 对象

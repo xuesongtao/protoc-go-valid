@@ -30,27 +30,27 @@ var (
 	levelColor = map[int]string{
 		-1: "\033[0m", // 重置
 		// LevelDebug: "DEBU",
-		LevelInfo:  "\033[1;32m",   // 绿色
-		LevelWarn:  "\033[1;33m",   // 黄色
-		LevelError: "\033[1;31m",   // 红色
-		LevelPanic: "\033[1;35m",   // 紫红色
+		LevelInfo:  "\033[1;32m", // 绿色
+		LevelWarn:  "\033[1;33m", // 黄色
+		LevelError: "\033[1;31m", // 红色
+		LevelPanic: "\033[1;35m", // 紫红色
 		LevelFatal: "\033[1;35m", // 加粗紫红色
 	}
 )
 
 var (
-	CjLog *defaultLogger
+	Log *defaultLogger
 )
 
 func init() {
-	CjLog = NewCjLogger()
+	Log = NewLogger()
 }
 
 type defaultLogger struct {
 	log *log.Logger
 }
 
-func NewCjLogger() *defaultLogger {
+func NewLogger() *defaultLogger {
 	return &defaultLogger{
 		log: log.New(os.Stderr, "", log.LstdFlags),
 	}
@@ -109,41 +109,41 @@ func (x *defaultLogger) getLevelPrefix(level int) string {
 // ============================= 常用方法封装 ===============================
 
 func Info(v ...interface{}) {
-	CjLog.Info(v...)
+	Log.Info(v...)
 }
 
 func Infof(format string, v ...interface{}) {
-	CjLog.Infof(format, v...)
+	Log.Infof(format, v...)
 }
 
 func Error(v ...interface{}) {
-	CjLog.Error(v...)
+	Log.Error(v...)
 }
 
 func Errorf(format string, v ...interface{}) {
-	CjLog.Errorf(format, v...)
+	Log.Errorf(format, v...)
 }
 
 func Warning(v ...interface{}) {
-	CjLog.Warning(v...)
+	Log.Warning(v...)
 }
 
 func Warningf(format string, v ...interface{}) {
-	CjLog.Warningf(format, v...)
+	Log.Warningf(format, v...)
 }
 
 func Fatal(v ...interface{}) {
-	CjLog.Fatal(v...)
+	Log.Fatal(v...)
 }
 
 func Fatalf(format string, v ...interface{}) {
-	CjLog.Fatalf(format, v...)
+	Log.Fatalf(format, v...)
 }
 
 func Panic(v ...interface{}) {
-	CjLog.Panic(v...)
+	Log.Panic(v...)
 }
 
 func Panicf(format string, v ...interface{}) {
-	CjLog.Panicf(format, v...)
+	Log.Panicf(format, v...)
 }

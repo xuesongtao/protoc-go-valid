@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"gitee.com/xuesongtao/protoc-go-valid/valid/internal"
+	// "gitlab.cd.anpro/go/common/valid/internal"
 )
 
 // ParseValidNameKV 解析 validName 中的 key, value 和 cusMsg,
