@@ -187,3 +187,4 @@ fmt.Println(ValidateStruct(m))
 #### 最后
 
 * 欢迎大佬们指正, 同时也希望大佬给 ❤️，to [gitee](https://gitee.com/xuesongtao/protoc-go-valid) [github](https://github.com/xuesongtao/protoc-go-valid.git)
+* 在线 SQL 转 GO [gotool](https://gotool.top): sql to gorm/xorm/ent/struct; json to struct
