@@ -24,11 +24,7 @@ func (s *stackByte) Pop() byte {
 	}
 	lastIndex := len(s.data) - 1
 	b := s.data[lastIndex]
-	if lastIndex >= 1 {
-		s.data = append(s.data[:0], s.data[:lastIndex-1]...)
-	} else {
-		s.data = s.data[:0]
-	}
+	s.data = append(s.data[:0], s.data[:lastIndex]...)
 	return b
 }
 
